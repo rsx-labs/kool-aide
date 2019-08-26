@@ -1,0 +1,16 @@
+{
+    "common":{
+        "log_level": 1,
+        "log_location": "",
+        "debug_mode": "True"
+    },
+    "connection_string" :{
+        "server_name": "servername",
+        "user_id": "user",
+        "password": "password"
+    },
+    "user" : {
+        "email": "email",
+        "vsts_email": "vsts_email"
+    }
+}
