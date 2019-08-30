@@ -6,6 +6,7 @@ from ..library.constants import *
 from ..model.cli_argument import CliArgument
 from ..db_access.connection import Connection
 from .command_processor import CommandProcessor
+from ..assets.resources.version import *
 
 
 def log(message, level = 3):
@@ -19,7 +20,8 @@ if __name__ == "__main__":
     arguments = CliArgument()
     db_connection = Connection(config, logger)
     processor = CommandProcessor(logger, config, db_connection)
-    log(f'starting {APP_TITLE} main cli module v{APP_VERSION}....')
+    
+    log(f'starting {APP_TITLE} main cli module v{APP_VERSION} [{APP_RELEASE}]')
     
     # region create arg parser
     parser = argparse.ArgumentParser()
@@ -37,7 +39,8 @@ if __name__ == "__main__":
     parser.add_argument('-m',  
                         help='the data model to use', 
                         action='store', 
-                        dest='model')
+                        dest='model',
+                        choices=SUPPORTED_MODELS)
     parser.add_argument('--input',  
                         help='the input file', 
                         action='store', 
@@ -81,6 +84,7 @@ if __name__ == "__main__":
     # start delegating if db is properly initialized
     if db_connection.initialize():
         log("we are connected to the db")
-        processor.delegate(arguments)
+        result, message = processor.delegate(arguments)
+        log(f"result = {result} | {message}")
 
     log("end of main")

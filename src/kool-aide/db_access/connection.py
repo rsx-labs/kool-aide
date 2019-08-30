@@ -37,8 +37,9 @@ class Connection:
             self._connection = engine.connect()
             
             metadata = MetaData(engine)
-            self._status_report = Table('vw_statusreport', metadata, autoload = True)
-            self._week_range = Table('week_range', metadata, autoload = True)
+            self.status_report = Table('vw_statusreport', metadata, autoload = True)
+            self.week_range = Table('week_range', metadata, autoload = True)
+            self.project = Table('project', metadata, autoload = True)
             #self._log(week.columns.key())
             
             # query = week.select()
@@ -57,12 +58,14 @@ class Connection:
 
     def get_status_report_view(self, project, week):
         try:
-            query = self._status_report.select(
-                self._status_report.c.Project == project and 
-                self._status_report.c.WeekRangeId == int(week)
+            query = self.status_report.select(
+                self.status_report.c.Project == project and 
+                self.status_report.c.WeekRangeId == int(week)
             )
             result = query.execute()
             return result
         except Exception as ex:
             self._log(f"error getting db values. {str(ex)}")
             return False, None
+
+    

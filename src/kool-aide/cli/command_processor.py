@@ -5,6 +5,8 @@ from ..library.custom_logger import CustomLogger
 from ..library.app_setting import AppSetting
 from ..library.constants import *
 from ..model.cli_argument import CliArgument
+from ..processor.report_manager import ReportManager
+from ..processor.common_manager import CommonManager
 
 class CommandProcessor:
     def __init__(self, logger: CustomLogger, config: AppSetting, 
@@ -24,17 +26,37 @@ class CommandProcessor:
         if arguments.action == CMD_ACTIONS[0]: # create
             return True, ""
         elif arguments.action == CMD_ACTIONS[1]: # retrieve
-            return True, ""
+            if arguments.model in SUPPORTED_MODELS:
+                result, message = self._retrieve_model(arguments)
+                return True, f"{result} | {message}"
+            else:
+                self._log(f"model not supported : {arguments.model}")
+                return False, "model not supported"
+                
         elif arguments.action == CMD_ACTIONS[2]: # update
             return True, ""
         elif arguments.action == CMD_ACTIONS[3]: # delete
             return True, ""
         elif arguments.action == CMD_ACTIONS[4]: # gen report
             if arguments.report in REPORT_TYPES:
-                self._log(f"generating report : {arguments.report}")
-                return True, ""
+                
+                result, message = self._generate_report(arguments)
+
+                return True, f"{result} | {message}"
             else:
                 self._log(f"report type not supported : {arguments.report}")
                 return False, "report type not supported"
         else:
             return False, "invalid action"
+
+    def _generate_report(self, arguments : CliArgument):
+        self._log(f"generating report : {arguments.report}")
+
+        report_manager = ReportManager(self._logger, self._config, self._connection, arguments)
+        return report_manager.generate()
+
+    def _retrieve_model(self, arguments: CliArgument):
+        self._log(f"retrieving model : {arguments.model}")
+
+        common_manager = CommonManager(self._logger, self._config, self._connection, arguments)
+        return common_manager.retrieve(arguments)
