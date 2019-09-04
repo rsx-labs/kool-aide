@@ -1,6 +1,6 @@
 # kool-aide/model/project.py
 
-class AIDEProject:
+class Project:
     def __init__(self, result_set = None):
         self.id = 0
         self.name = ""

@@ -1,12 +1,16 @@
 # kool-aide/cli/command_processor.py
 
 from ..db_access.connection import Connection
+
 from ..library.custom_logger import CustomLogger
 from ..library.app_setting import AppSetting
 from ..library.constants import *
+
 from ..model.cli_argument import CliArgument
+
 from ..processor.report_manager import ReportManager
 from ..processor.common_manager import CommonManager
+from ..processor.status_report_manager import StatusReportManager
 
 class CommandProcessor:
     def __init__(self, logger: CustomLogger, config: AppSetting, 
@@ -58,5 +62,9 @@ class CommandProcessor:
     def _retrieve_model(self, arguments: CliArgument):
         self._log(f"retrieving model : {arguments.model}")
 
-        common_manager = CommonManager(self._logger, self._config, self._connection, arguments)
-        return common_manager.retrieve(arguments)
+        if arguments.model == SUPPORTED_MODELS[4]:
+            status_report_manager = StatusReportManager(self._logger, self._config, self._connection, arguments)
+            return status_report_manager.retrieve(arguments)
+        else:
+            common_manager = CommonManager(self._logger, self._config, self._connection, arguments)
+            return common_manager.retrieve(arguments)

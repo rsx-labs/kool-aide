@@ -1,6 +1,6 @@
-# kool-aide/model/aide_week_range.py
+# kool-aide/model/week_range.py
 
-class AIDEWeekRange:
+class WeekRange:
     def __init__(self, result_set = None):
         self.id = 0
         # self.week_id
@@ -14,7 +14,6 @@ class AIDEWeekRange:
         self.id = result["WEEK_ID"]
         self.start = result["WEEK_START"]
         self.end = result["WEEK_END"]
-
 
     def to_json(self):
         data = {}

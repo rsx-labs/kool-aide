@@ -7,11 +7,11 @@ import os
 from datetime import datetime
 import urllib
 
-from ..library.app_setting import AppSetting
-from ..library.custom_logger import CustomLogger
-from ..db_access.connection import Connection
+from ...library.app_setting import AppSetting
+from ...library.custom_logger import CustomLogger
+from ...db_access.connection import Connection
 
-class CommonDBHelper:
+class CommonHelper:
     def __init__(self, logger: CustomLogger, config: AppSetting,
                 db_connection: Connection):
         self._logger = logger
@@ -21,20 +21,26 @@ class CommonDBHelper:
         self._log("initialize")
 
     def _log(self, message, level=3):
-        self._logger.log(f"{message} [common dbhelper]", level)
+        self._logger.log(f"{message} [db_access.dbhelper.common_helper]", level)
 
-    def get_all_week_range(self):
+    def get_all_week_range(self, limit= 0):
         try:
-            query = self._connection.week_range.select()
+            if limit <= 0:
+                query = self._connection.week_range.select()
+            else:
+                query = self._connection.week_range.select().limit(limit)
             result = query.execute()
             return result
         except Exception as ex:
             self._log(f"error getting db values. {str(ex)}")
             return False, None
 
-    def get_all_project(self):
+    def get_all_project(self, limit=0):
         try:
-            query = self._connection.project.select()
+            if limit <= 0:
+                query = self._connection.project.select()
+            else:
+                query = self._connection.project.select().limit(limit)
             result = query.execute()
             return result
         except Exception as ex:

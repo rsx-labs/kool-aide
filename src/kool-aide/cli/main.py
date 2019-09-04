@@ -7,6 +7,7 @@ from ..model.cli_argument import CliArgument
 from ..db_access.connection import Connection
 from .command_processor import CommandProcessor
 from ..assets.resources.version import *
+from ..assets.resources.messages import *
 
 
 def log(message, level = 3):
@@ -24,19 +25,17 @@ if __name__ == "__main__":
     log(f'starting {APP_TITLE} main cli module v{APP_VERSION} [{APP_RELEASE}]')
     
     # region create arg parser
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-a', 
+    parser = argparse.ArgumentParser(description=APP_DESCRIPTION, epilog=APP_EPILOG)
+    parser.add_argument('action', 
                         help='the action to perform', 
                         action='store', 
-                        dest='action',
-                        choices=CMD_ACTIONS,
-                        required=True)
+                        choices=CMD_ACTIONS)
     parser.add_argument('-r',
                         help='report name to generate', 
                         action='store', 
                         dest='report_to_generate',
                         choices=REPORT_TYPES)
-    parser.add_argument('-m',  
+    parser.add_argument('-m',   
                         help='the data model to use', 
                         action='store', 
                         dest='model',
@@ -49,19 +48,11 @@ if __name__ == "__main__":
                         help='the output file', 
                         action='store', 
                         dest='output_file')
-    parser.add_argument('--inline',  
-                        help='mark the parameters as inline json', 
-                        action='store_true', 
-                        dest='is_inline')
-    parser.add_argument('--csv',  
-                        help='input file is csv. the default is json.', 
-                        action='store_true', 
-                        dest='is_csv')
-    parser.add_argument('-u','--uid',  
+    parser.add_argument('--uid',  
                         help='the user id', 
                         action='store', 
                         dest='user_id')
-    parser.add_argument('-p','--password',  
+    parser.add_argument('--password',  
                         help='user password', 
                         action='store', 
                         dest='password')
@@ -73,6 +64,21 @@ if __name__ == "__main__":
                         help='interactive mode', 
                         action='store_true', 
                         dest='interactive_mode')
+    parser.add_argument('-f', '--format',
+                        help='result format', 
+                        action='store', 
+                        dest='display_format',
+                        choices= DISPLAY_FORMAT)
+    parser.add_argument('-l', '--limit',
+                        help='limit the number of records', 
+                        action='store', 
+                        dest='result_limit',
+                        nargs='?',
+                        const=0)
+    parser.add_argument('-p', '--params',
+                        help='command parameters in json', 
+                        action='store', 
+                        dest='parameters')                    
     # endregion
 
     result = parser.parse_args()

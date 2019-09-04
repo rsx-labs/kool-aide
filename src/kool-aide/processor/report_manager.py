@@ -1,4 +1,6 @@
 # kool-aide/processors/report_manager.py
+import pandas as pd
+
 from ..library.app_setting import AppSetting
 from ..library.custom_logger import CustomLogger
 from ..library.constants import *

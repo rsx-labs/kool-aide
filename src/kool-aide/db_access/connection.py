@@ -37,9 +37,10 @@ class Connection:
             self._connection = engine.connect()
             
             metadata = MetaData(engine)
-            self.status_report = Table('vw_statusreport', metadata, autoload = True)
+            self.status_report_view = Table('vw_statusreport', metadata, autoload = True)
             self.week_range = Table('week_range', metadata, autoload = True)
             self.project = Table('project', metadata, autoload = True)
+            
             #self._log(week.columns.key())
             
             # query = week.select()

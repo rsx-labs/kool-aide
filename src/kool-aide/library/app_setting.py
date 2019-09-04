@@ -1,12 +1,12 @@
 import json
 
 class UserSetting:
-    def __init__(self, email, vsts_email="" ):
+    def __init__(self, email, vsts_email='' ):
         self.email = email
         self.vsts_email=vsts_email
 
     def __str__(self):
-        return f"user = [email : {self.email} ; vsts : {self.vsts_email} ]"
+        return f'user = [email : {self.email} ; vsts : {self.vsts_email} ]'
 
 
 class ConnectionSetting:
@@ -17,26 +17,28 @@ class ConnectionSetting:
         self.database = db
 
     def __str__(self):
-        return f"connection = [server : {self.server_name} ; uid = {self.uid} ; password = {self.password}]"
+        return f'connection = [server : {self.server_name} ; uid = {self.uid} ; password = {self.password}]'
 
 class CommonSetting:
-    def __init__(self, log_level=3, log_location="", debug=False):
+    def __init__(self, log_level=3, log_location='', debug=False, out_dir = ''):
         self.log_level = log_level
         self.log_location = log_location
+        self.output_dir = out_dir
         self.debug_mode = debug
 
     def __str__(self):
-        return f"common = [log_level : {self.log_level} ; log_location : {self.log_location}]"
+        return f'common = [log_level : {self.log_level} ; log_location : {self.log_location}]'
 
 
 class AppSetting:
     def __init__(self):
-        self.user_setting= UserSetting("")
-        self.connection_setting= ConnectionSetting("","","", "")
+        self.user_setting= UserSetting('')
+        self.connection_setting= ConnectionSetting('','','', '')
         self.common_setting= CommonSetting()
 
+
     def __str__(self):
-        return f"app setting = [{str(self.user_setting)} ; {str(self.connection_setting)} ; {str(self.common_setting)}]"
+        return f'app setting = [{str(self.user_setting)} ; {str(self.connection_setting)} ; {str(self.common_setting)}]'
 
     def load(self):
         settings = {}
@@ -51,7 +53,8 @@ class AppSetting:
         self.connection_setting.database = settings['connection_string']['database']
         self.common_setting.log_level = settings['common']['log_level']
         self.common_setting.log_location = settings['common']['log_location']
-        self.common_setting.debug_mode = settings['common']['debug_mode'] == "True"
+        self.common_setting.output_dir = settings['common']['output_folder']
+        self.common_setting.debug_mode = settings['common']['debug_mode'] == 'True'
 
 
     def update(self):
