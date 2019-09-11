@@ -20,7 +20,7 @@ from ..assets.resources.messages import *
 
 class CommonManager:
     def __init__(self, logger: CustomLogger, config: AppSetting,
-                db_connection: Connection, arguments: CliArgument):
+                db_connection: Connection, arguments: CliArgument = None):
 
         self._logger = logger
         self._config = config
@@ -46,42 +46,43 @@ class CommonManager:
             
         return False, NOT_SUPPORTED
     
-    def _retrieve_project(self, arguments: CliArgument):
+    def get_project_data_frame(self, arguments : CliArgument):
         
         columns = None
         sort_keys = None
-        project_filter = None
         
         try:
+            if arguments.parameters is not None:
+                try:
+                    json_parameters = json.loads(arguments.parameters)
+                    sort_keys = None if PARAM_SORT not in json_parameters else json_parameters[PARAM_SORT]
+                    columns = None if PARAM_COLUMNS not in json_parameters else json_parameters[PARAM_COLUMNS] 
+                except Exception as ex:
+                    self._log(f'error reading parameters . {str(ex)}',2)
+            
             results = self._db_helper.get_all_project()
             data_frame = pd.DataFrame(results.fetchall()) 
             data_frame.columns = results.keys()
-
-            try:
-                json_parameters = json.loads(arguments.parameters)
-                sort_keys = None if PARAM_SORT not in json_parameters else json_parameters[PARAM_SORT]
-                project_filter = None if PARAM_PROJECT not in json_parameters else json_parameters[PARAM_PROJECT] 
-                columns = None if PARAM_COLUMNS not in json_parameters else json_parameters[PARAM_COLUMNS]
-            except Exception as ex:
-                self._log(f'error parsing parameter or parameter empty. {str(ex)}')
-        
-            if project_filter is not None and len(project_filter)>0:
-                data_frame = data_frame[data_frame['PROJ_NAME'].isin(project_filter)]
             
             if sort_keys is not None and len(sort_keys)>0:
                 data_frame.sort_values(by=sort_keys, inplace= True)
-        
+     
             limit = int(arguments.result_limit)
 
             if columns is not None and len(columns)>0:        
                 data_frame = data_frame[columns].head(limit)
             else:
                 data_frame = data_frame.head(limit)
-                   
-            if columns is not None and len(columns)>0:        
-                data_frame = data_frame[columns].head(limit)
-            else:
-                data_frame = data_frame.head(limit)
+            
+            return data_frame
+
+        except Exception as ex:
+            self._log(f'error getting data frame. {str(ex)}',2)
+
+    def _retrieve_project(self, arguments: CliArgument):
+        
+        try:
+            data_frame = self.get_project_data_frame(arguments)
 
             self.send_to_output(data_frame, arguments.display_format, arguments.output_file)
 

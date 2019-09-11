@@ -28,7 +28,7 @@ class CliArgument:
         self.interactive_mode = result.interactive_mode
         self.report = result.report_to_generate
         self.display_format = 'screen' if result.display_format is None else result.display_format
-        self.result_limit = 10 if result.result_limit is None else result.result_limit
+        self.result_limit =1000 if result.result_limit is None else result.result_limit
         self.parameters = result.parameters
 
     def __str__(self):

@@ -24,9 +24,17 @@ class StatusReportHelper:
     def _log(self, message, level=3):
         self._logger.log(f"{message} [db_access.dbhelper.status_report_helper]", level)
 
-    def get_status_report_view(self, projects=[], weeks=[]):
+    def get_status_report_view(self, weeks=[]):
         try:
-            query = self._connection.status_report_view.select()
+            if weeks is not None:
+                if len(weeks)>0:
+                    query = self._connection.status_report_view.select(
+                        self._connection.status_report_view.c.WeekRangeId.in_(weeks)
+                    )
+                else:
+                    query = self._connection.status_report_view.select()
+            else:
+                query = self._connection.status_report_view.select()
             result = query.execute()
             return result
         except Exception as ex:

@@ -11,6 +11,7 @@ from ..model.cli_argument import CliArgument
 from ..processor.report_manager import ReportManager
 from ..processor.common_manager import CommonManager
 from ..processor.status_report_manager import StatusReportManager
+from ..processor.attendance_manager import AttendanceManager
 
 class CommandProcessor:
     def __init__(self, logger: CustomLogger, config: AppSetting, 
@@ -50,6 +51,8 @@ class CommandProcessor:
             else:
                 self._log(f"report type not supported : {arguments.report}")
                 return False, "report type not supported"
+        elif arguments.action == CMD_ACTIONS[5]: # time-in
+            return self._do_time_in(arguments)
         else:
             return False, "invalid action"
 
@@ -57,9 +60,10 @@ class CommandProcessor:
         self._log(f"generating report : {arguments.report}")
 
         report_manager = ReportManager(self._logger, self._config, self._connection, arguments)
-        return report_manager.generate()
+        return report_manager.generate(arguments)
 
     def _retrieve_model(self, arguments: CliArgument):
+
         self._log(f"retrieving model : {arguments.model}")
 
         if arguments.model == SUPPORTED_MODELS[4]:
@@ -68,3 +72,8 @@ class CommandProcessor:
         else:
             common_manager = CommonManager(self._logger, self._config, self._connection, arguments)
             return common_manager.retrieve(arguments)
+
+    def _do_time_in(self, arguments: CliArgument):
+        a = AttendanceManager(self._logger, self._config, self._connection, arguments)
+        a.record_time_in("")
+        return True, ""

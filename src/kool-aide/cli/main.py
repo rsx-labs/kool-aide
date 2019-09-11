@@ -1,4 +1,5 @@
 import argparse
+import json
 
 from ..library.app_setting import AppSetting
 from ..library.custom_logger import CustomLogger
@@ -78,7 +79,8 @@ if __name__ == "__main__":
     parser.add_argument('-p', '--params',
                         help='command parameters in json', 
                         action='store', 
-                        dest='parameters')                    
+                        dest='parameters',
+                        type=str)                    
     # endregion
 
     result = parser.parse_args()

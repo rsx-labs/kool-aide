@@ -2,7 +2,7 @@
 # kool-aide/library/constants.py
 
 CMD_ACTIONS =[ 
-    'create','get','update','delete','generate-report'
+    'create','get','update','delete','generate-report','time-in'
 ]
 REPORT_TYPES = [
     'team-status-report',
@@ -18,8 +18,15 @@ DISPLAY_FORMAT = [
     'screen','json', 'csv','excel'
 ]
 
+MONTHS = [
+    'JAN', 'FEB', 'MAR', 'APR',
+    'MAY', 'JUN', 'JUL', 'AUG',
+    'SEP', 'OCT', 'NOV', 'DEC'
+]
+
 DEFAULT_FILENAME = 'result'
-PARAM_COLUMNS = 'column'
-PARAM_SORT = 'sort'
-PARAM_WEEK = 'week'
-PARAM_PROJECT = 'project'
+PARAM_COLUMNS = 'columns'
+PARAM_SORT = 'sorts'
+PARAM_WEEK = 'weeks'
+PARAM_PROJECT = 'projects'
+# PARAM_FLAGS = 'flags'

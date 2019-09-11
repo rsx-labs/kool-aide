@@ -2,6 +2,7 @@
 
 from sqlalchemy import create_engine, MetaData, Table
 from sqlalchemy.sql import Select, Insert, Update, Delete
+from sqlalchemy.orm import sessionmaker
 import sqlalchemy as db
 import pyodbc
 import os
@@ -41,6 +42,8 @@ class Connection:
             self.week_range = Table('week_range', metadata, autoload = True)
             self.project = Table('project', metadata, autoload = True)
             
+            self._session = sessionmaker(bind=engine)()
+            
             #self._log(week.columns.key())
             
             # query = week.select()
@@ -69,4 +72,6 @@ class Connection:
             self._log(f"error getting db values. {str(ex)}")
             return False, None
 
+    def exec(self, sp):
+        self._session.execute(sp)    
     

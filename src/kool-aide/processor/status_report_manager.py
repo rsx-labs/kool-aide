@@ -7,6 +7,8 @@ from beautifultable import BeautifulTable
 import pandas as pd
 from tabulate import tabulate
 import os
+from datetime import datetime
+import xlsxwriter
 
 
 from ..library.app_setting import AppSetting
@@ -26,7 +28,7 @@ from ..assets.resources.messages import *
 
 class StatusReportManager:
     def __init__(self, logger: CustomLogger, config: AppSetting,
-                db_connection: Connection, arguments: CliArgument):
+                db_connection: Connection, arguments: CliArgument = None):
 
         self._logger = logger
         self._config = config
@@ -50,30 +52,32 @@ class StatusReportManager:
 
     def get_data_frame(self, arguments : CliArgument):
         
-        results = self._db_helper.get_status_report_view()
-        data_frame = pd.DataFrame(results.fetchall()) 
-        data_frame.columns = results.keys()
-
         columns = None
         sort_keys = None
         project_filter = None
         week_filter = None
         
         try:
-            try:
-                json_parameters = json.loads(arguments.parameters)
-                sort_keys = None if PARAM_SORT not in json_parameters else json_parameters[PARAM_SORT]
-                project_filter = None if PARAM_PROJECT not in json_parameters else json_parameters[PARAM_PROJECT] 
-                week_filter = None if PARAM_WEEK not in json_parameters else json_parameters[PARAM_WEEK] 
-                columns = None if PARAM_COLUMNS not in json_parameters else json_parameters[PARAM_COLUMNS] 
-            except:
-                self._log(f'error reading parameters . {str(ex)}',2)
-        
+            if arguments.parameters is not None:
+                try:
+                    json_parameters = json.loads(arguments.parameters)
+                    sort_keys = None if PARAM_SORT not in json_parameters else json_parameters[PARAM_SORT]
+                    project_filter = None if PARAM_PROJECT not in json_parameters else json_parameters[PARAM_PROJECT] 
+                    week_filter = None if PARAM_WEEK not in json_parameters else json_parameters[PARAM_WEEK] 
+                    columns = None if PARAM_COLUMNS not in json_parameters else json_parameters[PARAM_COLUMNS] 
+                except Exception as ex:
+                    self._log(f'error reading parameters . {str(ex)}',2)
+            
+            results = self._db_helper.get_status_report_view(week_filter)
+            data_frame = pd.DataFrame(results.fetchall()) 
+            data_frame.columns = results.keys()
+
+
             if project_filter is not None and len(project_filter)>0:
                 data_frame = data_frame[data_frame['Project'].isin(project_filter)]
             
-            if week_filter is not None and len(week_filter)>0:
-                data_frame = data_frame[data_frame['WeekRangeId'].isin(week_filter)]
+            # if week_filter is not None and len(week_filter)>0:
+            #     data_frame = data_frame[data_frame['WeekRangeId'].isin(week_filter)]
             
             if sort_keys is not None and len(sort_keys)>0:
                 data_frame.sort_values(by=sort_keys, inplace= True)
@@ -95,12 +99,17 @@ class StatusReportManager:
         try:
             data_frame = self.get_data_frame(arguments)
 
-            self.send_to_output(data_frame, arguments.display_format, arguments.output_file)
+            self._send_to_output(
+                data_frame, 
+                arguments.display_format, 
+                arguments.output_file
+            )
+
             self._log(f"retrieved [ {len(data_frame)} ] records")
         except Exception as ex:
             self._log(f'error parsing parameter. {str(ex)}',2)
        
-    def send_to_output(self, data_frame: pd.DataFrame, format, out_file):
+    def _send_to_output(self, data_frame: pd.DataFrame, format, out_file):
         if out_file is None:
             file = DEFAULT_FILENAME
         try:
@@ -114,13 +123,117 @@ class StatusReportManager:
                 print(f"the file was saved : {csv_file}")
             elif format == DISPLAY_FORMAT[3]:
                 excel_file = f"{file}.xslx" if out_file is None else out_file
-                data_frame.to_excel(excel_file)
-                print(f"the file was saved : {excel_file}") 
+                self._process_excel(data_frame, excel_file)
+                
             elif format == DISPLAY_FORMAT[0]:    
                 print('\n') 
-                print(tabulate(data_frame, showindex=False, headers=data_frame.columns))
+                print(tabulate(
+                    data_frame, 
+                    showindex=False, 
+                    headers=data_frame.columns
+                ))
                 print('\n') 
             else:
                 print(NOT_SUPPORTED)
+
         except Exception as ex:
             self._log(str(ex),2)
+
+    def _process_excel(self, data_frame : pd.DataFrame, file_name):
+        try:
+            # check if the filename contains placeholder [D]
+
+            drop_columns=['WeekRangeStart', 'WeekRangeId']
+            column_headers = [
+                'Project',
+                'Project Code',
+                'Rework',
+                'Ref ID',
+                'Description',
+                'Severity',
+                'Incident Type',
+                'Assigned Employee',
+                'Phase',
+                'Status',
+                'Start Date',
+                'Target Date',
+                'Completion Date',
+                'Estimate',
+                'Week Effort',
+                'Actual Effort',
+                'Comments',
+                'Inbound Contacts',
+                'Week End Date',
+            ]
+
+            data_frame.drop(drop_columns, inplace=True, axis=1)
+            if '[D]' in file_name:
+                date_now = datetime.now()
+                date_string = f'{MONTHS[date_now.month-1]}{date_now.year}'
+                file_name = file_name.replace('[D]',date_string)
+
+            grouped_per_project = data_frame.groupby('Project')
+
+            # Create a Pandas Excel writer using XlsxWriter as the engine.
+            writer = pd.ExcelWriter(file_name, engine='xlsxwriter')
+            for key, values in grouped_per_project:
+                df_per_group = pd.DataFrame(grouped_per_project.get_group(key))
+                df_per_group.columns = column_headers
+              
+                df_per_group.to_excel(
+                    writer, 
+                    sheet_name=key, 
+                    index= False 
+                )
+
+                workbook = writer.book
+                header_format = workbook.add_format({
+                    'bold': True,
+                    'text_wrap': True,
+                    'valign': 'top',
+                    'fg_color': '#D7E4BC',
+                    'border': 1
+                })
+
+                worksheet = writer.sheets[key]
+                worksheet.set_column(0,3,12)
+                worksheet.set_column(4,4,45)
+                worksheet.set_column(6,6,20)
+                worksheet.set_column(7,7,20)
+                worksheet.set_column(8,12,18)
+                worksheet.set_column(13,15,12)
+                worksheet.set_column(16,19,25)
+
+                for col_num, value in enumerate(df_per_group.columns.values):
+                    worksheet.write(0, col_num, value, header_format)       
+
+                total_row = len(df_per_group)
+                total_hrs = sum(df_per_group['Week Effort'])
+                
+                worksheet.write(total_row + 3, 0, f'Total Entries')
+                worksheet.write(total_row + 3, 1, f'{total_row}')
+                
+                grouped_by_phase_status = df_per_group.groupby([
+                    'Week End Date'
+                ])
+                #print(grouped_by_phase_status['Week Effort'].sum())
+                worksheet.write(total_row + 5, 0, f'Time Entries By Week')
+                worksheet.write(total_row + 6, 0, f'Week Ending')
+                worksheet.write(total_row + 6, 1, f'Time')
+                index = 7
+                for group, value in grouped_by_phase_status['Week Effort'].sum().items():
+                    worksheet.write(total_row + index, 0, f'{group}')
+                    worksheet.write(total_row + index, 1, f'{value}')
+                    index += 1
+                    #print(f'{group}  - {value}')
+                    # pass
+                worksheet.write(total_row + index + 1, 0, f'Total Hours')
+                worksheet.write(total_row + index + 1, 1, f'{total_hrs}')
+
+            writer.save()
+
+            # data_frame.to_excel(file_name, index=False)
+            print(f"the file was saved : {file_name}") 
+       
+        except Exception as ex:
+            self._log(f'error = {str(ex)}', 2)
