@@ -1,14 +1,14 @@
 import argparse
 import json
 
-from ..library.app_setting import AppSetting
-from ..library.custom_logger import CustomLogger
-from ..library.constants import *
-from ..model.cli_argument import CliArgument
-from ..db_access.connection import Connection
-from .command_processor import CommandProcessor
-from ..assets.resources.version import *
-from ..assets.resources.messages import *
+from kool_aide.library.app_setting import AppSetting
+from kool_aide.library.custom_logger import CustomLogger
+from kool_aide.library.constants import *
+from kool_aide.model.cli_argument import CliArgument
+from kool_aide.db_access.connection import Connection
+from kool_aide.cli.command_processor import CommandProcessor
+from kool_aide.assets.resources.version import *
+from kool_aide.assets.resources.messages import *
 
 
 def log(message, level = 3):
@@ -31,12 +31,12 @@ if __name__ == "__main__":
                         help='the action to perform', 
                         action='store', 
                         choices=CMD_ACTIONS)
-    parser.add_argument('-r',
+    parser.add_argument('-r', '--report',
                         help='report name to generate', 
                         action='store', 
                         dest='report_to_generate',
                         choices=REPORT_TYPES)
-    parser.add_argument('-m',   
+    parser.add_argument('-m','--model',   
                         help='the data model to use', 
                         action='store', 
                         dest='model',
@@ -65,18 +65,18 @@ if __name__ == "__main__":
                         help='interactive mode', 
                         action='store_true', 
                         dest='interactive_mode')
-    parser.add_argument('-f', '--format',
+    parser.add_argument('--format',
                         help='result format', 
                         action='store', 
                         dest='display_format',
                         choices= DISPLAY_FORMAT)
-    parser.add_argument('-l', '--limit',
+    parser.add_argument('--limit',
                         help='limit the number of records', 
                         action='store', 
                         dest='result_limit',
                         nargs='?',
                         const=0)
-    parser.add_argument('-p', '--params',
+    parser.add_argument('--params',
                         help='command parameters in json', 
                         action='store', 
                         dest='parameters',

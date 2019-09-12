@@ -9,19 +9,19 @@ from tabulate import tabulate
 import os
 
 
-from ..library.app_setting import AppSetting
-from ..library.custom_logger import CustomLogger
-from ..library.constants import *
+from kool_aide.library.app_setting import AppSetting
+from kool_aide.library.custom_logger import CustomLogger
+from kool_aide.library.constants import *
 
-from ..db_access.connection import Connection
-from ..db_access.dbhelper.status_report_helper import StatusReportHelper
+from kool_aide.db_access.connection import Connection
+from kool_aide.db_access.dbhelper.status_report_helper import StatusReportHelper
 
-from ..model.cli_argument import CliArgument
-from ..model.aide.project import Project
-from ..model.aide.week_range import WeekRange
-from ..model.aide.status_report import StatusReport
+from kool_aide.model.cli_argument import CliArgument
+from kool_aide.model.aide.project import Project
+from kool_aide.model.aide.week_range import WeekRange
+from kool_aide.model.aide.status_report import StatusReport
 
-from ..assets.resources.messages import *
+from kool_aide.assets.resources.messages import *
 
 class AttendanceManager:
     def __init__(self, logger: CustomLogger, config: AppSetting,

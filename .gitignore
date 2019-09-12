@@ -123,11 +123,15 @@ dmypy.json
 .idea/
 
 # project related
-cookie.txt
+
 pip.tx
 *.sample
 *.docx
 kool-aide-settings.json
 *.log.*
 /kool-aide-venv
+/build
+/dist
+
+
 

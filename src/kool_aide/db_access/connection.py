@@ -9,8 +9,8 @@ import os
 from datetime import datetime
 import urllib
 
-from ..library.app_setting import AppSetting
-from ..library.custom_logger import CustomLogger
+from kool_aide.library.app_setting import AppSetting
+from kool_aide.library.custom_logger import CustomLogger
 
 class Connection:
     def __init__(self, config: AppSetting, logger: CustomLogger):

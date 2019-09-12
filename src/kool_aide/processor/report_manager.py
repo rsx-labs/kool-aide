@@ -1,13 +1,13 @@
 # kool-aide/processors/report_manager.py
 import pandas as pd
 
-from ..library.app_setting import AppSetting
-from ..library.custom_logger import CustomLogger
-from ..library.constants import *
-from ..db_access.connection import Connection
-from ..model.cli_argument import CliArgument
-from .status_report_manager import StatusReportManager
-from .common_manager import CommonManager
+from kool_aide.library.app_setting import AppSetting
+from kool_aide.library.custom_logger import CustomLogger
+from kool_aide.library.constants import *
+from kool_aide.db_access.connection import Connection
+from kool_aide.model.cli_argument import CliArgument
+from kool_aide.processor.status_report_manager import StatusReportManager
+from kool_aide.processor.common_manager import CommonManager
 
 class ReportManager:
     def __init__(self, logger: CustomLogger, config: AppSetting,

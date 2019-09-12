@@ -5,7 +5,7 @@ import logging
 from logging.handlers import RotatingFileHandler
 from logging import Formatter
 
-from .app_setting import AppSetting
+from kool_aide.library.app_setting import AppSetting
 
 class CustomLogger:
     """ This is a custom logger for logging operations """

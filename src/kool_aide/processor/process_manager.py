@@ -1,5 +1,5 @@
 # kool-aide/processors/process_manager.py
-from ..library.custom_logger import CustomLogger
+from kool_aide.library.custom_logger import CustomLogger
 
 
 class ProcessManager:

@@ -1,17 +1,17 @@
 # kool-aide/cli/command_processor.py
 
-from ..db_access.connection import Connection
+from kool_aide.db_access.connection import Connection
 
-from ..library.custom_logger import CustomLogger
-from ..library.app_setting import AppSetting
-from ..library.constants import *
+from kool_aide.library.custom_logger import CustomLogger
+from kool_aide.library.app_setting import AppSetting
+from kool_aide.library.constants import *
 
-from ..model.cli_argument import CliArgument
+from kool_aide.model.cli_argument import CliArgument
 
-from ..processor.report_manager import ReportManager
-from ..processor.common_manager import CommonManager
-from ..processor.status_report_manager import StatusReportManager
-from ..processor.attendance_manager import AttendanceManager
+from kool_aide.processor.report_manager import ReportManager
+from kool_aide.processor.common_manager import CommonManager
+from kool_aide.processor.status_report_manager import StatusReportManager
+from kool_aide.processor.attendance_manager import AttendanceManager
 
 class CommandProcessor:
     def __init__(self, logger: CustomLogger, config: AppSetting, 

@@ -56,6 +56,11 @@ class AppSetting:
         self.common_setting.output_dir = settings['common']['output_folder']
         self.common_setting.debug_mode = settings['common']['debug_mode'] == 'True'
 
+    def get_section(self, section):
+        try:
+            return settings[section]
+        except:
+            return None
 
     def update(self):
         pass

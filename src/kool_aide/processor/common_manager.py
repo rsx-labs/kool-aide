@@ -4,18 +4,18 @@ import pprint
 import json
 import pandas as pd
 from tabulate import tabulate
-from ..library.app_setting import AppSetting
-from ..library.custom_logger import CustomLogger
-from ..library.constants import *
+from kool_aide.library.app_setting import AppSetting
+from kool_aide.library.custom_logger import CustomLogger
+from kool_aide.library.constants import *
 
-from ..db_access.connection import Connection
-from ..db_access.dbhelper.common_helper import CommonHelper
+from kool_aide.db_access.connection import Connection
+from kool_aide.db_access.dbhelper.common_helper import CommonHelper
 
-from ..model.cli_argument import CliArgument
-from ..model.aide.project import Project
-from ..model.aide.week_range import WeekRange
+from kool_aide.model.cli_argument import CliArgument
+from kool_aide.model.aide.project import Project
+from kool_aide.model.aide.week_range import WeekRange
 
-from ..assets.resources.messages import *
+from kool_aide.assets.resources.messages import *
 
 
 class CommonManager:

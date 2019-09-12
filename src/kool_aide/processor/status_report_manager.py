@@ -11,19 +11,19 @@ from datetime import datetime
 import xlsxwriter
 
 
-from ..library.app_setting import AppSetting
-from ..library.custom_logger import CustomLogger
-from ..library.constants import *
+from kool_aide.library.app_setting import AppSetting
+from kool_aide.library.custom_logger import CustomLogger
+from kool_aide.library.constants import *
 
-from ..db_access.connection import Connection
-from ..db_access.dbhelper.status_report_helper import StatusReportHelper
+from kool_aide.db_access.connection import Connection
+from kool_aide.db_access.dbhelper.status_report_helper import StatusReportHelper
 
-from ..model.cli_argument import CliArgument
-from ..model.aide.project import Project
-from ..model.aide.week_range import WeekRange
-from ..model.aide.status_report import StatusReport
+from kool_aide.model.cli_argument import CliArgument
+from kool_aide.model.aide.project import Project
+from kool_aide.model.aide.week_range import WeekRange
+from kool_aide.model.aide.status_report import StatusReport
 
-from ..assets.resources.messages import *
+from kool_aide.assets.resources.messages import *
 
 
 class StatusReportManager:
@@ -35,6 +35,7 @@ class StatusReportManager:
         self._connection = db_connection
         self._arguments = arguments
         self._db_helper = StatusReportHelper(self._logger, self._config, self._connection)
+        self._report_settings = self._load_report_settings()
 
         self._log("initialize")
 
@@ -143,7 +144,7 @@ class StatusReportManager:
         try:
             # check if the filename contains placeholder [D]
 
-            drop_columns=['WeekRangeStart', 'WeekRangeId']
+            drop_columns=['WeekRangeStart', 'WeekRangeId', 'ProjectId']
             column_headers = [
                 'Project',
                 'Project Code',
@@ -179,7 +180,10 @@ class StatusReportManager:
             for key, values in grouped_per_project:
                 df_per_group = pd.DataFrame(grouped_per_project.get_group(key))
                 df_per_group.columns = column_headers
-              
+                grouped_per_project_by_week = df_per_group.groupby([
+                    'Week End Date'
+                ])
+               
                 df_per_group.to_excel(
                     writer, 
                     sheet_name=key, 
@@ -192,8 +196,23 @@ class StatusReportManager:
                     'text_wrap': True,
                     'valign': 'top',
                     'fg_color': '#D7E4BC',
-                    'border': 1
+                    'border': 0
                 })
+                sub1_format = workbook.add_format({
+                    'bold': True,
+                    'text_wrap':False,
+                    'valign': 'top',
+                    'fg_color': '#FDBF42',
+                    'border': 0
+                })
+                sub2_format = workbook.add_format({
+                    'bold': True,
+                    'text_wrap':False,
+                    'valign': 'top',
+                    'fg_color': '#BBB9B5',
+                    'border': 0
+                })
+
 
                 worksheet = writer.sheets[key]
                 worksheet.set_column(0,3,12)
@@ -210,25 +229,27 @@ class StatusReportManager:
                 total_row = len(df_per_group)
                 total_hrs = sum(df_per_group['Week Effort'])
                 
-                worksheet.write(total_row + 3, 0, f'Total Entries')
-                worksheet.write(total_row + 3, 1, f'{total_row}')
+                # worksheet.write(total_row + 3, 0, f'Total Entries')
+                # worksheet.write(total_row + 3, 1, f'{total_row}')
                 
                 grouped_by_phase_status = df_per_group.groupby([
                     'Week End Date'
                 ])
                 #print(grouped_by_phase_status['Week Effort'].sum())
-                worksheet.write(total_row + 5, 0, f'Time Entries By Week')
-                worksheet.write(total_row + 6, 0, f'Week Ending')
-                worksheet.write(total_row + 6, 1, f'Time')
-                index = 7
+                worksheet.write(total_row + 3, 0, f'Time Entries By Week', sub1_format)
+                worksheet.write(total_row + 3, 1, f'', sub1_format)
+                worksheet.write(total_row + 3, 2, f'', sub1_format)
+                worksheet.write(total_row + 4, 0, f'Week Ending', sub2_format)
+                worksheet.write(total_row + 5, 0, f'Hours', sub2_format)
+                index = 1
                 for group, value in grouped_by_phase_status['Week Effort'].sum().items():
-                    worksheet.write(total_row + index, 0, f'{group}')
-                    worksheet.write(total_row + index, 1, f'{value}')
+                    worksheet.write(total_row + 4, index, f'{group}')
+                    worksheet.write(total_row + 5, index, f'{value}')
                     index += 1
                     #print(f'{group}  - {value}')
                     # pass
-                worksheet.write(total_row + index + 1, 0, f'Total Hours')
-                worksheet.write(total_row + index + 1, 1, f'{total_hrs}')
+                worksheet.write(total_row + 6 + 1, 0, f'Total Hours', sub1_format)
+                worksheet.write(total_row + 6 + 1, 1, f'{total_hrs}')
 
             writer.save()
 
@@ -237,3 +258,6 @@ class StatusReportManager:
        
         except Exception as ex:
             self._log(f'error = {str(ex)}', 2)
+
+    def _load_report_settings(self):
+        pass
