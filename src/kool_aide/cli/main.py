@@ -12,18 +12,19 @@ from kool_aide.assets.resources.messages import *
 
 
 def log(message, level = 3):
-    logger.log(f"{message} [Main]", level)
+    logger.log(f"{message} [cli.main]", level)
 
 
 if __name__ == "__main__":
     config = AppSetting()
     config.load()
     logger = CustomLogger(config)
+    
+    log(f'starting {APP_TITLE} main cli module v{APP_VERSION} [{APP_RELEASE}]')
+
     arguments = CliArgument()
     db_connection = Connection(config, logger)
     processor = CommandProcessor(logger, config, db_connection)
-    
-    log(f'starting {APP_TITLE} main cli module v{APP_VERSION} [{APP_RELEASE}]')
     
     # region create arg parser
     parser = argparse.ArgumentParser(description=APP_DESCRIPTION, epilog=APP_EPILOG)
@@ -80,18 +81,22 @@ if __name__ == "__main__":
                         help='command parameters in json', 
                         action='store', 
                         dest='parameters',
-                        type=str)                    
+                        type=str)   
+    parser.add_argument('--autorun',
+                        help='command is run via another application or script',
+                        action='store_true',
+                        dest='auto_mode')                 
     # endregion
 
     result = parser.parse_args()
-    log(str(result), 4)
+    # log(str(result), 4)
 
     arguments.load_arguments(result)
     log(str(arguments), 4)
 
     # start delegating if db is properly initialized
     if db_connection.initialize():
-        log("we are connected to the db")
+        log("cool! we are connected to the db")
         result, message = processor.delegate(arguments)
         log(f"result = {result} | {message}")
 

@@ -15,8 +15,9 @@ class CliArgument:
         self.display_format = ''
         self.result_limit = 0
         self.parameters = {}
+        self.auto_mode = False
 
-    def load_arguments(self, result):
+    def load_arguments(self, result) -> None:
         self.action = result.action
         self.model = result.model
         self.input_file = result.input_file
@@ -30,6 +31,7 @@ class CliArgument:
         self.display_format = 'screen' if result.display_format is None else result.display_format
         self.result_limit =1000 if result.result_limit is None else result.result_limit
         self.parameters = result.parameters
+        self.auto_mode = result.auto_mode if result.auto_mode is not None else False
 
     def __str__(self):
         return f"[arguments = [action : {self.action} ; model : {self.model} ; " +\

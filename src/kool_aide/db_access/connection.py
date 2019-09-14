@@ -23,9 +23,7 @@ class Connection:
         self._log("initializing")
 
         try:
-            # engine = db.create_engine('mssql+pyodbc://aide:aide1234@192.168.1.39\\SQLEXPRESS2014:1433/AIDE?driver=SQL+Server')
-            # self._log("database connection is initialized")
-            #self._connection = engine.connect()
+           
             params = urllib.parse.quote_plus("DRIVER={SQL Server};"
                 f"SERVER={self._config.connection_setting.server_name};"
                 f"DATABASE={self._config.connection_setting.database};"
@@ -58,7 +56,7 @@ class Connection:
         return True
         
     def _log(self, message, level = 3):
-        self._logger.log(f"{message} [connection]", level)
+        self._logger.log(f"{message} [db_access.connection]", level)
 
     def get_status_report_view(self, project, week):
         try:

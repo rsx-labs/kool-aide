@@ -36,7 +36,7 @@ class AttendanceManager:
         self._log("initialize")
 
     def _log(self, message, level=3):
-        self._logger.log(f"{message} [processor.status_report_manager]", level)
+        self._logger.log(f"{message} [processor.attendance_manager]", level)
 
     def record_time_in(self, user, password = ""):
         self._connection.exec('sp_GetAllDepartment')

@@ -9,6 +9,7 @@ from tabulate import tabulate
 import os
 from datetime import datetime
 import xlsxwriter
+from typing import List
 
 
 from kool_aide.library.app_setting import AppSetting
@@ -16,7 +17,8 @@ from kool_aide.library.custom_logger import CustomLogger
 from kool_aide.library.constants import *
 
 from kool_aide.db_access.connection import Connection
-from kool_aide.db_access.dbhelper.status_report_helper import StatusReportHelper
+from kool_aide.db_access.dbhelper.status_report_helper \
+    import StatusReportHelper
 
 from kool_aide.model.cli_argument import CliArgument
 from kool_aide.model.aide.project import Project
@@ -34,8 +36,17 @@ class StatusReportManager:
         self._config = config
         self._connection = db_connection
         self._arguments = arguments
-        self._db_helper = StatusReportHelper(self._logger, self._config, self._connection)
-        self._report_settings = self._load_report_settings()
+        
+        self._db_helper = StatusReportHelper(
+            self._logger, 
+            self._config, 
+            self._connection
+        )
+
+        self._report_settings = None
+        self._report_schedules = None
+
+        self._load_report_settings()
 
         self._log("initialize")
 
@@ -69,16 +80,17 @@ class StatusReportManager:
                 except Exception as ex:
                     self._log(f'error reading parameters . {str(ex)}',2)
             
+            # if running as auto, use settings. else, use params
+            if arguments.auto_mode:
+                week_filter = self._get_report_schedule(datetime.now().month)
+
             results = self._db_helper.get_status_report_view(week_filter)
             data_frame = pd.DataFrame(results.fetchall()) 
             data_frame.columns = results.keys()
 
-
             if project_filter is not None and len(project_filter)>0:
                 data_frame = data_frame[data_frame['Project'].isin(project_filter)]
             
-            # if week_filter is not None and len(week_filter)>0:
-            #     data_frame = data_frame[data_frame['WeekRangeId'].isin(week_filter)]
             
             if sort_keys is not None and len(sort_keys)>0:
                 data_frame.sort_values(by=sort_keys, inplace= True)
@@ -90,12 +102,14 @@ class StatusReportManager:
             else:
                 data_frame = data_frame.head(limit)
             
+            data_frame = data_frame[data_frame['ActualWeekWork'] > 0]
+
             return data_frame
 
         except Exception as ex:
             self._log(f'error getting data frame. {str(ex)}',2)
     
-    def _retrieve_status_report_view(self, arguments: CliArgument):
+    def _retrieve_status_report_view(self, arguments: CliArgument)->None:
         
         try:
             data_frame = self.get_data_frame(arguments)
@@ -110,7 +124,7 @@ class StatusReportManager:
         except Exception as ex:
             self._log(f'error parsing parameter. {str(ex)}',2)
        
-    def _send_to_output(self, data_frame: pd.DataFrame, format, out_file):
+    def _send_to_output(self, data_frame: pd.DataFrame, format, out_file) ->None:
         if out_file is None:
             file = DEFAULT_FILENAME
         try:
@@ -140,10 +154,9 @@ class StatusReportManager:
         except Exception as ex:
             self._log(str(ex),2)
 
-    def _process_excel(self, data_frame : pd.DataFrame, file_name):
+    def _process_excel(self, data_frame : pd.DataFrame, file_name)-> None:
         try:
             # check if the filename contains placeholder [D]
-
             drop_columns=['WeekRangeStart', 'WeekRangeId', 'ProjectId']
             column_headers = [
                 'Project',
@@ -177,6 +190,16 @@ class StatusReportManager:
 
             # Create a Pandas Excel writer using XlsxWriter as the engine.
             writer = pd.ExcelWriter(file_name, engine='xlsxwriter')
+            
+            workbook = writer.book
+            main_header_format = workbook.add_format(SHEET_TOP_HEADER)
+            header_format_orange = workbook.add_format(SHEET_HEADER_ORANGE)
+            header_format_gray = workbook.add_format(SHEET_HEADER_GRAY)
+            cell_wrap_noborder = workbook.add_format(SHEET_CELL_WRAP_NOBORDER)
+            cell_wrap_noborder_alt = workbook.add_format(SHEET_CELL_WRAP_NOBORDER_ALT)
+            cell_total = workbook.add_format(SHEET_HEADER_LT_GREEN)
+            cell_sub_total = workbook.add_format(SHEET_HEADER_LT_BLUE)
+
             for key, values in grouped_per_project:
                 df_per_group = pd.DataFrame(grouped_per_project.get_group(key))
                 df_per_group.columns = column_headers
@@ -190,41 +213,19 @@ class StatusReportManager:
                     index= False 
                 )
 
-                workbook = writer.book
-                header_format = workbook.add_format({
-                    'bold': True,
-                    'text_wrap': True,
-                    'valign': 'top',
-                    'fg_color': '#D7E4BC',
-                    'border': 0
-                })
-                sub1_format = workbook.add_format({
-                    'bold': True,
-                    'text_wrap':False,
-                    'valign': 'top',
-                    'fg_color': '#FDBF42',
-                    'border': 0
-                })
-                sub2_format = workbook.add_format({
-                    'bold': True,
-                    'text_wrap':False,
-                    'valign': 'top',
-                    'fg_color': '#BBB9B5',
-                    'border': 0
-                })
-
-
                 worksheet = writer.sheets[key]
-                worksheet.set_column(0,3,12)
-                worksheet.set_column(4,4,45)
+                worksheet.set_column(0,3,12,cell_wrap_noborder)
+                worksheet.set_column(4,4,45, cell_wrap_noborder)
+                worksheet.set_column(5,5,12.5)
                 worksheet.set_column(6,6,20)
                 worksheet.set_column(7,7,20)
                 worksheet.set_column(8,12,18)
                 worksheet.set_column(13,15,12)
                 worksheet.set_column(16,19,25)
+                
 
                 for col_num, value in enumerate(df_per_group.columns.values):
-                    worksheet.write(0, col_num, value, header_format)       
+                    worksheet.write(0, col_num, value, main_header_format)       
 
                 total_row = len(df_per_group)
                 total_hrs = sum(df_per_group['Week Effort'])
@@ -232,25 +233,89 @@ class StatusReportManager:
                 # worksheet.write(total_row + 3, 0, f'Total Entries')
                 # worksheet.write(total_row + 3, 1, f'{total_row}')
                 
-                grouped_by_phase_status = df_per_group.groupby([
+                grouped_by_week = df_per_group.groupby([
                     'Week End Date'
                 ])
-                #print(grouped_by_phase_status['Week Effort'].sum())
-                worksheet.write(total_row + 3, 0, f'Time Entries By Week', sub1_format)
-                worksheet.write(total_row + 3, 1, f'', sub1_format)
-                worksheet.write(total_row + 3, 2, f'', sub1_format)
-                worksheet.write(total_row + 4, 0, f'Week Ending', sub2_format)
-                worksheet.write(total_row + 5, 0, f'Hours', sub2_format)
-                index = 1
-                for group, value in grouped_by_phase_status['Week Effort'].sum().items():
-                    worksheet.write(total_row + 4, index, f'{group}')
-                    worksheet.write(total_row + 5, index, f'{value}')
+                # print(grouped_by_phase_status['Week Effort'].sum())
+                worksheet.write(total_row + 3, 0, f'Weekly Time Entries', header_format_orange)
+                worksheet.write(total_row + 3, 1, f'', header_format_orange)
+                worksheet.write(total_row + 4, 0, f'Week Ending', header_format_gray)
+                worksheet.write(total_row + 4, 1, f'Hours', header_format_gray)
+                index = 5
+                for group, value in grouped_by_week['Week Effort'].sum().items():
+                    worksheet.write(total_row + index, 0, f'{group}')
+                    worksheet.write_number(total_row + index, 1, value)
                     index += 1
                     #print(f'{group}  - {value}')
                     # pass
-                worksheet.write(total_row + 6 + 1, 0, f'Total Hours', sub1_format)
-                worksheet.write(total_row + 6 + 1, 1, f'{total_hrs}')
+                worksheet.write(total_row + index, 0, f'Total Hours', header_format_orange)
+                worksheet.write_number(total_row + index, 1, total_hrs, cell_total)
 
+                grouped_by_week_per_employee_by_incident_type = \
+                    df_per_group.groupby([
+                        'Week End Date',
+                        'Assigned Employee',
+                        'Incident Type'
+                    ])
+
+                worksheet.write(total_row + 3, 3, f'Time Entries By Employees Per Incident Type Per Week', header_format_orange)
+                worksheet.write(total_row + 3, 4, f'', header_format_orange)
+                worksheet.write(total_row + 3, 5, f'', header_format_orange)
+                worksheet.write(total_row + 3, 6, f'', header_format_orange)
+                for group, value in grouped_by_week_per_employee_by_incident_type.sum().items():
+                    
+                    if group=='Week Effort':
+                        worksheet.write(total_row + 4, 3, f'Week Ending', header_format_gray)
+                        worksheet.write(total_row + 4, 4, f'Assigned Employee', header_format_gray)
+                        worksheet.write(total_row + 4, 5, f'Incident Type', header_format_gray)
+                        worksheet.write(total_row + 4, 6, f'Hours', header_format_gray)
+                        index = 5
+                        date_list=[]
+                        emp_list=[]
+                        add_date= False
+                        cell_format = cell_wrap_noborder
+                        group_index = 1
+                        weekly_hours = 0
+                        for inner_group, inner_value in value.items():
+                            #print(f'{g1[2]} : {v1}')
+                            if len(date_list) == 0:
+                                date_list.append(inner_group[0])
+                                add_date = True
+                            else:
+                                if inner_group[0] in date_list:
+                                    add_date = False
+                                else:
+                                    date_list.append(inner_group[0])
+                                    add_date = True
+                                    emp_list.clear()
+                                    group_index += 1
+                                    worksheet.write_number(total_row + index, 6, weekly_hours, cell_sub_total)
+                                    weekly_hours = 0
+                                    index += 1
+
+
+                            if add_date:
+                                worksheet.write(total_row + index, 3,f'{inner_group[0]}', cell_format)
+                                worksheet.write(total_row + index, 4,f'{inner_group[1]}', cell_format)
+                                emp_list.append(inner_group[1])
+                            else:
+                                if inner_group[1] not in emp_list:
+                                    worksheet.write(total_row + index, 4,f'{inner_group[1]}', cell_format)
+                                    emp_list.append(inner_group[1])
+
+                            worksheet.write(total_row + index, 5,f'{inner_group[2]}', cell_format)
+                            worksheet.write_number(total_row + index, 6,inner_value, cell_format)
+                            weekly_hours += inner_value
+                            index += 1
+
+                        worksheet.write_number(total_row + index, 6, weekly_hours, cell_sub_total)
+                        weekly_hours = 0
+                        index += 1
+                        worksheet.write(total_row + index, 3, f'Total Hours', header_format_orange)
+                        worksheet.write(total_row + index, 4, '', header_format_orange)
+                        worksheet.write(total_row + index, 5, '', header_format_orange)
+                        worksheet.write_number(total_row + index, 6, total_hrs, cell_total)
+                    
             writer.save()
 
             # data_frame.to_excel(file_name, index=False)
@@ -259,5 +324,9 @@ class StatusReportManager:
         except Exception as ex:
             self._log(f'error = {str(ex)}', 2)
 
-    def _load_report_settings(self):
-        pass
+    def _load_report_settings(self) -> None:
+        self._report_settings = self._config.get_section('reports')
+        self._report_schedules = self._report_settings['schedules']
+
+    def _get_report_schedule(self, month: int) -> List[str]:
+        return self._report_schedules[month-1]

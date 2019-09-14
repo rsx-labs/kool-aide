@@ -35,7 +35,7 @@ class AppSetting:
         self.user_setting= UserSetting('')
         self.connection_setting= ConnectionSetting('','','', '')
         self.common_setting= CommonSetting()
-
+        self._settings = {}
 
     def __str__(self):
         return f'app setting = [{str(self.user_setting)} ; {str(self.connection_setting)} ; {str(self.common_setting)}]'
@@ -43,22 +43,22 @@ class AppSetting:
     def load(self):
         settings = {}
         with open('kool-aide-settings.json') as json_setting:
-            settings = json.load(json_setting)
+            self._settings = json.load(json_setting)
 
-        self.user_setting.email = settings['user']['email']
-        self.user_setting.vsts_email = settings['user']['vsts_email']
-        self.connection_setting.server_name = settings['connection_string']['server_name']
-        self.connection_setting.uid = settings['connection_string']['user_id']
-        self.connection_setting.password = settings['connection_string']['password']
-        self.connection_setting.database = settings['connection_string']['database']
-        self.common_setting.log_level = settings['common']['log_level']
-        self.common_setting.log_location = settings['common']['log_location']
-        self.common_setting.output_dir = settings['common']['output_folder']
-        self.common_setting.debug_mode = settings['common']['debug_mode'] == 'True'
+        self.user_setting.email = self._settings['user']['email']
+        self.user_setting.vsts_email = self._settings['user']['vsts_email']
+        self.connection_setting.server_name = self._settings['connection_string']['server_name']
+        self.connection_setting.uid = self._settings['connection_string']['user_id']
+        self.connection_setting.password = self._settings['connection_string']['password']
+        self.connection_setting.database = self._settings['connection_string']['database']
+        self.common_setting.log_level = self._settings['common']['log_level']
+        self.common_setting.log_location = self._settings['common']['log_location']
+        self.common_setting.output_dir = self._settings['common']['output_folder']
+        self.common_setting.debug_mode = self._settings['common']['debug_mode'] == 'True'
 
     def get_section(self, section):
         try:
-            return settings[section]
+            return self._settings[section]
         except:
             return None
 
