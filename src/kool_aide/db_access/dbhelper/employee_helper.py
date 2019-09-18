@@ -6,35 +6,32 @@ import pyodbc
 import os
 from datetime import datetime
 import urllib
-import pandas as pd
 
 from kool_aide.library.app_setting import AppSetting
 from kool_aide.library.custom_logger import CustomLogger
 from kool_aide.db_access.connection import Connection
 
-class StatusReportHelper:
+class EmployeeHelper:
     def __init__(self, logger: CustomLogger, config: AppSetting,
                 db_connection: Connection):
         self._logger = logger
         self._config = config
         self._connection = db_connection
 
-        self._log("initialize")
+        self._log("creating component")
 
     def _log(self, message, level=3):
-        self._logger.log(f"{message} [db_access.dbhelper.status_report_helper]", level)
+        self._logger.log(f"{message} [db_access.dbhelper.employee_helper]", level)
 
-    def get_status_report_view(self, weeks=[]):
+    def get_all_employee(self, ids=[]):
         try:
-            if weeks is not None:
-                if len(weeks)>0:
-                    query = self._connection.status_report_view.select(
-                        self._connection.status_report_view.c.WeekRangeId.in_(weeks)
-                    )
-                else:
-                    query = self._connection.status_report_view.select()
+            if ids is not None and len(ids) > 0:
+                query = self._connection.employee.select(
+                    self._connection.employee.c.WeekRangeId.in_(ids)
+                )
             else:
-                query = self._connection.status_report_view.select()
+                query = self._connection.employee.select()
+           
             result = query.execute()
             return result
         except Exception as ex:

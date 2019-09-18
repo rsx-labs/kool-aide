@@ -2,16 +2,16 @@
 # kool-aide/library/constants.py
 
 CMD_ACTIONS =[ 
-    'create','get','update','delete','generate-report','time-in'
+    'create','get','update','delete','generate-report'
 ]
 REPORT_TYPES = [
-    'team-status-report',
     'status-report',
     'outstanding-tasks'
 ]
 
 SUPPORTED_MODELS = [
-    'employee', 'attendance', 'week-range', 'project', 'status-report-view'
+    'employee', 'attendance', 'week-range', 'project', 'status-report',
+    'department', 'division', 'position'
 ]
 
 DISPLAY_FORMAT = [
@@ -19,9 +19,9 @@ DISPLAY_FORMAT = [
 ]
 
 MONTHS = [
-    'JAN', 'FEB', 'MAR', 'APR',
-    'MAY', 'JUN', 'JUL', 'AUG',
-    'SEP', 'OCT', 'NOV', 'DEC'
+    'January', 'February', 'March', 'April',
+    'May', 'June', 'July', 'August',
+    'September', 'October', 'November', 'December'
 ]
 
 DEFAULT_FILENAME = 'result'
@@ -29,6 +29,7 @@ PARAM_COLUMNS = 'columns'
 PARAM_SORT = 'sorts'
 PARAM_WEEK = 'weeks'
 PARAM_PROJECT = 'projects'
+PARAM_IDS = 'ids'
 
 # excel formats
 SHEET_TOP_HEADER = {
@@ -67,6 +68,13 @@ SHEET_HEADER_LT_BLUE = {
     'fg_color': '#66FFCC',
     'border': 0
 }
+SHEET_HEADER_GAINSBORO = {
+    'bold': True,
+    'text_wrap':False,
+    'valign': 'top',
+    'fg_color': '#DCDCDC',
+    'border': 0
+}
 
 SHEET_CELL_WRAP = {
     'text_wrap':True
@@ -82,4 +90,7 @@ SHEET_CELL_WRAP_NOBORDER_ALT = {
     'fg_color': '#E8E8E8',
 }
 
-
+# mapping
+MAP_REPORT_TO_MODEL ={
+    'status-report': 'status-report'
+}

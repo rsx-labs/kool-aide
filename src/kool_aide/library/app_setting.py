@@ -25,7 +25,7 @@ class CommonSetting:
         self.log_location = log_location
         self.output_dir = out_dir
         self.debug_mode = debug
-
+   
     def __str__(self):
         return f'common = [log_level : {self.log_level} ; log_location : {self.log_location}]'
 
@@ -55,7 +55,7 @@ class AppSetting:
         self.common_setting.log_location = self._settings['common']['log_location']
         self.common_setting.output_dir = self._settings['common']['output_folder']
         self.common_setting.debug_mode = self._settings['common']['debug_mode'] == 'True'
-
+   
     def get_section(self, section):
         try:
             return self._settings[section]

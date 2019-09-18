@@ -35,8 +35,21 @@ class AttendanceManager:
 
         self._log("initialize")
 
-    def _log(self, message, level=3):
+    def _log(self, message, level=3) -> None:
         self._logger.log(f"{message} [processor.attendance_manager]", level)
 
-    def record_time_in(self, user, password = ""):
-        self._connection.exec('sp_GetAllDepartment')
+    
+    def create(self, arguments: CliArgument) ->(bool, str):
+        pass
+
+    def retrieve(self, arguments: CliArgument) ->(bool, str):
+        pass
+
+    def update(self, arguments: CliArgument) ->(bool, str):
+        pass
+
+    def delete(self, arguments: CliArgument) ->(bool, str):
+        pass
+
+    def execute(self, arguments: CliArgument) ->(bool, str):
+        pass

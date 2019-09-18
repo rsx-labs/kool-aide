@@ -20,6 +20,7 @@ if __name__ == "__main__":
     config.load()
     logger = CustomLogger(config)
     
+    log(f'*******************************************************************')
     log(f'starting {APP_TITLE} main cli module v{APP_VERSION} [{APP_RELEASE}]')
 
     arguments = CliArgument()
@@ -88,16 +89,10 @@ if __name__ == "__main__":
                         dest='auto_mode')                 
     # endregion
 
-    result = parser.parse_args()
-    # log(str(result), 4)
-
-    arguments.load_arguments(result)
+    arguments.load_arguments(parser.parse_args())
     log(str(arguments), 4)
-
-    # start delegating if db is properly initialized
-    if db_connection.initialize():
-        log("cool! we are connected to the db")
-        result, message = processor.delegate(arguments)
-        log(f"result = {result} | {message}")
+    # delegate the command 
+    result, message = processor.delegate(arguments)
+    log(f"result = {result} | {message}")
 
     log("end of main")

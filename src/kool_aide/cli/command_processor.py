@@ -12,10 +12,12 @@ from kool_aide.processor.report_manager import ReportManager
 from kool_aide.processor.common_manager import CommonManager
 from kool_aide.processor.status_report_manager import StatusReportManager
 from kool_aide.processor.attendance_manager import AttendanceManager
+from kool_aide.processor.employee_manager import EmployeeManager
 
 class CommandProcessor:
-    def __init__(self, logger: CustomLogger, config: AppSetting, 
-        db_connection: Connection):
+    def __init__(self, logger: CustomLogger, 
+                    config: AppSetting, db_connection: Connection):
+
         self._logger = logger
         self._config = config
         self._connection = db_connection
@@ -23,7 +25,7 @@ class CommandProcessor:
         self._log("creating component")
 
     def _log(self, message, level = 3):
-        self._logger.log(f"{message} [command processor]", level)
+        self._logger.log(f"{message} [cli.command_processor]", level)
 
     def delegate(self, arguments: CliArgument):
         self._log(f"delegating {str(arguments)}")
@@ -32,12 +34,11 @@ class CommandProcessor:
             return True, ""
         elif arguments.action == CMD_ACTIONS[1]: # retrieve
             if arguments.model in SUPPORTED_MODELS:
-                result, message = self._retrieve_model(arguments)
+                result, message = self._retrieve(arguments)
                 return True, f"{result} | {message}"
             else:
                 self._log(f"model not supported : {arguments.model}")
-                return False, "model not supported"
-                
+                return False, "model not supported"             
         elif arguments.action == CMD_ACTIONS[2]: # update
             return True, ""
         elif arguments.action == CMD_ACTIONS[3]: # delete
@@ -52,28 +53,71 @@ class CommandProcessor:
                 self._log(f"report type not supported : {arguments.report}")
                 return False, "report type not supported"
         elif arguments.action == CMD_ACTIONS[5]: # time-in
-            return self._do_time_in(arguments)
+            return self._execute(arguments)
         else:
             return False, "invalid action"
 
     def _generate_report(self, arguments : CliArgument):
         self._log(f"generating report : {arguments.report}")
-
-        report_manager = ReportManager(self._logger, self._config, self._connection, arguments)
-        return report_manager.generate(arguments)
-
-    def _retrieve_model(self, arguments: CliArgument):
-
-        self._log(f"retrieving model : {arguments.model}")
-
-        if arguments.model == SUPPORTED_MODELS[4]:
-            status_report_manager = StatusReportManager(self._logger, self._config, self._connection, arguments)
-            return status_report_manager.retrieve(arguments)
+        self._log(f"opening connection to database ...")
+        if self._connection.initialize():
+            self._log(f"connected to the database ...")
+            # get the mapped model for the report
+            arguments.model=MAP_REPORT_TO_MODEL[arguments.report]
+            report_manager = ReportManager(
+                self._logger, 
+                self._config, 
+                self._connection, 
+                arguments
+            )
+            return report_manager.generate(arguments)
         else:
-            common_manager = CommonManager(self._logger, self._config, self._connection, arguments)
-            return common_manager.retrieve(arguments)
+            self._log(f"error connecting to the database", 1)
+            return False, "command execution failed"
 
-    def _do_time_in(self, arguments: CliArgument):
-        a = AttendanceManager(self._logger, self._config, self._connection, arguments)
-        a.record_time_in("")
+    def _retrieve(self, arguments: CliArgument):
+        self._log(f"retrieving model : {arguments.model}")
+        self._log(f"opening connection to database ...")
+        if self._connection.initialize():
+            self._log(f"connected to the database ...")
+
+            if arguments.model == SUPPORTED_MODELS[0]:
+                # employee
+                employee_manager = EmployeeManager(
+                    self._logger, 
+                    self._config, 
+                    self._connection, 
+                    arguments
+                )
+                return employee_manager.retrieve(arguments)
+
+            elif arguments.model == SUPPORTED_MODELS[4]:
+                # status-report
+                status_report_manager = StatusReportManager(
+                    self._logger, 
+                    self._config, 
+                    self._connection, 
+                    arguments
+                )
+                return status_report_manager.retrieve(arguments)
+            
+            else:
+                common_manager = CommonManager(
+                    self._logger,
+                    self._config, 
+                    self._connection,
+                    arguments
+                )
+                return common_manager.retrieve(arguments)
+        else:
+            self._log(f"error connecting to the database", 1)
+            return False, "command execution failed"
+
+    def _execute(self, arguments: CliArgument):
+        attendance_manager = AttendanceManager(
+            self._logger, 
+            self._config, 
+            self._connection, 
+            arguments
+        )
         return True, ""
