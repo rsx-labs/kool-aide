@@ -1,16 +1,17 @@
 import json
 import pandas as pd
 from tabulate import tabulate
+from typing import List
 from kool_aide.library.app_setting import AppSetting
 from kool_aide.library.custom_logger import CustomLogger
 from kool_aide.library.constants import *
+from kool_aide.library.utilities import append_date_to_file_name
 
 from kool_aide.db_access.connection import Connection
 from kool_aide.db_access.dbhelper.employee_helper import EmployeeHelper
 
 from kool_aide.model.cli_argument import CliArgument
-from kool_aide.model.aide.project import Project
-from kool_aide.model.aide.week_range import WeekRange
+from kool_aide.model.aide.employee import Employee
 
 from kool_aide.assets.resources.messages import *
 
@@ -35,6 +36,33 @@ class EmployeeManager:
         self._logger.log(f"{message} [processor.employee_manager]", level)
 
     def create(self, arguments: CliArgument)->(bool, str):
+        if arguments.input_file is None:
+            return False, MISSING_PARAMETER.replace('%0', 'input file')
+
+        if arguments.display_format is None:
+            # default to json
+            arguments.display_format = OUTPUT_FORMAT[0]
+
+        if arguments.display_format == OUTPUT_FORMAT[0]: #json
+            employees = self._read_json(arguments.input_file)
+            self._log(f'read data = {employees}')
+
+            for employee in employees:
+                result, error = self._add_employee(employee, arguments)
+                self._log(f'add = {result} ; error = {error}')
+
+
+            return True, ''
+        else:
+            return False, NOT_SUPPORTED
+
+    def _read_json(self, file: str):
+        employees = []
+        with open(file) as input_file:
+            employees = json.load(input_file)
+        return employees
+
+    def _read_excel(self, file: str) -> pd.DataFrame:
         pass
 
     def retrieve(self, arguments: CliArgument)->(bool, str):
@@ -92,20 +120,23 @@ class EmployeeManager:
     def send_to_output(self, data_frame: pd.DataFrame, format, out_file)-> None:
         if out_file is None:
             file = DEFAULT_FILENAME
+            out_file = file
+
+        out_file = append_date_to_file_name(out_file)
         try:
-            if format == DISPLAY_FORMAT[1]:
+            if format == OUTPUT_FORMAT[1]:
                 json_file = f"{file}.json" if out_file is None else out_file
                 data_frame.to_json(json_file, orient='records')
                 print(f"the file was saved : {json_file}")
-            elif format == DISPLAY_FORMAT[2]:
+            elif format == OUTPUT_FORMAT[2]:
                 csv_file = f"{file}.csv" if out_file is None else out_file
                 data_frame.to_csv(csv_file)
                 print(f"the file was saved : {csv_file}")
-            elif format == DISPLAY_FORMAT[3]:
+            elif format == OUTPUT_FORMAT[3]:
                 excel_file = f"{file}.xslx" if out_file is None else out_file
                 data_frame.to_excel(excel_file)
                 print(f"the file was saved : {excel_file}") 
-            elif format == DISPLAY_FORMAT[0]:    
+            elif format == OUTPUT_FORMAT[0]:    
                 print('\n') 
                 print(tabulate(
                     data_frame, 
@@ -131,4 +162,11 @@ class EmployeeManager:
         except Exception as ex:
             self._log(f'error retrieving data. {str(ex)}')
 
-    
+    def _add_employee(self, employee_data, argument: CliArgument):
+        employee = Employee()
+        employee.populate_from_json(employee_data)
+        
+        if employee.is_ok_to_add:
+            return True, ''
+        else:
+            return False, MISSING_PARAMETER

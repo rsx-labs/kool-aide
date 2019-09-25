@@ -1,5 +1,6 @@
 import argparse
 import json
+# from pyfiglet import Figlet
 
 from kool_aide.library.app_setting import AppSetting
 from kool_aide.library.custom_logger import CustomLogger
@@ -43,6 +44,11 @@ if __name__ == "__main__":
                         action='store', 
                         dest='model',
                         choices=SUPPORTED_MODELS)
+    parser.add_argument('-vw','--view',   
+                        help='the data view to use', 
+                        action='store', 
+                        dest='view',
+                        choices=SUPPORTED_VIEWS)
     parser.add_argument('--input',  
                         help='the input file', 
                         action='store', 
@@ -71,7 +77,7 @@ if __name__ == "__main__":
                         help='result format', 
                         action='store', 
                         dest='display_format',
-                        choices= DISPLAY_FORMAT)
+                        choices= OUTPUT_FORMAT)
     parser.add_argument('--limit',
                         help='limit the number of records', 
                         action='store', 
@@ -86,9 +92,16 @@ if __name__ == "__main__":
     parser.add_argument('--autorun',
                         help='command is run via another application or script',
                         action='store_true',
-                        dest='auto_mode')                 
+                        dest='auto_mode')       
+    parser.add_argument('-v',
+                        '--version',
+                        action='version',
+                        version=f'{APP_TITLE} [{APP_RELEASE}] v{APP_VERSION}')          
     # endregion
 
+    # custom_fig = Figlet(font='doom')
+    # print(custom_fig.renderText(APP_TITLE), end='')
+   
     arguments.load_arguments(parser.parse_args())
     log(str(arguments), 4)
     # delegate the command 

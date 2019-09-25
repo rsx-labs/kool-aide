@@ -16,6 +16,7 @@ class CliArgument:
         self.result_limit = 0
         self.parameters = {}
         self.auto_mode = False
+        self.view = ''
 
     def load_arguments(self, result) -> None:
         self.action = result.action
@@ -32,6 +33,7 @@ class CliArgument:
         self.result_limit =1000 if result.result_limit is None else result.result_limit
         self.parameters = result.parameters
         self.auto_mode = result.auto_mode if result.auto_mode is not None else False
+        self.view = result.view
 
     def __str__(self):
         return f"[arguments = [action : {self.action} ; model : {self.model} ; " +\
@@ -39,4 +41,5 @@ class CliArgument:
                 f"user_id : {self.user_id} ;  " +\
                 f"is_csv : {self.is_csv_format} ; quiet_mode : {self.quiet_mode} ; " +\
                 f"interactive : {self.interactive_mode} ; report_to_generate : {self.report} ; " +\
-                f"display_format : {self.display_format} ; result_limit : {self.result_limit}]]"
+                f"display_format : {self.display_format} ; result_limit : {self.result_limit} ; " + \
+                f"view : {self.view}]]"

@@ -14,12 +14,10 @@ from kool_aide.library.custom_logger import CustomLogger
 from kool_aide.library.constants import *
 
 from kool_aide.db_access.connection import Connection
-from kool_aide.db_access.dbhelper.status_report_helper import StatusReportHelper
 
 from kool_aide.model.cli_argument import CliArgument
 from kool_aide.model.aide.project import Project
 from kool_aide.model.aide.week_range import WeekRange
-from kool_aide.model.aide.status_report import StatusReport
 
 from kool_aide.assets.resources.messages import *
 

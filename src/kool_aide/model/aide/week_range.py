@@ -27,3 +27,11 @@ class WeekRange:
     def to_csv(self):
         return f"{self.id},{self.start},{self.end}"
     
+    def populate_from_data_row(self, data_row) -> None:
+        pass
+
+    def populate_from_json(self, json_data) -> None:
+        pass
+
+    def is_ok_to_add(self) -> bool:
+        pass

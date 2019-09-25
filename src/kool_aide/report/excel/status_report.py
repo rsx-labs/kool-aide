@@ -1,12 +1,5 @@
-# kool-aide/processor/common_manager.py
-
-import pprint
-import jsonpickle
 import json
-from beautifultable import BeautifulTable
 import pandas as pd
-from tabulate import tabulate
-import os
 from datetime import datetime
 import xlsxwriter
 from typing import List
@@ -16,28 +9,20 @@ from kool_aide.library.app_setting import AppSetting
 from kool_aide.library.custom_logger import CustomLogger
 from kool_aide.library.constants import *
 
-from kool_aide.db_access.connection import Connection
-from kool_aide.db_access.dbhelper.status_report_helper \
-    import StatusReportHelper
 
 from kool_aide.model.cli_argument import CliArgument
-from kool_aide.model.aide.project import Project
-from kool_aide.model.aide.week_range import WeekRange
-from kool_aide.model.aide.status_report import StatusReport
-
 from kool_aide.assets.resources.messages import *
 
+class StatusReport:
 
-class StatusReportManager:
-    def __init__(self, logger: CustomLogger, config: AppSetting,
-                db_connection: Connection, arguments: CliArgument = None):
-
+    def __init__(self, logger: CustomLogger, settings: AppSetting, 
+                    data: pd.DataFrame, writer = None) -> None:
+        
+        self._data = data
+        self._settings = settings,
         self._logger = logger
-        self._config = config
-        self._connection = db_connection
-        self._arguments = arguments
 
-        self._writer = None
+        self._writer = writer
         self._workbook = None
         self._main_header_format = None
         self._header_format_orange = None
@@ -45,134 +30,21 @@ class StatusReportManager:
         self._cell_wrap_noborder = None
         self._cell_total = None
         self._cell_sub_total = None
-        
-        self._db_helper = StatusReportHelper(
-            self._logger, 
-            self._config, 
-            self._connection
-        )
 
-        self._report_settings = None
-        self._report_schedules = None
-
-        self._load_report_settings()
-
-        self._log("initialize")
+        self._log('creating component ...')
 
     def _log(self, message, level=3):
-        self._logger.log(f"{message} [processor.status_report_manager]", level)
+        self._logger.log(f"{message} [report.status_report]", level)
 
-    def retrieve(self, arguments : CliArgument):
-        self._log(f"retrieving model : {arguments.model}")
-  
-        if arguments.model == SUPPORTED_MODELS[4]:
-            self._retrieve_status_report_view(arguments)
-            return True, DATA_RETRIEVED
-        
-        return False, NOT_SUPPORTED
+    def generate(self, format: str) -> None:
+        if format == OUTPUT_FORMAT[3]: # excel
+            return self._generate_excel_report()
+        else:
+            return False, NOT_SUPPORTED
 
-    def get_data_frame(self, arguments : CliArgument):
-        
-        columns = None
-        sort_keys = None
-        project_filter = None
-        week_filter = None
-        
+    def _generate_excel_report(self) -> None:
         try:
-            if arguments.parameters is not None:
-                try:
-                    json_parameters = json.loads(arguments.parameters)
-                    sort_keys = None if PARAM_SORT not in json_parameters else json_parameters[PARAM_SORT]
-                    project_filter = None if PARAM_PROJECT not in json_parameters else json_parameters[PARAM_PROJECT] 
-                    week_filter = None if PARAM_WEEK not in json_parameters else json_parameters[PARAM_WEEK] 
-                    columns = None if PARAM_COLUMNS not in json_parameters else json_parameters[PARAM_COLUMNS] 
-                except Exception as ex:
-                    self._log(f'error reading parameters . {str(ex)}',2)
-            
-            # if running as auto, use settings. else, use params
-            if arguments.auto_mode:
-                week_filter = self._get_report_schedule(datetime.now().month)
-
-            results = self._db_helper.get_status_report_view(week_filter)
-            data_frame = pd.DataFrame(results.fetchall()) 
-            data_frame.columns = results.keys()
-
-            if project_filter is not None and len(project_filter)>0:
-                data_frame = data_frame[data_frame['Project'].isin(project_filter)]
-            
-            
-            if sort_keys is not None and len(sort_keys)>0:
-                data_frame.sort_values(by=sort_keys, inplace= True)
-     
-            limit = int(arguments.result_limit)
-
-            if columns is not None and len(columns)>0:        
-                data_frame = data_frame[columns].head(limit)
-            else:
-                data_frame = data_frame.head(limit)
-            
-            data_frame = data_frame[data_frame['ActualWeekWork'] > 0]
-
-            return data_frame
-
-        except Exception as ex:
-            self._log(f'error getting data frame. {str(ex)}',2)
-    
-    def _retrieve_status_report_view(self, arguments: CliArgument)->None:
-        
-        try:
-            data_frame = self.get_data_frame(arguments)
-
-            self._send_to_output(
-                data_frame, 
-                arguments.display_format, 
-                arguments.output_file
-            )
-
-            self._log(f"retrieved [ {len(data_frame)} ] records")
-        except Exception as ex:
-            self._log(f'error parsing parameter. {str(ex)}',2)
-       
-    def _send_to_output(self, data_frame: pd.DataFrame, format, out_file) -> None:
-        if out_file is None:
-            file = DEFAULT_FILENAME
-        try:
-            if format == DISPLAY_FORMAT[1]:
-                json_file = f"{file}.json" if out_file is None else out_file
-                data_frame.to_json(json_file, orient='records')
-                print(f"the file was saved : {json_file}")
-            elif format == DISPLAY_FORMAT[2]:
-                csv_file = f"{file}.csv" if out_file is None else out_file
-                data_frame.to_csv(csv_file)
-                print(f"the file was saved : {csv_file}")
-            elif format == DISPLAY_FORMAT[3]:
-                excel_file = f"{file}.xlsx" if out_file is None else out_file
-
-                if '[D]' in excel_file:
-                    date_now = datetime.now()
-                    date_string = f'{MONTHS[date_now.month-1]}{date_now.year}'
-                    excel_file = excel_file.replace('[D]',date_string)
-
-                self._process_excel(data_frame, excel_file)
-                
-            elif format == DISPLAY_FORMAT[0]:    
-                print('\n') 
-                print(tabulate(
-                    data_frame, 
-                    showindex=False, 
-                    headers=data_frame.columns
-                ))
-                print('\n') 
-            else:
-                print(NOT_SUPPORTED)
-
-        except Exception as ex:
-            self._log(str(ex),2)
-
-    def _process_excel(self, data_frame : pd.DataFrame, file_name)-> None:
-        try:
-            self._writer = pd.ExcelWriter(file_name, engine='xlsxwriter')
-            
+            data_frame = self._data
             self._workbook = self._writer.book
             self._main_header_format = self._workbook.add_format(SHEET_TOP_HEADER)
             self._header_format_orange = self._workbook.add_format(SHEET_HEADER_ORANGE)
@@ -181,7 +53,7 @@ class StatusReportManager:
             self._cell_total = self._workbook.add_format(SHEET_HEADER_LT_GREEN)
             self._cell_sub_total = self._workbook.add_format(SHEET_HEADER_GAINSBORO)
 
-            drop_columns=['WeekRangeStart', 'WeekRangeId', 'ProjectId']
+            drop_columns = ['WeekRangeStart', 'WeekRangeId', 'ProjectId']
             column_headers = [
                 'Project',
                 'Project Code',
@@ -213,12 +85,12 @@ class StatusReportManager:
                           
             self._writer.save()
             # data_frame.to_excel(file_name, index=False)
-            print(f"the file was saved : {file_name}") 
+            # print(f"the file was saved : {file_name}") 
        
         except Exception as ex:
             self._log(f'error = {str(ex)}', 2)
 
-    def _create_main_report(self, data_frame : pd.DataFrame)-> None:
+    def _create_main_report(self, data_frame: pd.DataFrame)-> None:
         try:
             
             grouped_per_project = data_frame.groupby('Project')
@@ -604,7 +476,6 @@ class StatusReportManager:
         total_row = 0
         worksheet.write(total_row, 0, 'Time Entries Per Project', self._header_format_orange)
         worksheet.write(total_row, 1, '', self._header_format_orange)
-        worksheet.write(total_row, 2, '', self._header_format_orange)
         worksheet.write(total_row + 1, 0, 'Project', self._header_format_gray)
         worksheet.write(total_row + 1, 1, 'Hours', self._header_format_gray)
 
@@ -615,13 +486,30 @@ class StatusReportManager:
         sub_list = []
         index = 2
         total_hrs = sum(data_frame['Week Effort'])
+        count = 0
         for key, value in grouped_per_project['Week Effort'].sum().items():
             worksheet.write(total_row + index, 0,f'{key}', self._cell_wrap_noborder)
             worksheet.write_number(total_row + index, 1,value, self._cell_wrap_noborder)
             index += 1
+            count += 1
         
         worksheet.write(total_row + index, 0, f'Total Hours', self._header_format_orange)
         worksheet.write_number(total_row + index, 1, total_hrs, self._cell_total)
+
+        # # Create a chart object.
+        # summary_project_hours_chart = self._workbook.add_chart({'type': 'pie'})
+
+        # # Configure the chart from the dataframe data. Configuring the segment
+        # # colours is optional. Without the 'points' option you will get Excel's
+        # # default colours.
+        # summary_project_hours_chart.add_series({
+        #     'categories': "='Team Summary'!A3:A13",
+        #     'values':     "='Team Summary'!B3:B13",
+        # })
+
+        # # Insert the chart into the worksheet.
+        # worksheet.insert_chart('A16', summary_project_hours_chart)
+
 
         ######
 
@@ -769,9 +657,7 @@ class StatusReportManager:
         worksheet.write_number(total_row + index, 12, total_hrs, self._cell_total)
 
   
-    def _load_report_settings(self) -> None:
-        self._report_settings = self._config.get_section('reports')
-        self._report_schedules = self._report_settings['schedules']
+    
 
-    def _get_report_schedule(self, month: int) -> List[str]:
-        return self._report_schedules[month-1]
+
+    

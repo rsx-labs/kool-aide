@@ -38,4 +38,22 @@ class EmployeeHelper:
             self._log(f"error getting db values. {str(ex)}")
             return False
     
-    
+    def insert(self, user_session_id, start_credit, starting_demo_credit):
+        try:
+            if self._db_connection.closed:
+                self._logger.log("db connection closed, reconnecting ...")
+                self._initialize()
+
+            command = self._trade_session_table.insert().values(
+                client_session_id = user_session_id,
+                start_timestamp  = datetime.now(),
+                start_credit = start_credit,
+                start_demo_credit = starting_demo_credit
+            )
+            result = self._db_connection.execute(command)
+            # self._logger.log(result, 4)
+            return result.lastrowid
+        except Exception as ex:
+            self._logger.log("error inserting data to db...", 1)
+            self._logger.log(f"error : {ex}", 1)
+            return None

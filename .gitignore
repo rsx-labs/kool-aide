@@ -124,7 +124,7 @@ dmypy.json
 
 # project related
 
-pip.tx
+pip.txt
 *.sample
 *.docx
 kool-aide-settings.json
@@ -132,6 +132,7 @@ kool-aide-settings.json
 /kool-aide-venv
 /build
 /dist
+todo.txt
 
 
 

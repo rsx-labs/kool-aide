@@ -40,7 +40,7 @@ class Connection:
             self.week_range = Table('week_range', metadata, autoload = True)
             self.project = Table('project', metadata, autoload = True)
             self.employee = Table('employee', metadata, autoload = True)
-
+            self.asset_inventory_view = Table('vw_assetinventory', metadata, autoload = True)
             
             self._session = sessionmaker(bind=engine)()
             
