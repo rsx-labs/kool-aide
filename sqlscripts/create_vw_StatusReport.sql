@@ -32,7 +32,9 @@ SELECT      project.PROJ_NAME AS Project,
             week.WEEK_START AS WeekRangeStart, 
             week.WEEK_END AS WeekRangeEnd, 
             week.WEEK_ID AS WeekRangeId, 
-            project.PROJ_ID AS ProjectId
+            project.PROJ_ID AS ProjectId,
+            incharge.DEPT_ID as DepartmentID, 
+            incharge.DIV_ID as DivisionID
 FROM        dbo.PROJECT AS project INNER JOIN
             dbo.WEEKLY_REPORT AS wReport 
                 ON project.PROJ_ID = wReport.WR_PROJ_ID INNER JOIN
@@ -54,7 +56,9 @@ FROM        dbo.PROJECT AS project INNER JOIN
                 ON severity.STATUS = wReport.WR_INC_TYPE 
                     AND severity.STATUS_NAME = 'SEVERITY' INNER JOIN
             dbo.WEEK_RANGE AS week 
-                ON week.WEEK_ID = wReport.WR_WEEK_RANGE_ID
+                ON week.WEEK_ID = wReport.WR_WEEK_RANGE_ID LEFT OUTER JOIN
+            dbo.EMPLOYEE AS incharge
+                ON  incharge.EMP_ID = project.EMP_ID
 
 
 GO

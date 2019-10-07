@@ -74,6 +74,8 @@ class StatusReport:
                 'Comments',
                 'Inbound Contacts',
                 'Week End Date',
+                'DepartmentID',
+                'DivisionID'
             ]
 
             data_frame.drop(drop_columns, inplace=True, axis=1)

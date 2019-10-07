@@ -46,10 +46,9 @@ class AssetInventoryReport:
             self._workbook = self._writer.book
             main_header_format = self._workbook.add_format(SHEET_TOP_HEADER)
             footer_format = self._workbook.add_format(SHEET_CELL_FOOTER)
+            wrap_content = self._workbook.add_format(SHEET_CELL_WRAP)
 
             drop_columns=[
-                'Comments', 
-                'OtherInfo', 
                 'DateAssigned',
                 'DatePurchased',
                 'DepartmentID',
@@ -64,7 +63,9 @@ class AssetInventoryReport:
                 'Manufacturer',
                 'Model',
                 'Serial Number',
-                'Asset Tag'
+                'Asset Tag',
+                'Other Info',
+                'Comments'
             ]
             
             data_frame.drop(drop_columns, inplace=True, axis=1)
@@ -81,6 +82,7 @@ class AssetInventoryReport:
             worksheet.set_column(1,1,35)
             worksheet.set_column(2,3,14)
             worksheet.set_column(4,7,22)
+            worksheet.set_column(8,9,25, wrap_content)
             
             for col_num, value in enumerate(data_frame.columns.values):
                 worksheet.write(0, col_num, value, main_header_format)       

@@ -12,5 +12,23 @@
     "user" : {
         "email": "email",
         "vsts_email": "vsts_email"
+    },
+    "reports" : {
+        "colors_themes" : [],
+        "schedules" :[
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            [11,12,13,14],
+            [],
+            [],
+            [],
+        ]
     }
+
 }

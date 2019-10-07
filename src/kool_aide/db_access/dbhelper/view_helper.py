@@ -27,7 +27,7 @@ class ViewHelper:
     def get_status_report_view(self, weeks=[]):
         try:
             if weeks is not None:
-                if len(weeks)>0:
+                if len(weeks) > 0:
                     query = self._connection.status_report_view.select(
                         self._connection.status_report_view.c.WeekRangeId.in_(weeks)
                     )
@@ -49,4 +49,14 @@ class ViewHelper:
         except Exception as ex:
             self._log(f"error getting db values. {str(ex)}")
             return False
+
+    def get_project_view(self, departments=[], divisions=[]):
+        try:
+            query = self._connection.project_view.select()
+            result = query.execute()
+            return result
+        except Exception as ex:
+            self._log(f"error getting db values. {str(ex)}")
+            return False
+    
     

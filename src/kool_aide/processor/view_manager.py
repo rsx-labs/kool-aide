@@ -55,13 +55,16 @@ class ViewManager:
         self._logger.log(f"{message} [processor.view_manager]", level)
 
     def retrieve(self, arguments : CliArgument):
-        self._log(f"retrieving model : {arguments.model}")
+        self._log(f"retrieving view : {arguments.model}")
   
         if arguments.view == SUPPORTED_VIEWS[0]:
             self._retrieve_status_report_view(arguments)
             return True, DATA_RETRIEVED
         elif arguments.view == SUPPORTED_VIEWS[1]:
             self._retrieve_asset_inventory_view(arguments)
+            return True, DATA_RETRIEVED
+        elif arguments.view == SUPPORTED_VIEWS[2]:
+            self._retrieve_project_view(arguments)
             return True, DATA_RETRIEVED
         
         return False, NOT_SUPPORTED
@@ -72,7 +75,9 @@ class ViewManager:
         sort_keys = None
         project_filter = None
         week_filter = None
-        
+        division_filter = None
+        department_filter = None
+
         try:
             if arguments.parameters is not None:
                 try:
@@ -80,6 +85,8 @@ class ViewManager:
                     sort_keys = None if PARAM_SORT not in json_parameters else json_parameters[PARAM_SORT]
                     project_filter = None if PARAM_PROJECT not in json_parameters else json_parameters[PARAM_PROJECT] 
                     week_filter = None if PARAM_WEEK not in json_parameters else json_parameters[PARAM_WEEK] 
+                    division_filter = None if PARAM_DIVISIONS not in json_parameters else json_parameters[PARAM_DIVISIONS] 
+                    department_filter = None if PARAM_DEPARTMENTS not in json_parameters else json_parameters[PARAM_DEPARTMENTS] 
                     columns = None if PARAM_COLUMNS not in json_parameters else json_parameters[PARAM_COLUMNS] 
                 except Exception as ex:
                     self._log(f'error reading parameters . {str(ex)}',2)
@@ -87,15 +94,20 @@ class ViewManager:
             # if running as auto, use settings. else, use params
             if arguments.auto_mode:
                 week_filter = self._get_report_schedule(datetime.now().month)
-
+           
             results = self._db_helper.get_status_report_view(week_filter)
             data_frame = pd.DataFrame(results.fetchall()) 
             data_frame.columns = results.keys()
 
             if project_filter is not None and len(project_filter)>0:
                 data_frame = data_frame[data_frame['Project'].isin(project_filter)]
+
+            if division_filter is not None and len(division_filter)>0:
+                data_frame = data_frame[data_frame['DivisionID'].isin(division_filter)]
             
-            
+            if department_filter is not None and len(department_filter)>0:
+                data_frame = data_frame[data_frame['DepartmentID'].isin(department_filter)]
+
             if sort_keys is not None and len(sort_keys)>0:
                 data_frame.sort_values(by=sort_keys, inplace= True)
      
@@ -156,7 +168,54 @@ class ViewManager:
         except Exception as ex:
             self._log(f'error getting data frame. {str(ex)}',2)
     
+    def get_project_data_frame(self, arguments : CliArgument):
+        
+        columns = None
+        sort_keys = None
+        divisions = None
+        departments = None
+        projects = None
+        
+        try:
+            if arguments.parameters is not None:
+                try:
+                    json_parameters = json.loads(arguments.parameters)
+                    sort_keys = None if PARAM_SORT not in json_parameters else json_parameters[PARAM_SORT]
+                    divisions = None if PARAM_DIVISIONS not in json_parameters else json_parameters[PARAM_DIVISIONS] 
+                    departments = None if PARAM_DEPARTMENTS not in json_parameters else json_parameters[PARAM_DEPARTMENTS] 
+                    projects = None if PARAM_PROJECT not in json_parameters else json_parameters[PARAM_PROJECT] 
+                    columns = None if PARAM_COLUMNS not in json_parameters else json_parameters[PARAM_COLUMNS] 
+                except Exception as ex:
+                    self._log(f'error reading parameters . {str(ex)}',2)
+            
+            results = self._db_helper.get_project_view()
+            data_frame = pd.DataFrame(results.fetchall()) 
+            data_frame.columns = results.keys()
 
+            if projects is not None and len(projects)>0:
+                data_frame = data_frame[data_frame['ProjectName'].isin(projects)]
+
+            if departments is not None and len(departments)>0:
+                data_frame = data_frame[data_frame['DepartmentID'].isin(departments)]
+            
+            if divisions is not None and len(divisions)>0:
+                data_frame = data_frame[data_frame['DivisionID'].isin(divisions)]
+
+            if sort_keys is not None and len(sort_keys) > 0:
+                data_frame.sort_values(by=sort_keys, inplace= True)
+     
+            limit = int(arguments.result_limit)
+
+            if columns is not None and len(columns) > 0:        
+                data_frame = data_frame[columns].head(limit)
+            else:
+                data_frame = data_frame.head(limit)
+            
+            return data_frame
+
+        except Exception as ex:
+            self._log(f'error getting data frame. {str(ex)}',2)
+    
     def _retrieve_status_report_view(self, arguments: CliArgument)->None:
         
         try:
@@ -177,6 +236,22 @@ class ViewManager:
         
         try:
             data_frame = self.get_asset_inventory_data_frame(arguments)
+
+            self._send_to_output(
+                data_frame, 
+                arguments.display_format, 
+                arguments.output_file,
+                arguments.view
+            )
+
+            self._log(f"retrieved [ {len(data_frame)} ] records")
+        except Exception as ex:
+            self._log(f'error parsing parameter. {str(ex)}',2)
+    
+    def _retrieve_project_view(self, arguments: CliArgument)->None:
+        
+        try:
+            data_frame = self.get_project_data_frame(arguments)
 
             self._send_to_output(
                 data_frame, 
@@ -217,6 +292,12 @@ class ViewManager:
                     self._generate_raw_asset_inventory_excel(
                         data_frame, 
                         excel_file
+                    )
+                elif view == SUPPORTED_VIEWS[2]: #project
+                    self._generate_raw_excel(
+                        data_frame, 
+                        excel_file,
+                        'Projects'
                     )
                 else:
                     self._log(f'error = {NOT_SUPPORTED}', 1)
@@ -264,6 +345,9 @@ class ViewManager:
                 'Comments',
                 'Inbound Contacts',
                 'Week End Date',
+                'DepartmentID',
+                'DivsionID'
+
             ]
 
             data_frame.drop(drop_columns, inplace=True, axis=1)
@@ -354,6 +438,79 @@ class ViewManager:
             worksheet.set_column(1,1,35)
             worksheet.set_column(2,3,14)
             worksheet.set_column(4,7,22)
+            
+            for col_num, value in enumerate(data_frame.columns.values):
+                worksheet.write(0, col_num, value, main_header_format)       
+
+            total_row = len(data_frame)
+            worksheet.write(
+                total_row + 4, 
+                0, 
+                f'Report generated : {datetime.now()}', 
+                footer_format
+            )
+               
+            self._writer.save()
+            # data_frame.to_excel(file_name, index=False)
+            print(f'the file was saved : {file_name}') 
+       
+        except Exception as ex:
+            self._log(f'error = {str(ex)}', 2)
+
+    def _generate_raw_asset_inventory_excel(self, data_frame : pd.DataFrame, file_name)-> None:
+        try:
+            self._writer = pd.ExcelWriter(file_name, engine='xlsxwriter')
+            
+            self._workbook = self._writer.book
+            main_header_format = self._workbook.add_format(SHEET_TOP_HEADER)
+            footer_format = self._workbook.add_format(SHEET_CELL_FOOTER)
+
+        
+            data_frame.to_excel(
+                self._writer, 
+                sheet_name='Asset Inventory', 
+                index= False 
+            )
+
+            worksheet = self._writer.sheets['Asset Inventory']
+            worksheet.set_column(0,0,12)
+            worksheet.set_column(1,1,35)
+            worksheet.set_column(2,3,14)
+            worksheet.set_column(4,7,22)
+            
+            for col_num, value in enumerate(data_frame.columns.values):
+                worksheet.write(0, col_num, value, main_header_format)       
+
+            total_row = len(data_frame)
+            worksheet.write(
+                total_row + 4, 
+                0, 
+                f'Report generated : {datetime.now()}', 
+                footer_format
+            )
+               
+            self._writer.save()
+            # data_frame.to_excel(file_name, index=False)
+            print(f'the file was saved : {file_name}') 
+       
+        except Exception as ex:
+            self._log(f'error = {str(ex)}', 2)
+
+    def _generate_raw_excel(self, data_frame : pd.DataFrame, file_name, sheet_name = 'Sheet1')-> None:
+        try:
+            self._writer = pd.ExcelWriter(file_name, engine='xlsxwriter')
+            
+            self._workbook = self._writer.book
+            main_header_format = self._workbook.add_format(SHEET_TOP_HEADER)
+            footer_format = self._workbook.add_format(SHEET_CELL_FOOTER)
+        
+            data_frame.to_excel(
+                self._writer, 
+                sheet_name=sheet_name, 
+                index= False 
+            )
+
+            worksheet = self._writer.sheets[sheet_name]
             
             for col_num, value in enumerate(data_frame.columns.values):
                 worksheet.write(0, col_num, value, main_header_format)       

@@ -171,9 +171,13 @@ kool-aide generate-report -r status-report --format excel --output "e:\\Temp\\St
 ```
 
 ### Log files
-When things go wrong, we look at the logs :) Kool-aide logs are created the the same directory where the executable resides. The format is a regular log file, rolling every 1MB of content. The application keeps the last 10 generated files. The amount of information logged is configurable via the kool-aide-setting.json.
+When things go wrong, we look at the logs :) Kool-aide logs are created on the same directory where the executable resides. The format is a regular log/txt file, rolling every 1MB of content. The application keeps the last 10 generated files. The amount of information logged is configurable via the kool-aide-setting.json.
 
 
 ### Release notes
-- v0.0.1 TBD
-- v0.0.2 TBD
+
+|   Version	|  Changes 	|
+|---	|---	|
+|  0.0.1 	|  - status report generation, retrieve project list, retrieve week range list	|
+|   0.0.2	|  - asset inventory report generation, retrieve employee list, refactoring	|
+|   	|   	|

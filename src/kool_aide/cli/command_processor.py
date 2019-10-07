@@ -113,6 +113,7 @@ class CommandProcessor:
     def _retrieve_view(self, arguments: CliArgument):
         self._log(f"retrieving view : {arguments.view}")
         self._log(f"opening connection to database ...")
+        
         if self._connection.initialize():
             self._log(f"connected to the database ...")
             view_manager = ViewManager(
@@ -121,7 +122,6 @@ class CommandProcessor:
                     self._connection, 
                     arguments
                 )
-
             return view_manager.retrieve(arguments)
         else:
             self._log(f"error connecting to the database", 1)
