@@ -41,7 +41,7 @@ class Connection:
             self.project = Table('project', metadata, autoload = True)
             self.employee = Table('employee', metadata, autoload = True)
             self.asset_inventory_view = Table('vw_assetinventory', metadata, autoload = True)
-            self.project_view = Table('vw_project', metadata, autoload = True)
+            #self.project_view = Table('vw_project', metadata, autoload = True)
             self._session = sessionmaker(bind=engine)()
             
             #self._log(week.columns.key())

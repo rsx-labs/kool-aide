@@ -5,6 +5,7 @@ import json
 from kool_aide.library.app_setting import AppSetting
 from kool_aide.library.custom_logger import CustomLogger
 from kool_aide.library.constants import *
+from kool_aide.library.utilities import print_to_screen
 from kool_aide.model.cli_argument import CliArgument
 from kool_aide.db_access.connection import Connection
 from kool_aide.cli.command_processor import CommandProcessor
@@ -20,11 +21,12 @@ if __name__ == "__main__":
     config = AppSetting()
     config.load()
     logger = CustomLogger(config)
-    
+    arguments = CliArgument()
+
     log(f'*******************************************************************')
     log(f'starting {APP_TITLE} main cli module v{APP_VERSION} [{APP_RELEASE}]')
 
-    arguments = CliArgument()
+    
     db_connection = Connection(config, logger)
     processor = CommandProcessor(logger, config, db_connection)
     
@@ -104,6 +106,9 @@ if __name__ == "__main__":
    
     arguments.load_arguments(parser.parse_args())
     log(str(arguments), 4)
+
+    print_to_screen(f'\n*** kool-aide v{APP_VERSION} ***\n', arguments.quiet_mode, False)
+
     # delegate the command 
     result, message = processor.delegate(arguments)
     log(f"result = {result} | {message}")

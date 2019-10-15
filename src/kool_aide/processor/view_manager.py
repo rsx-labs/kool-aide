@@ -124,6 +124,7 @@ class ViewManager:
 
         except Exception as ex:
             self._log(f'error getting data frame. {str(ex)}',2)
+            return None
     
     def get_asset_inventory_data_frame(self, arguments : CliArgument):
         

@@ -5,6 +5,7 @@ from kool_aide.db_access.connection import Connection
 from kool_aide.library.custom_logger import CustomLogger
 from kool_aide.library.app_setting import AppSetting
 from kool_aide.library.constants import *
+from kool_aide.library.utilities import print_to_screen
 
 from kool_aide.model.cli_argument import CliArgument
 
@@ -26,7 +27,7 @@ class CommandProcessor:
 
     def _log(self, message, level = 3):
         self._logger.log(f"{message} [cli.command_processor]", level)
-
+ 
     def delegate(self, arguments: CliArgument):
         self._log(f"delegating {str(arguments)}")
 
@@ -56,7 +57,12 @@ class CommandProcessor:
                 
                 result, message = self._generate_report(arguments)
 
-                return True, f"{result} | {message}"
+                if result:
+                    print_to_screen('Report generated.',arguments.quiet_mode)
+                    return True, f"{result} | {message}"
+                else:
+                    print_to_screen('Data retrieved. Check logs.',arguments.quiet_mode)
+                    return False, f"{result} | {message}"
             else:
                 self._log(f"report type not supported : {arguments.report}")
                 return False, "report type not supported"

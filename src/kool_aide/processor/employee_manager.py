@@ -6,7 +6,7 @@ from datetime import datetime
 from kool_aide.library.app_setting import AppSetting
 from kool_aide.library.custom_logger import CustomLogger
 from kool_aide.library.constants import *
-from kool_aide.library.utilities import append_date_to_file_name
+from kool_aide.library.utilities import append_date_to_file_name, print_to_screen
 
 from kool_aide.db_access.connection import Connection
 from kool_aide.db_access.dbhelper.employee_helper import EmployeeHelper
@@ -30,7 +30,6 @@ class EmployeeManager:
             self._config, 
             self._connection
         )
-
         self._log("initialize")
 
     def _log(self, message, level=3) -> None:
@@ -50,8 +49,8 @@ class EmployeeManager:
 
             for employee in employees:
                 result, error = self._add_employee(employee, arguments)
-                self._log(f'add = {result} ; error = {error}')
-
+                self._log(f'inserting employee = {result} ; \
+                            error = {error}')
 
             return True, ''
         else:
@@ -70,6 +69,7 @@ class EmployeeManager:
         self._log(f"retrieving model : {arguments.model}")
   
         if arguments.model == SUPPORTED_MODELS[0]:
+            print_to_screen('Retrieving employee list ...', arguments.quiet_mode)
             self._retrieve_employees(arguments)
             return True, DATA_RETRIEVED
 
@@ -128,11 +128,11 @@ class EmployeeManager:
             if format == OUTPUT_FORMAT[1]:
                 json_file = f"{file}.json" if out_file is None else out_file
                 data_frame.to_json(json_file, orient='records')
-                print(f"the file was saved : {json_file}")
+                # print(f"the file was saved : {json_file}")
             elif format == OUTPUT_FORMAT[2]:
                 csv_file = f"{file}.csv" if out_file is None else out_file
                 data_frame.to_csv(csv_file)
-                print(f"the file was saved : {csv_file}")
+                # print(f"the file was saved : {csv_file}")
             elif format == OUTPUT_FORMAT[3]:
                 excel_file = f"{file}.xslx" if out_file is None else out_file
                 self._generate_raw_excel(
@@ -156,7 +156,10 @@ class EmployeeManager:
     def _retrieve_employees(self, arguments: CliArgument) -> None:
         try:
             data_frame = self.get_data_frame(arguments)
-
+            print_to_screen(
+                f'Sending result to : {arguments.display_format} [{arguments.output_file}]',
+                arguments.quiet_mode
+            )
             self.send_to_output(
                 data_frame, 
                 arguments.display_format, 
@@ -203,8 +206,12 @@ class EmployeeManager:
     def _add_employee(self, employee_data, argument: CliArgument):
         employee = Employee()
         employee.populate_from_json(employee_data)
-        
-        if employee.is_ok_to_add:
-            return True, ''
+        self._log(f"employee [{employee.id}]")
+        if employee.is_ok_to_add():
+            result, error = self._db_helper.insert(employee)
+            if result:
+                return True, ''
+            else:
+                return False, error      
         else:
             return False, MISSING_PARAMETER

@@ -15,7 +15,7 @@ SUPPORTED_MODELS = [
 ]
 
 SUPPORTED_VIEWS = [
-    'status-report','asset-inventory', 'project'
+    'status-report','asset-inventory'
 ]
 
 OUTPUT_FORMAT = [

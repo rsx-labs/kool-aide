@@ -8,6 +8,7 @@ class Employee:
         self.last_name = ''
         self.first_name = ''
         self.middle_name = ''
+        self.nick_name = ''
         self.birth_date = None
         self.position_id = 0
         self.hire_date = None
@@ -32,6 +33,7 @@ class Employee:
         self.last_name = json_data['LAST_NAME']
         self.first_name = json_data['FIRST_NAME']
         self.middle_name = json_data['MIDDLE_NAME']
+        self.nick_name = json_data['NICK_NAME']
         self.birth_date = json_data['BIRTHDATE']
         self.position_id = json_data['POS_ID']
         self.hire_date = json_data['DATE_HIRED']
@@ -50,8 +52,8 @@ class Employee:
             self.last_name is not None and \
             self.first_name is not None and \
             self.status is not None and \
-            self.last_name != '' and \
-            self.first_name != '' and \
+            len(self.last_name) > 0 and \
+            len(self.first_name) > 0 and \
             self.is_approved is not None :
 
                 return True

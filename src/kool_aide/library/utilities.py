@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import datetime, time
 
 from kool_aide.library.constants import *
 
@@ -49,3 +49,12 @@ def decrypt(value, key):
         dec_c = chr((256 + ord(value[i]) - ord(key_c)) % 256)
         dec.append(dec_c)
     return "".join(dec)
+
+def print_to_screen(message: str, quiet: bool, show_time = True) -> None:
+    if not  quiet:
+        if show_time:
+            print(f'[{datetime.now().strftime("%H:%M:%S")}] {message}')
+        else:
+            print(f'{message}')
+
+

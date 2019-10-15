@@ -11,6 +11,7 @@ from kool_aide.processor.view_manager import ViewManager
 from kool_aide.processor.common_manager import CommonManager
 from kool_aide.report.excel.status_report import StatusReport
 from kool_aide.report.excel.asset_inventory_report import AssetInventoryReport
+from kool_aide.library.utilities import print_to_screen
 
 class ReportManager:
     def __init__(self, logger: CustomLogger, config: AppSetting,
@@ -31,12 +32,22 @@ class ReportManager:
         # get target report from argument
         if self._arguments.report == REPORT_TYPES[0]:
             # weekly status
-            self._generate_status_report(arguments)
-            return True, ''
+            print_to_screen('Generating status report ...',arguments.quiet_mode)
+            try:
+                self._generate_status_report(arguments)
+                return True, ''
+            except:
+                print_to_screen('Error generating report ...',arguments.quiet_mode)
+                return False, REPORT_NOT_GENERATED
         elif self._arguments.report == REPORT_TYPES[1]: # asset inventory
             # asset inventory
-            self._generate_asset_inventory_report(arguments)
-            return True, ''
+            print_to_screen('Generating asset inventory report ...',arguments.quiet_mode)
+            try:
+                self._generate_asset_inventory_report(arguments)
+                return True, ''
+            except:
+                print_to_screen('Error generating report ...',arguments.quiet_mode)
+                return False, REPORT_NOT_GENERATED
         else:
             pass
 
@@ -44,6 +55,7 @@ class ReportManager:
         self._log(f"writing to {self._arguments.output_file}")
 
     def _generate_status_report(self, arguments: CliArgument):
+        print_to_screen('Getting data ...',arguments.quiet_mode)
         view_manager = ViewManager(
             self._logger, 
             self._config, 
@@ -51,17 +63,24 @@ class ReportManager:
         )
         data_frame = view_manager.get_status_report_data_frame(arguments)
         
-        out_file = arguments.output_file
-        if arguments.output_file is None:
-            out_file = DEFAULT_FILENAME
-        
-        out_file = append_date_to_file_name(out_file)
-        writer = pd.ExcelWriter(out_file, engine='xlsxwriter')
-        report = StatusReport(self._logger, self._config, data_frame, writer)
+        if data_frame is not None:
+            print_to_screen('Data retrieved.',arguments.quiet_mode)
+            out_file = arguments.output_file
+            if arguments.output_file is None:
+                out_file = DEFAULT_FILENAME
+            
+            out_file = append_date_to_file_name(out_file)
+            writer = pd.ExcelWriter(out_file, engine='xlsxwriter')
+            report = StatusReport(self._logger, self._config, data_frame, writer)
 
-        return report.generate(OUTPUT_FORMAT[3])
+            print_to_screen(f'Writing report to : {out_file}',arguments.quiet_mode)
+            return report.generate(OUTPUT_FORMAT[3])
+        else:
+            print_to_screen('Error generating report ...',arguments.quiet_mode)
+            return False, REPORT_NOT_GENERATED
     
     def _generate_asset_inventory_report(self, arguments: CliArgument):
+        print_to_screen('Getting data ...',arguments.quiet_mode)
         view_manager = ViewManager(
             self._logger, 
             self._config, 
@@ -69,21 +88,27 @@ class ReportManager:
         )
         data_frame = view_manager.get_asset_inventory_data_frame(arguments)
         
-        out_file = arguments.output_file
-        if arguments.output_file is None:
-            out_file = DEFAULT_FILENAME
-        
-        out_file = append_date_to_file_name(out_file)
-        writer = pd.ExcelWriter(out_file, engine='xlsxwriter')
-        report = AssetInventoryReport(
-            self._logger, 
-            self._config, 
-            data_frame, 
-            writer
-        )
-        # generate excel report
-        return report.generate(OUTPUT_FORMAT[3])
-
+        if data_frame is not None:
+            print_to_screen('Data retrieved.',arguments.quiet_mode)
+            out_file = arguments.output_file
+            if arguments.output_file is None:
+                out_file = DEFAULT_FILENAME
+            
+            out_file = append_date_to_file_name(out_file)
+            writer = pd.ExcelWriter(out_file, engine='xlsxwriter')
+            report = AssetInventoryReport(
+                self._logger, 
+                self._config, 
+                data_frame, 
+                writer
+            )
+            # generate excel report
+            print_to_screen(f'Writing report to : {out_file}',arguments.quiet_mode)
+            return report.generate(OUTPUT_FORMAT[3])
+        else:
+            print_to_screen('Error generating report ...',arguments.quiet_mode)
+            return False, REPORT_NOT_GENERATED
+    
     
         
 
