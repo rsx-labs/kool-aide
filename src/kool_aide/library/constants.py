@@ -2,7 +2,7 @@
 # kool-aide/library/constants.py
 
 CMD_ACTIONS =[ 
-    'create','get','update','delete','generate-report'
+    'add','get','edit','delete','generate-report'
 ]
 REPORT_TYPES = [
     'status-report',
@@ -11,7 +11,7 @@ REPORT_TYPES = [
 
 SUPPORTED_MODELS = [
     'employee', 'attendance', 'week-range', 'project', 
-    'department', 'division', 'position'
+    'department', 'division'
 ]
 
 SUPPORTED_VIEWS = [
@@ -42,6 +42,8 @@ PARAM_PROJECT = 'projects'
 PARAM_IDS = 'ids'
 PARAM_DEPARTMENTS = 'departments'
 PARAM_DIVISIONS = 'divisions'
+PARAM_START_DATE = 'startdate'
+PARAM_END_DATE = 'enddate'
 
 # excel formats
 SHEET_TOP_HEADER = {

@@ -35,15 +35,6 @@ class CommonHelper:
             self._log(f"error getting db values. {str(ex)}")
             return False, None
 
-    def get_all_project(self, limit=0):
-        try:
-            if limit <= 0:
-                query = self._connection.project.select()
-            else:
-                query = self._connection.project.select().limit(limit)
-            result = query.execute()
-            return result
-        except Exception as ex:
-            self._log(f"error getting db values. {str(ex)}")
-            return False, None
+
+
     

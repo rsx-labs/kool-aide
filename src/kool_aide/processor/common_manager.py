@@ -7,13 +7,13 @@ from tabulate import tabulate
 from kool_aide.library.app_setting import AppSetting
 from kool_aide.library.custom_logger import CustomLogger
 from kool_aide.library.constants import *
+from kool_aide.library.utilities import *
 
 from kool_aide.db_access.connection import Connection
 from kool_aide.db_access.dbhelper.common_helper import CommonHelper
+from kool_aide.db_access.dbhelper.week_range_helper import WeekRangeHelper
 
 from kool_aide.model.cli_argument import CliArgument
-from kool_aide.model.aide.project import Project
-from kool_aide.model.aide.week_range import WeekRange
 
 from kool_aide.assets.resources.messages import *
 
@@ -26,9 +26,9 @@ class CommonManager:
         self._config = config
         self._connection = db_connection
         self._arguments = arguments
-        self._db_helper = CommonHelper(self._logger, self._config, self._connection)
-
-        self._log("initialize")
+        self._common_db_helper = CommonHelper(self._logger, self._config, self._connection)
+        self._week_range_db_helper = WeekRangeHelper(self._logger, self._config, self._connection)
+        self._log("creating component")
 
     def _log(self, message, level=3):
         self._logger.log(f"{message} [processor.common_manager]", level)
@@ -36,65 +36,46 @@ class CommonManager:
     def retrieve(self, arguments : CliArgument):
         self._log(f"retrieving model : {arguments.model}")
   
-        if arguments.model == SUPPORTED_MODELS[3]:
-            self._retrieve_project(arguments)
-            return True, DATA_RETRIEVED
-
         if arguments.model == SUPPORTED_MODELS[2]:
             self._retrieve_week_range(arguments)
             return True, DATA_RETRIEVED
             
         return False, NOT_SUPPORTED
-    
-    def get_project_data_frame(self, arguments : CliArgument):
-        
-        columns = None
-        sort_keys = None
-        
-        try:
-            if arguments.parameters is not None:
-                try:
-                    json_parameters = json.loads(arguments.parameters)
-                    sort_keys = None if PARAM_SORT not in json_parameters else json_parameters[PARAM_SORT]
-                    columns = None if PARAM_COLUMNS not in json_parameters else json_parameters[PARAM_COLUMNS] 
-                except Exception as ex:
-                    self._log(f'error reading parameters . {str(ex)}',2)
+
+    def create(self, arguments: CliArgument)->(bool, str):
+        if arguments.input_file is None:
+            return False, MISSING_PARAMETER.replace('%0', 'input file')
+
+        if arguments.display_format is None:
+            # default to json
+            arguments.display_format = OUTPUT_FORMAT[0]
+
+        if arguments.display_format == OUTPUT_FORMAT[0]: #json
+            elements = self._read_json(arguments.input_file)
+            self._log(f'read data = {elements}')
+
+            for element in elements:
+                result, error = self._add(element, arguments)
+                self._log(f'inserting data = {result} ; \
+                            error = {error}')
             
-            results = self._db_helper.get_all_project()
-            data_frame = pd.DataFrame(results.fetchall()) 
-            data_frame.columns = results.keys()
-            
-            if sort_keys is not None and len(sort_keys)>0:
-                data_frame.sort_values(by=sort_keys, inplace= True)
-     
-            limit = int(arguments.result_limit)
+            print_to_screen(f'Done creating data. Check the logs.', arguments.quiet_mode)
+            return True, ''
+        else:
+            return False, NOT_SUPPORTED
 
-            if columns is not None and len(columns)>0:        
-                data_frame = data_frame[columns].head(limit)
-            else:
-                data_frame = data_frame.head(limit)
-            
-            return data_frame
-
-        except Exception as ex:
-            self._log(f'error getting data frame. {str(ex)}',2)
-
-    def _retrieve_project(self, arguments: CliArgument):
-        
-        try:
-            data_frame = self.get_project_data_frame(arguments)
-
-            self.send_to_output(data_frame, arguments.display_format, arguments.output_file)
-
-        except Exception as ex:
-            self._log(f'error retrieving data. {str(ex)}')
-    
+    def _read_json(self, file: str):
+        elements = []
+        with open(file) as input_file:
+            elements = json.load(input_file)
+        return elements
+      
     def _retrieve_week_range(self, arguments):
         columns = None
         sort_keys = None
         week_filter = None
         try:
-            results = self._db_helper.get_all_week_range()
+            results = self._week_range_db_helper.get()
             data_frame = pd.DataFrame(results.fetchall()) 
             data_frame.columns = results.keys()
 
@@ -154,3 +135,28 @@ class CommonManager:
                 print(NOT_SUPPORTED)
         except Exception as ex:
             self._log(str(ex),2)
+
+    def _add(self, element, arguments):
+
+        if arguments.model == SUPPORTED_MODELS[2]: #week range
+            # self._log(f'adding week_range : {element["WEEK_ID"]}')
+            if True:
+                result, error = self._week_range_db_helper.insert(
+                    get_date(element['WEEK_START']),
+                    get_date(element['WEEK_END'])
+                )
+                element_id_string = f' week range' # id :{element["WEEK_ID"]}'
+            else:
+                result = False
+                error = MISSING_PARAMETER
+        else:
+            result = False
+            error = NOT_SUPPORTED
+        
+        if result:
+            print_to_screen(f'Successful inserting {element_id_string}', arguments.quiet_mode)
+            return True, ''
+        else:
+            print_to_screen(f'Failed inserting {element_id_string}', arguments.quiet_mode)
+            return False, error   
+

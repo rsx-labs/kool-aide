@@ -17,6 +17,7 @@ class CliArgument:
         self.parameters = {}
         self.auto_mode = False
         self.view = ''
+        self.template_only = False
 
     def load_arguments(self, result) -> None:
         self.action = result.action
@@ -34,6 +35,7 @@ class CliArgument:
         self.parameters = result.parameters
         self.auto_mode = result.auto_mode if result.auto_mode is not None else False
         self.view = result.view
+        self.template_only = result.template_only
 
     def __str__(self):
         return f"[arguments = [action : {self.action} ; model : {self.model} ; " +\

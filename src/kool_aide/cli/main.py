@@ -94,7 +94,11 @@ if __name__ == "__main__":
     parser.add_argument('--autorun',
                         help='command is run via another application or script',
                         action='store_true',
-                        dest='auto_mode')       
+                        dest='auto_mode')    
+    parser.add_argument('--template',
+                        help='generate a template',
+                        action='store_true',
+                        dest='template_only')   
     parser.add_argument('-v',
                         '--version',
                         action='version',

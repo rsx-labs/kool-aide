@@ -24,7 +24,6 @@ from kool_aide.db_access.dbhelper.view_helper \
 
 from kool_aide.model.cli_argument import CliArgument
 from kool_aide.model.aide.project import Project
-from kool_aide.model.aide.week_range import WeekRange
 
 from kool_aide.assets.resources.messages import *
 

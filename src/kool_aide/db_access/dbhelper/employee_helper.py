@@ -25,7 +25,7 @@ class EmployeeHelper:
     def _log(self, message, level=3):
         self._logger.log(f"{message} [db_access.dbhelper.employee_helper]", level)
 
-    def get_all_employee(self, ids=[]):
+    def get(self, ids=[]):
         try:
             if ids is not None and len(ids) > 0:
                 query = self._connection.employee.select(
@@ -38,7 +38,7 @@ class EmployeeHelper:
             return result
         except Exception as ex:
             self._log(f"error getting db values. {str(ex)}")
-            return False
+            return None
     
     def insert(self, employee: Employee) -> bool:
         try:

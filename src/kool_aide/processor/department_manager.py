@@ -4,13 +4,15 @@ from tabulate import tabulate
 from kool_aide.library.app_setting import AppSetting
 from kool_aide.library.custom_logger import CustomLogger
 from kool_aide.library.constants import *
+from kool_aide.library.utilities import *
+
 
 from kool_aide.db_access.connection import Connection
-from kool_aide.db_access.dbhelper.employee_helper import EmployeeHelper
+from kool_aide.db_access.dbhelper.department_helper import DepartmentHelper
 
 from kool_aide.model.cli_argument import CliArgument
 from kool_aide.model.aide.project import Project
-from kool_aide.model.aide.week_range import WeekRange
+
 
 from kool_aide.assets.resources.messages import *
 
@@ -23,7 +25,7 @@ class DepartmentManager:
         self._config = config
         self._connection = db_connection
         self._arguments = arguments
-        self._db_helper = EmployeeHelper(
+        self._db_helper = DepartmentHelper(
             self._logger, 
             self._config, 
             self._connection
@@ -35,12 +37,37 @@ class DepartmentManager:
         self._logger.log(f"{message} [processor.department_manager]", level)
 
     def create(self, arguments: CliArgument)->(bool, str):
-        pass
+        if arguments.input_file is None:
+            return False, MISSING_PARAMETER.replace('%0', 'input file')
+
+        if arguments.display_format is None:
+            # default to json
+            arguments.display_format = OUTPUT_FORMAT[0]
+
+        if arguments.display_format == OUTPUT_FORMAT[0]: #json
+            departments = self._read_json(arguments.input_file)
+            self._log(f'read data = {departments}')
+
+            for department in departments:
+                result, error = self._add(department, arguments)
+                self._log(f'inserting department = {result} ; \
+                            error = {error}')
+            
+            print_to_screen(f'Done creating department/s. Check the logs.', arguments.quiet_mode)
+            return True, ''
+        else:
+            return False, NOT_SUPPORTED
+
+    def _read_json(self, file: str):
+        departments = []
+        with open(file) as input_file:
+            departments = json.load(input_file)
+        return departments
 
     def retrieve(self, arguments: CliArgument)->(bool, str):
         self._log(f"retrieving model : {arguments.model}")
   
-        if arguments.model == SUPPORTED_MODELS[0]:
+        if arguments.model == SUPPORTED_MODELS[4]:
             self._retrieve(arguments)
             return True, DATA_RETRIEVED
 
@@ -69,13 +96,16 @@ class DepartmentManager:
                 except Exception as ex:
                     self._log(f'error reading parameters . {str(ex)}',2)
             
-            results = self._db_helper.get_all_employee()
+            results = self._db_helper.get()
             data_frame = pd.DataFrame(results.fetchall()) 
             data_frame.columns = results.keys()
             
             if sort_keys is not None and len(sort_keys)>0:
                 data_frame.sort_values(by=sort_keys, inplace= True)
      
+            if ids is not None and len(ids)>0:
+                data_frame = data_frame[data_frame['DEPT_ID'].isin(ids)]
+                
             limit = int(arguments.result_limit)
 
             if columns is not None and len(columns)>0:        
@@ -96,15 +126,15 @@ class DepartmentManager:
             if format == OUTPUT_FORMAT[1]:
                 json_file = f"{file}.json" if out_file is None else out_file
                 data_frame.to_json(json_file, orient='records')
-                print(f"the file was saved : {json_file}")
+                # print(f"the file was saved : {json_file}")
             elif format == OUTPUT_FORMAT[2]:
                 csv_file = f"{file}.csv" if out_file is None else out_file
                 data_frame.to_csv(csv_file)
-                print(f"the file was saved : {csv_file}")
+                # print(f"the file was saved : {csv_file}")
             elif format == OUTPUT_FORMAT[3]:
                 excel_file = f"{file}.xslx" if out_file is None else out_file
                 data_frame.to_excel(excel_file)
-                print(f"the file was saved : {excel_file}") 
+                # print(f"the file was saved : {excel_file}") 
             elif format == OUTPUT_FORMAT[0]:    
                 print('\n') 
                 print(tabulate(
@@ -130,5 +160,22 @@ class DepartmentManager:
 
         except Exception as ex:
             self._log(f'error retrieving data. {str(ex)}')
+
+    def _add(self, department_data, argument: CliArgument):
+        self._log(f"department [{department_data['DEPT_ID']}]")
+        if department_data['DEPT_ID'] is not None:
+            result, error = self._db_helper.insert(
+                int(department_data['DEPT_ID']),
+                department_data['DESCR'],
+                department_data['BUILDING/FLOOR']
+            )
+            if result:
+                print_to_screen(f'Successful inserting {department_data["DEPT_ID"]}', argument.quiet_mode)
+                return True, ''
+            else:
+                print_to_screen(f'Failed creating {department_data["DEPT_ID"]}', argument.quiet_mode)
+                return False, error      
+        else:
+            return False, MISSING_PARAMETER
 
     

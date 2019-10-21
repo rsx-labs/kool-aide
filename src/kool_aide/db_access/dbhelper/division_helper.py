@@ -23,12 +23,27 @@ class DivisionHelper:
     def _log(self, message, level=3):
         self._logger.log(f"{message} [db_access.dbhelper.department_helper]", level)
 
-    def get_all_division(self, ids=[]):
+    def get(self, ids=[]):
         try:
-            pass
-            return True
+            query = self._connection.division.select()
+            result = query.execute()
+            return result
         except Exception as ex:
             self._log(f"error getting db values. {str(ex)}")
-            return False
+            return None
+
+    def insert(self, id, description) -> bool:
+        try:
+            command = self._connection.division.insert().values(
+                DIV_ID = id,
+                DESCR = description
+            )
+            result = command.execute()
+            self._logger.log(result, 4)
+            return True, ''
+        except Exception as ex:
+            self._logger.log("error inserting data to db...", 1)
+            self._logger.log(f"error : {ex}", 1)
+            return False, str(ex)
     
     

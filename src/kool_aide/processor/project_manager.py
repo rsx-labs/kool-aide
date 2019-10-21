@@ -1,23 +1,21 @@
 import json
 import pandas as pd
 from tabulate import tabulate
-from typing import List
-from datetime import datetime
 from kool_aide.library.app_setting import AppSetting
 from kool_aide.library.custom_logger import CustomLogger
 from kool_aide.library.constants import *
-from kool_aide.library.utilities import append_date_to_file_name, print_to_screen
+from kool_aide.library.utilities import print_to_screen
+from kool_aide.model.aide.project import Project
 
 from kool_aide.db_access.connection import Connection
-from kool_aide.db_access.dbhelper.employee_helper import EmployeeHelper
+from kool_aide.db_access.dbhelper.project_helper import ProjectHelper
 
 from kool_aide.model.cli_argument import CliArgument
-from kool_aide.model.aide.employee import Employee
 
 from kool_aide.assets.resources.messages import *
 
 
-class EmployeeManager:
+class ProjectManager:
     def __init__(self, logger: CustomLogger, config: AppSetting,
                 db_connection: Connection, arguments: CliArgument = None):
 
@@ -25,15 +23,16 @@ class EmployeeManager:
         self._config = config
         self._connection = db_connection
         self._arguments = arguments
-        self._db_helper = EmployeeHelper(
+        self._db_helper = ProjectHelper(
             self._logger, 
             self._config, 
             self._connection
         )
-        self._log("initialize")
+
+        self._log("creating component")
 
     def _log(self, message, level=3) -> None:
-        self._logger.log(f"{message} [processor.employee_manager]", level)
+        self._logger.log(f"{message} [processor.project_manager]", level)
 
     def create(self, arguments: CliArgument)->(bool, str):
         if arguments.input_file is None:
@@ -44,33 +43,30 @@ class EmployeeManager:
             arguments.display_format = OUTPUT_FORMAT[0]
 
         if arguments.display_format == OUTPUT_FORMAT[0]: #json
-            employees = self._read_json(arguments.input_file)
-            self._log(f'read data = {employees}')
+            projects = self._read_json(arguments.input_file)
+            self._log(f'read data = {projects}')
 
-            for employee in employees:
-                result, error = self._add_employee(employee, arguments)
-                self._log(f'inserting employee = {result} ; \
+            for project in projects:
+                result, error = self._add(project, arguments)
+                self._log(f'inserting project = {result} ; \
                             error = {error}')
-              
+            
+            print_to_screen(f'Done creating project/s. Check the logs.', arguments.quiet_mode)
             return True, ''
         else:
             return False, NOT_SUPPORTED
 
     def _read_json(self, file: str):
-        employees = []
+        projects = []
         with open(file) as input_file:
-            employees = json.load(input_file)
-        return employees
-
-    def _read_excel(self, file: str) -> pd.DataFrame:
-        pass
+            projects = json.load(input_file)
+        return projects
 
     def retrieve(self, arguments: CliArgument)->(bool, str):
         self._log(f"retrieving model : {arguments.model}")
   
-        if arguments.model == SUPPORTED_MODELS[0]:
-            print_to_screen('Retrieving employee list ...', arguments.quiet_mode)
-            self._retrieve_employees(arguments)
+        if arguments.model == SUPPORTED_MODELS[3]:
+            self._retrieve(arguments)
             return True, DATA_RETRIEVED
 
         return False, NOT_SUPPORTED
@@ -98,13 +94,16 @@ class EmployeeManager:
                 except Exception as ex:
                     self._log(f'error reading parameters . {str(ex)}',2)
             
-            results = self._db_helper.get()
+            results = self._db_helper.get_all_project()
             data_frame = pd.DataFrame(results.fetchall()) 
             data_frame.columns = results.keys()
             
             if sort_keys is not None and len(sort_keys)>0:
                 data_frame.sort_values(by=sort_keys, inplace= True)
      
+            if ids is not None and len(ids)>0:
+                data_frame = data_frame[data_frame['PROJ_ID'].isin(ids)]
+                
             limit = int(arguments.result_limit)
 
             if columns is not None and len(columns)>0:        
@@ -112,6 +111,8 @@ class EmployeeManager:
             else:
                 data_frame = data_frame.head(limit)
             
+            
+
             return data_frame
 
         except Exception as ex:
@@ -121,9 +122,6 @@ class EmployeeManager:
     def send_to_output(self, data_frame: pd.DataFrame, format, out_file)-> None:
         if out_file is None:
             file = DEFAULT_FILENAME
-            out_file = file
-
-        out_file = append_date_to_file_name(out_file)
         try:
             if format == OUTPUT_FORMAT[1]:
                 json_file = f"{file}.json" if out_file is None else out_file
@@ -135,11 +133,8 @@ class EmployeeManager:
                 # print(f"the file was saved : {csv_file}")
             elif format == OUTPUT_FORMAT[3]:
                 excel_file = f"{file}.xslx" if out_file is None else out_file
-                self._generate_raw_excel(
-                        data_frame, 
-                        excel_file,
-                        'Employees'
-                    )
+                data_frame.to_excel(excel_file)
+                # print(f"the file was saved : {excel_file}") 
             elif format == OUTPUT_FORMAT[0]:    
                 print('\n') 
                 print(tabulate(
@@ -153,13 +148,10 @@ class EmployeeManager:
         except Exception as ex:
             self._log(str(ex),2)
 
-    def _retrieve_employees(self, arguments: CliArgument) -> None:
+    def _retrieve(self, arguments: CliArgument) -> None:
         try:
             data_frame = self.get_data_frame(arguments)
-            print_to_screen(
-                f'Sending result to : {arguments.display_format} [{arguments.output_file}]',
-                arguments.quiet_mode
-            )
+
             self.send_to_output(
                 data_frame, 
                 arguments.display_format, 
@@ -169,50 +161,18 @@ class EmployeeManager:
         except Exception as ex:
             self._log(f'error retrieving data. {str(ex)}')
 
-    def _generate_raw_excel(self, data_frame : pd.DataFrame, file_name, sheet_name = 'Sheet1')-> None:
-        try:
-            self._writer = pd.ExcelWriter(file_name, engine='xlsxwriter')
-            
-            self._workbook = self._writer.book
-            main_header_format = self._workbook.add_format(SHEET_TOP_HEADER)
-            footer_format = self._workbook.add_format(SHEET_CELL_FOOTER)
-        
-            data_frame.to_excel(
-                self._writer, 
-                sheet_name=sheet_name, 
-                index= False 
-            )
-
-            worksheet = self._writer.sheets[sheet_name]
-            
-            for col_num, value in enumerate(data_frame.columns.values):
-                worksheet.write(0, col_num, value, main_header_format)       
-
-            total_row = len(data_frame)
-            worksheet.write(
-                total_row + 4, 
-                0, 
-                f'Report generated : {datetime.now()}', 
-                footer_format
-            )
-               
-            self._writer.save()
-            # data_frame.to_excel(file_name, index=False)
-            print(f'the file was saved : {file_name}') 
-       
-        except Exception as ex:
-            self._log(f'error = {str(ex)}', 2)
- 
-    def _add_employee(self, employee_data, argument: CliArgument):
-        employee = Employee()
-        employee.populate_from_json(employee_data)
-        self._log(f"employee [{employee.id}]")
-        if employee.is_ok_to_add():
-            result, error = self._db_helper.insert(employee)
+    def _add(self, project , argument: CliArgument):
+        project_data = Project()
+        project_data.populate_from_json(project)
+        self._log(f"project[{project_data.name}]")
+        if project_data.is_ok_to_add():
+            result, error = self._db_helper.insert(project_data)
             if result:
+                print_to_screen(f'Successful inserting {project_data.name}', argument.quiet_mode)
                 return True, ''
             else:
-                print_to_screen(f'Failed inserting {employee.id}')
+                print_to_screen(f'Failed creating {project_data.name}', argument.quiet_mode)
                 return False, error      
         else:
             return False, MISSING_PARAMETER
+        # pass

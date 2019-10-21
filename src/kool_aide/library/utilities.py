@@ -53,8 +53,18 @@ def decrypt(value, key):
 def print_to_screen(message: str, quiet: bool, show_time = True) -> None:
     if not  quiet:
         if show_time:
-            print(f'[{datetime.now().strftime("%H:%M:%S")}] {message}')
+            print(f'{datetime.now().strftime("%d-%b-%y %H:%M:%S")} [CONSOLE] {message}')
         else:
             print(f'{message}')
 
+def get_start_date(date: datetime) -> datetime:
+    return datetime(date.year, date.month, date.day, 0,0,1)
 
+def get_end_date(date: datetime) -> datetime:
+    return datetime(date.year, date.month, date.day, 23,59,59)
+
+def get_date(string_date) -> datetime:
+    try:
+        return datetime.strptime(string_date, '%m/%d/%Y')
+    except:
+        return None

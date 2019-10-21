@@ -23,12 +23,28 @@ class DepartmentHelper:
     def _log(self, message, level=3):
         self._logger.log(f"{message} [db_access.dbhelper.department_helper]", level)
 
-    def get_all_department(self, ids=[]):
+    def get(self, ids=[]):
         try:
-            pass
-            return True
+            query = self._connection.department.select()
+            result = query.execute()
+            return result
         except Exception as ex:
             self._log(f"error getting db values. {str(ex)}")
-            return False
+            return None
+    
+    def insert(self, id, description, location) -> bool:
+        try:
+            command = self._connection.department.insert().values(
+                DEPT_ID = id,
+                DESCR = description,
+                LOCATION = location  # for now skip this
+            )
+            result = command.execute()
+            self._logger.log(result, 4)
+            return True, ''
+        except Exception as ex:
+            self._logger.log("error inserting data to db...", 1)
+            self._logger.log(f"error : {ex}", 1)
+            return False, str(ex)
     
     
