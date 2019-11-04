@@ -95,6 +95,34 @@ Detailed discussion can be found on this link : [How to insert data](/docs/how_t
 
 ### Miscellaneous operations
 
+### Getting acquianted with params!
+
+The --params argument can be your best friend when trying to customize kool-aide's results. Currently, it supports 8 keywords
+
+- 'columns' : use this to list down the columns you want to be included in the result. Note : the column names will be based on the table.
+
+```
+c:\your\directory>kool-aide get -m project --limit 5 --params {\"columns\":[\"PROJ_ID\",\"PROJ_NAME\"]}
+```
+- 'sorts' : use this to specify an array of fields you want as the sort fields. The sorting is ascending (for now)
+
+```
+c:\your\directory>kool-aide get -m project --limit 5 --params {\"sorts\":[\"PROJ_NAME\"]}
+```
+
+- 'weeks' : use this to filter your result based on an array of week id
+- 'projects' : use this to filter results based on an array of project name
+- 'departments' : use this to filter results based on an array of department ids
+- 'divisions' : use this to filter results based on an array of division ids
+- 'startdate' : use to specify startdate
+- 'enddate' : use to specify enddate
+
+Note : 
+- different keywords can be combined
+- the keywords are model/view based. even if included as params, if the model/view does not support it it will be disregarded.
+- the keywords may change as the project evolves. Heck, even the --params cant be forever.
+- more examples to follow
+
 ### Filename generation 
 
 Kool-aide supports configurable file names for its output. Please see below for reference:
