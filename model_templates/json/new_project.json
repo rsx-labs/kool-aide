@@ -1,0 +1,10 @@
+[
+        {
+                "PROJ_NAME" : "Test Proj A",
+                "CATEGORY" : 1,
+                "BILLABILITY" : 0,
+                "EMP_ID" : 101010,
+                "DSPLY_FLG" : 1,
+                "PROJ_CD" : "5554A"
+        }
+]

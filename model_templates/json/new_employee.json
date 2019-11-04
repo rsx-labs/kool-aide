@@ -1,0 +1,21 @@
+[
+    {
+        "EMP_ID": 999999,
+        "WS_EMP_ID": 999999,
+        "LAST_NAME": "test",
+        "FIRST_NAME": "user",
+		"MIDDLE_NAME": "",
+		"NICK_NAME": "",
+		"BIRTHDATE": "",
+		"POS_ID": "",
+		"DATE_HIRED": "",
+		"STATUS": 1,
+		"IMAGE_PATH": "",
+		"GRP_ID": "",
+		"DEPT_ID":"",
+		"ACTIVE": "",
+		"DIV_ID": "",
+		"SHIFT_STATUS":"",
+		"APPROVED": 1
+	}
+]

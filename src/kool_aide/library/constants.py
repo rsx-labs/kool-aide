@@ -11,7 +11,7 @@ REPORT_TYPES = [
 
 SUPPORTED_MODELS = [
     'employee', 'attendance', 'week-range', 'project', 
-    'department', 'division'
+    'department', 'division', 'commendation'
 ]
 
 SUPPORTED_VIEWS = [

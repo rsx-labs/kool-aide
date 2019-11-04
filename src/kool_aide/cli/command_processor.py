@@ -17,6 +17,7 @@ from kool_aide.processor.employee_manager import EmployeeManager
 from kool_aide.processor.department_manager import DepartmentManager
 from kool_aide.processor.division_manager import DivisionManager
 from kool_aide.processor.project_manager import ProjectManager
+from kool_aide.processor.commendation_manager import CommendationManager
 
 
 class CommandProcessor:
@@ -158,6 +159,14 @@ class CommandProcessor:
                     arguments
                 )
                 return division_manager.retrieve(arguments)
+            elif arguments.model == SUPPORTED_MODELS[6]: #commendation
+                commendation_manager = CommendationManager(
+                    self._logger, 
+                    self._config, 
+                    self._connection, 
+                    arguments
+                )
+                return commendation_manager.retrieve(arguments)
             else:
                 common_manager = CommonManager(
                     self._logger,
@@ -232,6 +241,15 @@ class CommandProcessor:
                     arguments
                 )
                 return division_manager.create(arguments)
+            elif arguments.model == SUPPORTED_MODELS[6]:
+                # commendation
+                commendation_manager = CommendationManager(
+                    self._logger, 
+                    self._config, 
+                    self._connection, 
+                    arguments
+                )
+                return commendation_manager.create(arguments)
             else:
                 common_manager = CommonManager(
                     self._logger, 
