@@ -1,22 +1,15 @@
 # project kool-aide
 
-```
-                                                           
-                  .@@@@@@@@@@@@@@@@@@@@@@@@@@@@.           
-                  %@@@@@@@@@@@@@@@@@@@@    &@@@%           
-                  %@@@@@@@@@@@@@@@@@@@@@@@@@@@@%           
-                  %@#                        (@%           "a fun and nerdy take on a desktop 
-                  %@#                        (@%             oriented application.
-                  %@#   &@@.                 (@%             its a (ko)mmand (o)riented
-                  %@#    @@@@/               (@%             (l)ite interface to AIDE"
-                  %@#      @@@@*             (@%           
-                  %@#     /@@@@  &&&&&&&&&&. (@%           
-                  %@#   %@@@%    @@@@@@@@@@. (@%           
-                  %@#   .@@      **********  (@%           
-                  %@#                        (@%           
-                  %@%************************%@%           
-                   /&&&&&&&&&&&&&&&&&&&&&&&&&&/            
-                                                                                                    
+```                                           
+                  ****************************              
+                  **                        **              
+                  **   &@@.                 **              "a kool and nerdy take on a
+                  **    @@@@/               **               desktop oriented application.
+                  **      @@@@*             **               its a (ko)mmand (o)riented
+                  **     /@@@@              **               (l)ite interface to AIDE"
+                  **   %@@@%    **********  **           
+                  **   .@@      **********  **           
+                  ****************************                                                                                                              
 ```
 
 ## Installation
@@ -89,6 +82,12 @@ Where:
 Detailed discussion can be found on this link : [How to generate reports](/docs/how_to_generate_report.md)
 
 ### Retrieving data
+
+Detailed discussion can be found on this link : [How to retrieve data](/docs/how_to_get_data.md)
+
+### Inserting data
+
+Detailed discussion can be found on this link : [How to insert data](/docs/how_to_add_data.md)
 
 ### Updating data
 
