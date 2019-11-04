@@ -1,14 +1,14 @@
 # project kool-aide
-A fun and nerdy take on a desktop oriented application we call AIDE. Its a (ko)mmand (o)riented (l)ite interface to AIDE. 
+
 ```
                                                            
                   .@@@@@@@@@@@@@@@@@@@@@@@@@@@@.           
                   %@@@@@@@@@@@@@@@@@@@@    &@@@%           
                   %@@@@@@@@@@@@@@@@@@@@@@@@@@@@%           
-                  %@#                        (@%           
-                  %@#                        (@%           
-                  %@#   &@@.                 (@%           
-                  %@#    @@@@/               (@%           
+                  %@#                        (@%           "a fun and nerdy take on a desktop 
+                  %@#                        (@%             oriented application.
+                  %@#   &@@.                 (@%             its a (ko)mmand (o)riented
+                  %@#    @@@@/               (@%             (l)ite interface to AIDE"
                   %@#      @@@@*             (@%           
                   %@#     /@@@@  &&&&&&&&&&. (@%           
                   %@#   %@@@%    @@@@@@@@@@. (@%           
@@ -16,27 +16,7 @@ A fun and nerdy take on a desktop oriented application we call AIDE. Its a (ko)m
                   %@#                        (@%           
                   %@%************************%@%           
                    /&&&&&&&&&&&&&&&&&&&&&&&&&&/            
-                           *@@@@@@%              ,(,       
-                  %@@@@   #@@@@@@@@@&          #@@@@@      
-                /@@@@@.  .@@@@@@@@@@@@*      &@@@@@@&      
-                 @@@@(   @@@@@@@@@@@@@@@#  @@@@@@@(        
-                   @@   #@@@@@@@@@@@@@@@@@@@@@@@#          
-                        @@@@@@@@@@@* @@@@@@@@@/            
-                       @@@@@@@@@@@&    @@@@@               
-                       @@@@@@@@@@@                         
-                       &@@@@@@@@@@&                        
-                         %@@@@@@@@@@@*                     
-                    .@.    #@@@@@@@@@@@/                   
-                    @@@@&     @@@@@@@@@@@                  
-                   @@@@@@@@     @@@@@@@@@@                 
-              ,&@@@@@@@@@@@       @@@@@@@@&                
-         ,@@@@@@@@@@@@@@@@         @@@@@@@@*               
-      &@@@@@@@@@@@@@@@@@#           @@@@@@@@               
-     @@@@@@@@@@@@@@@&               ,@@@@@@@@              
-     #@@@@@@@@@&                     /@@@@@@@@             
-       @@@@/                          @@@@@@@@             
-                                       /@@@@(              
-                                                                                                                                         
+                                                                                                    
 ```
 
 ## Installation
@@ -45,7 +25,7 @@ A fun and nerdy take on a desktop oriented application we call AIDE. Its a (ko)m
 - Fire up your command line and type away!
 
 ## Usage
-All features can be accessed via command line. Initially, only data retrieval and report generation is supported. Additional data management functions will be enabled once the authentication module is implemented.
+All features can be accessed via command line. Initially, only data retrieval, data upload and report generation is supported. Additional data management functions will be enabled once the authentication module is implemented. Let's start drinking!
 
 ### Displaying the help page
 
@@ -53,12 +33,12 @@ All features can be accessed via command line. Initially, only data retrieval an
 c:\your\directory>kool-aide -h
 
 usage: main.py [-h] [-r {status-report,asset-inventory}]
-               [-m {employee,attendance,week-range,project,department,division,position}]
+               [-m {employee,attendance,week-range,project,department,division,position, commendation}]
                [-vw {status-report,asset-inventory}] [--input INPUT_FILE]
                [--output OUTPUT_FILE] [--uid USER_ID] [--password PASSWORD]
                [--quiet] [--interactive] [--format {screen,json,csv,excel}]
                [--limit [RESULT_LIMIT]] [--params PARAMETERS] [--autorun] [-v]
-               {create,get,update,delete,generate-report}
+               {add,get,update,delete,generate-report}
 
 A 'fun' interface for AIDE.
 
@@ -70,7 +50,7 @@ optional arguments:
   -h, --help            show this help message and exit
   -r {status-report,asset-inventory}, --report {status-report,asset-inventory}
                         report name to generate
-  -m {employee,attendance,week-range,project,department,division,position}, --model {employee,attendance,week-range,project,department,division,position}
+  -m {employee,attendance,week-range,project,department,division,position, commendation}, --model {employee,attendance,week-range,project,department,division,position, commendation}
                         the data model to use
   -vw {status-report,asset-inventory}, --view {status-report,asset-inventory}
                         the data view to use
@@ -105,60 +85,16 @@ Where:
   - third item is the actual version
 
 ### Generating reports
+  
+Detailed discussion can be found on this link : [How to generate reports](/docs/how_to_generate_report.md)
 
-Team Status Report
-```
-c:\your\directory>kool-aide generate-report -r status-report --format excel --output c:\outpu\dir\status_report_[LM][Y].xlsx --autorun
-```
-The command above wil generate a status report in excel format on the directory and file name specified. The --autorun switch tells the application that it is being run as an automated script, thus, some settings will be read on the config file. 
+### Retrieving data
 
-Asset Inventory Report
-```
-c:\your\directory>kool-aide generate-report -r asset-inventory --format excel --output c:\outpu\dir\asset_inventory_[LM][Y].xlsx --autorun
-```
+### Updating data
 
-### Displaying the projects
+### Deleting Data
 
-```
-c:\your\directory>kool-aide get -m project 
-```
-The command above will display all projects in tabular format on te screen. To customized the output, several options are provided.
-
-Example 1 : Getting first 5 projects. 
-
-```
-c:\your\directory>kool-aide get -m project --limit 5
-```
-
-Example 2 : Getting the first 10 projects sorted by project name 
-```
-c:\your\directory>kool-aide get -m project --limit 10 --params {\"sorts\":[\"PROJ_NAME\"]}
-```
-
-Example 3 : Getting all projects and saving it to a json file (i.e. data.json)
-```
-c:\your\directory>kool-aide get -m project --output data.json --format json
-```
-
-Example 3 : Getting all projects and saving it to an excel file with the current date information(i.e. data_January2019.xlsx)
-```
-c:\your\directory>kool-aide get -m project --output data_[LM][Y].xlsx --format excel
-```
-
-Note:
-```
-The syntax are the same for all supported models and views. However, it is still in development stage, only the following are supported
-
-Models:
-- project
-- week-range
-- employee
-
-Views
-- status-report
-- asset-inventory
-
-```
+### Miscellaneous operations
 
 ### Filename generation 
 
@@ -203,11 +139,15 @@ kool-aide generate-report -r status-report --format excel --output "e:\\Temp\\St
 ### Log files
 When things go wrong, we look at the logs :) Kool-aide logs are created on the same directory where the executable resides. The format is a regular log/txt file, rolling every 1MB of content. The application keeps the last 10 generated files. The amount of information logged is configurable via the kool-aide-setting.json.
 
+## Developer Notes
 
-### Release notes
+### [How to Setup Dev Environment](/docs/how_to_setup_devenv.md)
+
+## Release notes
 
 |   Version	|  Changes 	|
 |---	|---	|
 |  0.0.1 	|  - status report generation, retrieve project list, retrieve week range list	|
 |   0.0.2	|  - asset inventory report generation, retrieve employee list, refactoring	|
+|   0.0.3	|  - batch upload (employee, project, division, department, commendation) using json input file,  refactoring	|
 |   	|   	|
