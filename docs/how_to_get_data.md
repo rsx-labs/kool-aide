@@ -32,6 +32,29 @@ Example 5 : Getting first 5 projects, retrieving only the PROJ_ID and PROJ_NAME 
 ```
 c:\your\directory>kool-aide get -m project --limit 5 --params {\"columns\":[\"PROJ_ID\",\"PROJ_NAME\"]}
 ```
+## Retrieving Commendations in Excel File
+
+A list of Commendations can be retrieved by using the get model and get view option. The get model retrieves raw data from the Commendations table.  The get view option gets its data from the vw_Commendation view and is more suited for reporting purposes.
+
+Retrieving the Excel list of commendations using the get view option
+
+This retrieves all commendations
+```
+c:\your\directory\>kool-aide get -vw commendation --output c:\file.xlsx --format excel
+```
+
+This uses the --params option to retrieve only commendation from 2 projects from a particular month and year
+```
+c:\your\directory\>kool-aide get -vw commendation --output c:\file.xlsx --format excel --params {\"projects\":[\"Fresco\",\"Savers\"],\"months\":[10,11,12],\"year\":2018}
+```
+Where:
+months : specify the month/s. If empty, the current month is used
+year : specify the year. If empty, the current year is used.
+projecs : specify the list of projects to retrieve. If empty, all projects.
+
+Note:
+All basic params such as 'sorts' and 'columns' is supported. 
+
 
 ## Note
 ```

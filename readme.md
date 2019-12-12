@@ -46,7 +46,7 @@ optional arguments:
                         report name to generate
   -m {employee,attendance,week-range,project,department,division,position, commendation}, --model {employee,attendance,week-range,project,department,division,position, commendation}
                         the data model to use
-  -vw {status-report,asset-inventory}, --view {status-report,asset-inventory}
+  -vw {status-report,asset-inventory, commendation}, --view {status-report,asset-inventory}
                         the data view to use
   --input INPUT_FILE    the input file
   --output OUTPUT_FILE  the output file
