@@ -1,4 +1,5 @@
 # project kool-aide
+[![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/dwyl/esta/issues)
 
 ```                                           
                   ****************************    
@@ -13,7 +14,7 @@
 ```
 
 ## Installation
-- Download the executable file to your machine. [TBD]
+- Download the executable file to your machine. [Please check the release section](https://github.com/rsx-labs/kool-aide/releases)
 - Download the initial kool-aide-settings.json file and modify the user information.
 - Fire up your command line and type away!
 
