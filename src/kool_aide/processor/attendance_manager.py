@@ -1,9 +1,6 @@
 # kool-aide/processors/attendance_manager.py
 
-import pprint
-import jsonpickle
 import json
-from beautifultable import BeautifulTable
 import pandas as pd
 from tabulate import tabulate
 from datetime import date, datetime

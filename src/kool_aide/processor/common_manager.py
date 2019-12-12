@@ -1,7 +1,5 @@
 # kool-aide/processor/common_manager.py
 
-import pprint
-import json
 import pandas as pd
 from tabulate import tabulate
 from kool_aide.library.app_setting import AppSetting

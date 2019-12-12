@@ -5,7 +5,7 @@ from sqlalchemy.sql import Select, Insert, Update, Delete
 from sqlalchemy.orm import sessionmaker
 import sqlalchemy as db
 import pyodbc
-import os
+# import os
 from datetime import datetime
 import urllib
 
@@ -46,6 +46,7 @@ class Connection:
             self.division = Table('division', metadata, autoload = True)
             self.attendance = Table('attendance', metadata, autoload = True)
             self.commendation = Table('commendations', metadata, autoload = True)
+            self.commendation_view = Table('vw_commendation', metadata, autoload = True)
 
             self._session = sessionmaker(bind=engine)()
             

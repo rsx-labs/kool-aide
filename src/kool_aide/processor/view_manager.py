@@ -62,9 +62,13 @@ class ViewManager:
         elif arguments.view == SUPPORTED_VIEWS[1]:
             self._retrieve_asset_inventory_view(arguments)
             return True, DATA_RETRIEVED
+        # elif arguments.view == SUPPORTED_VIEWS[2]:
+        #     self._retrieve_project_view(arguments)
+        #     return True, DATA_RETRIEVED
         elif arguments.view == SUPPORTED_VIEWS[2]:
-            self._retrieve_project_view(arguments)
+            self._retrieve_commendation_view(arguments)
             return True, DATA_RETRIEVED
+
         
         return False, NOT_SUPPORTED
 
@@ -216,6 +220,57 @@ class ViewManager:
         except Exception as ex:
             self._log(f'error getting data frame. {str(ex)}',2)
     
+    def get_commendation_view_data_frame(self, arguments : CliArgument):
+        
+        columns = None
+        sort_keys = None
+        months = [datetime.today().month]
+        year = datetime.today().year
+        projects = None
+        
+        try:
+            if arguments.parameters is not None:
+                try:
+                    json_parameters = json.loads(arguments.parameters)
+                    sort_keys = None if PARAM_SORT not in json_parameters else json_parameters[PARAM_SORT]
+                    months = months if PARAM_MONTHS not in json_parameters else json_parameters[PARAM_MONTHS] 
+                    year = year if PARAM_YEAR not in json_parameters else json_parameters[PARAM_YEAR] 
+                    projects = None if PARAM_PROJECT not in json_parameters else json_parameters[PARAM_PROJECT] 
+                    columns = None if PARAM_COLUMNS not in json_parameters else json_parameters[PARAM_COLUMNS] 
+                except Exception as ex:
+                    self._log(f'error reading parameters . {str(ex)}',2)
+            
+            results = self._db_helper.get_commendation_view()
+            data_frame = pd.DataFrame(results.fetchall()) 
+            data_frame.columns = results.keys()
+
+            # data_frame['Month'] =data_frame['DateSent'].dt.month
+
+            if projects is not None and len(projects)>0:
+                data_frame = data_frame[data_frame['Project'].isin(projects)]
+
+            if year is not None:
+                 data_frame = data_frame[data_frame['Year'] == year]
+            
+            if months is not None and len(months)>0:
+                  data_frame = data_frame[data_frame['Month'].isin(months)]
+
+            if sort_keys is not None and len(sort_keys) > 0:
+                data_frame.sort_values(by=sort_keys, inplace= True)
+     
+            limit = int(arguments.result_limit)
+
+            if columns is not None and len(columns) > 0:        
+                data_frame = data_frame[columns].head(limit)
+            else:
+                data_frame = data_frame.head(limit)
+            
+            data_frame.drop(['Month','Year'], inplace=True, axis=1)
+            return data_frame
+
+        except Exception as ex:
+            self._log(f'error getting data frame. {str(ex)}',2)
+    
     def _retrieve_status_report_view(self, arguments: CliArgument)->None:
         
         try:
@@ -248,23 +303,26 @@ class ViewManager:
         except Exception as ex:
             self._log(f'error parsing parameter. {str(ex)}',2)
     
-    def _retrieve_project_view(self, arguments: CliArgument)->None:
+      
+    def _retrieve_commendation_view(self, arguments: CliArgument)->None:
         
         try:
-            data_frame = self.get_project_data_frame(arguments)
-
+            data_frame = self.get_commendation_view_data_frame(arguments)
+            col_widths = [[0,25],[1,20],[2,20],[3,20],[4,60]]
             self._send_to_output(
                 data_frame, 
                 arguments.display_format, 
                 arguments.output_file,
-                arguments.view
+                arguments.view,
+                sheet_name = 'Commendations',
+                column_widths = col_widths
             )
 
             self._log(f"retrieved [ {len(data_frame)} ] records")
         except Exception as ex:
             self._log(f'error parsing parameter. {str(ex)}',2)
-       
-    def _send_to_output(self, data_frame: pd.DataFrame, format, out_file, view) -> None:
+     
+    def _send_to_output(self, data_frame: pd.DataFrame, format, out_file, view, column_widths='', sheet_name='Sheet1') -> None:
         
         if out_file is None:
             file = DEFAULT_FILENAME
@@ -297,7 +355,8 @@ class ViewManager:
                     self._generate_raw_excel(
                         data_frame, 
                         excel_file,
-                        'Projects'
+                        sheet_name = sheet_name,
+                        column_widths = column_widths
                     )
                 else:
                     self._log(f'error = {NOT_SUPPORTED}', 1)
@@ -464,7 +523,7 @@ class ViewManager:
             self._workbook = self._writer.book
             main_header_format = self._workbook.add_format(SHEET_TOP_HEADER)
             footer_format = self._workbook.add_format(SHEET_CELL_FOOTER)
-
+            
         
             data_frame.to_excel(
                 self._writer, 
@@ -496,13 +555,14 @@ class ViewManager:
         except Exception as ex:
             self._log(f'error = {str(ex)}', 2)
 
-    def _generate_raw_excel(self, data_frame : pd.DataFrame, file_name, sheet_name = 'Sheet1')-> None:
+    def _generate_raw_excel(self, data_frame : pd.DataFrame, file_name, sheet_name = 'Sheet1', column_widths='')-> None:
         try:
             self._writer = pd.ExcelWriter(file_name, engine='xlsxwriter')
             
             self._workbook = self._writer.book
             main_header_format = self._workbook.add_format(SHEET_TOP_HEADER)
             footer_format = self._workbook.add_format(SHEET_CELL_FOOTER)
+            cell_wrap_noborder = self._workbook.add_format(SHEET_CELL_WRAP_NOBORDER)
         
             data_frame.to_excel(
                 self._writer, 
@@ -511,6 +571,10 @@ class ViewManager:
             )
 
             worksheet = self._writer.sheets[sheet_name]
+            if column_widths != '' and len(column_widths) >0:
+                for col_width in column_widths:
+                    worksheet.set_column(col_width[0],col_width[0], col_width[1], cell_wrap_noborder)
+
             
             for col_num, value in enumerate(data_frame.columns.values):
                 worksheet.write(0, col_num, value, main_header_format)       

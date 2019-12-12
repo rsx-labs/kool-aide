@@ -3,7 +3,7 @@ from sqlalchemy import create_engine, MetaData, Table
 from sqlalchemy.sql import Select, Insert, Update, Delete
 import sqlalchemy as db
 import pyodbc
-import os
+# import os
 from datetime import datetime
 import urllib
 

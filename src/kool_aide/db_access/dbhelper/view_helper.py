@@ -3,7 +3,6 @@ from sqlalchemy import create_engine, MetaData, Table
 from sqlalchemy.sql import Select, Insert, Update, Delete
 import sqlalchemy as db
 import pyodbc
-import os
 from datetime import datetime
 import urllib
 import pandas as pd
@@ -59,4 +58,12 @@ class ViewHelper:
             self._log(f"error getting db values. {str(ex)}")
             return False
     
+    def get_commendation_view(self):
+        try:
+            query = self._connection.commendation_view.select()
+            result = query.execute()
+            return result
+        except Exception as ex:
+            self._log(f"error getting db values. {str(ex)}")
+            return False
     
