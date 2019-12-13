@@ -66,4 +66,13 @@ class ViewHelper:
         except Exception as ex:
             self._log(f"error getting db values. {str(ex)}")
             return False
+
+    def get_contact_list_view(self):
+        try:
+            query = self._connection.contact_view.select()
+            result = query.execute()
+            return result
+        except Exception as ex:
+            self._log(f"error getting db values. {str(ex)}")
+            return False
     

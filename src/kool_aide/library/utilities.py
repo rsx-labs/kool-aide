@@ -68,3 +68,9 @@ def get_date(string_date) -> datetime:
         return datetime.strptime(string_date, '%m/%d/%Y')
     except:
         return None
+
+def get_param_value(parameter_name: str, json_parameters, default_value = None)-> str:
+    if parameter_name not in json_parameters:
+        return default_value
+    else:
+        return json_parameters[parameter_name]

@@ -15,7 +15,7 @@ SUPPORTED_MODELS = [
 ]
 
 SUPPORTED_VIEWS = [
-    'status-report','asset-inventory','commendation'
+    'status-report','asset-inventory','commendation', 'contact-list'
 ]
 
 OUTPUT_FORMAT = [
@@ -35,6 +35,7 @@ SHORT_MONTHS = [
 ]
 
 DEFAULT_FILENAME = 'result'
+
 PARAM_COLUMNS = 'columns'
 PARAM_SORT = 'sorts'
 PARAM_WEEK = 'weeks'
@@ -46,6 +47,7 @@ PARAM_START_DATE = 'startdate'
 PARAM_END_DATE = 'enddate'
 PARAM_MONTHS = 'months'
 PARAM_YEAR = 'year'
+PARAM_FLAG = 'flag'
 
 # excel formats
 SHEET_TOP_HEADER = {

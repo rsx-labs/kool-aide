@@ -1,9 +1,6 @@
 # kool-aide/processor/common_manager.py
 
-import pprint
-import jsonpickle
 import json
-from beautifultable import BeautifulTable
 import pandas as pd
 from tabulate import tabulate
 import os
@@ -12,11 +9,10 @@ import xlsxwriter
 from typing import List
 from datetime import datetime
 
-
 from kool_aide.library.app_setting import AppSetting
 from kool_aide.library.custom_logger import CustomLogger
 from kool_aide.library.constants import *
-from kool_aide.library.utilities import append_date_to_file_name
+from kool_aide.library.utilities import append_date_to_file_name, get_param_value
 
 from kool_aide.db_access.connection import Connection
 from kool_aide.db_access.dbhelper.view_helper \
@@ -62,11 +58,11 @@ class ViewManager:
         elif arguments.view == SUPPORTED_VIEWS[1]:
             self._retrieve_asset_inventory_view(arguments)
             return True, DATA_RETRIEVED
-        # elif arguments.view == SUPPORTED_VIEWS[2]:
-        #     self._retrieve_project_view(arguments)
-        #     return True, DATA_RETRIEVED
         elif arguments.view == SUPPORTED_VIEWS[2]:
             self._retrieve_commendation_view(arguments)
+            return True, DATA_RETRIEVED
+        elif arguments.view == SUPPORTED_VIEWS[3]:
+            self._retrieve_contact_view(arguments)
             return True, DATA_RETRIEVED
 
         
@@ -227,6 +223,11 @@ class ViewManager:
         months = [datetime.today().month]
         year = datetime.today().year
         projects = None
+
+        col_names =[
+                'Employee', 'Project', 'Sent By', 'Date Sent',
+                'Month', 'Year', 'Reason'
+            ]
         
         try:
             if arguments.parameters is not None:
@@ -263,14 +264,88 @@ class ViewManager:
             if columns is not None and len(columns) > 0:        
                 data_frame = data_frame[columns].head(limit)
             else:
+                data_frame.columns = col_names
                 data_frame = data_frame.head(limit)
             
-            data_frame.drop(['Month','Year'], inplace=True, axis=1)
+            try:
+                data_frame.drop(['Month','Year'], inplace=True, axis=1)
+            except:
+                pass
+
             return data_frame
 
         except Exception as ex:
             self._log(f'error getting data frame. {str(ex)}',2)
     
+    def get_contact_view_data_frame(self, arguments: CliArgument):
+
+        columns = None
+        sort_keys = None
+        ids = None
+        departments = None
+        divisions = None
+        isActive = None
+        col_names =[
+                'Employee ID', 'Employee Name', 'Local No', 'Mobile No',
+                'Home Phone', 'Other Phone', 'Office Email',
+                'Other Email', 'IsActive','DepartmentID', 'DivisionID',
+                'Department', 'Division'
+            ] 
+
+        try:
+            if arguments.parameters is not None:
+                try:
+                    json_parameters = json.loads(arguments.parameters)
+                    sort_keys = get_param_value(PARAM_SORT, json_parameters)
+                    columns = get_param_value(PARAM_COLUMNS, json_parameters)
+                    ids = get_param_value(PARAM_IDS, json_parameters)
+                    departments = get_param_value(PARAM_DEPARTMENTS, json_parameters)
+                    divisions = get_param_value(PARAM_DIVISIONS, json_parameters)
+                    isActive = get_param_value(PARAM_FLAG, json_parameters)
+                except Exception as ex:
+                    self._log(f'error reading parameters . {str(ex)}',2)
+            
+            results = self._db_helper.get_contact_list_view()
+            data_frame = pd.DataFrame(results.fetchall()) 
+            data_frame.columns = results.keys()
+
+            if ids is not None and len(ids)>0:
+                data_frame = data_frame[data_frame['EmployeeID'].isin(ids)]
+
+            if departments is not None and len(departments)>0:
+                 data_frame = data_frame[data_frame['DepartmentID'].isin(departments)]
+            
+            if divisions is not None and len(divisions)>0:
+                  data_frame = data_frame[data_frame['DivisionID'].isin(divisions)]
+
+            if isActive is not None:
+                try:
+                    data_frame = data_frame[data_frame['IsActive'] == int(isActive)]
+                except:
+                    pass
+
+            if sort_keys is not None and len(sort_keys) > 0:
+                data_frame.sort_values(by=sort_keys, inplace= True)
+     
+            limit = int(arguments.result_limit)
+
+            if columns is not None and len(columns) > 0:        
+                data_frame = data_frame[columns].head(limit)
+            else:
+                data_frame.columns = col_names
+                data_frame = data_frame.head(limit)
+            
+            try:
+                data_frame.drop(['DepartmentID','DivisionID','IsActive'], inplace=True, axis=1)
+            except:
+                pass
+
+            return data_frame
+
+        except Exception as ex:
+            self._log(f'error getting data frame. {str(ex)}',2)
+    
+
     def _retrieve_status_report_view(self, arguments: CliArgument)->None:
         
         try:
@@ -302,8 +377,7 @@ class ViewManager:
             self._log(f"retrieved [ {len(data_frame)} ] records")
         except Exception as ex:
             self._log(f'error parsing parameter. {str(ex)}',2)
-    
-      
+        
     def _retrieve_commendation_view(self, arguments: CliArgument)->None:
         
         try:
@@ -322,7 +396,33 @@ class ViewManager:
         except Exception as ex:
             self._log(f'error parsing parameter. {str(ex)}',2)
      
-    def _send_to_output(self, data_frame: pd.DataFrame, format, out_file, view, column_widths='', sheet_name='Sheet1') -> None:
+    def _retrieve_contact_view(self, arguments: CliArgument) ->None:
+        try:
+            data_frame = self.get_contact_view_data_frame(arguments)
+            col_widths = [[0,15],[1,30],[2,8],[3,15],[4,15],[5,15],[6,25],[7,30],[8,15],[9,15]]
+            
+            self._send_to_output(
+                data_frame, 
+                arguments.display_format, 
+                arguments.output_file,
+                arguments.view,
+                sheet_name = 'Contacts',
+                column_widths=col_widths
+            )
+
+            self._log(f"retrieved [ {len(data_frame)} ] records")
+        except Exception as ex:
+            self._log(f'error parsing parameter. {str(ex)}',2)
+
+    def _send_to_output(
+        self, 
+        data_frame: pd.DataFrame, 
+        format, 
+        out_file, 
+        view, 
+        column_widths='', 
+        column_names = '',
+        sheet_name='Sheet1') -> None:
         
         if out_file is None:
             file = DEFAULT_FILENAME
@@ -351,12 +451,16 @@ class ViewManager:
                         data_frame, 
                         excel_file
                     )
-                elif view == SUPPORTED_VIEWS[2]: #project
+                elif view in [
+                    SUPPORTED_VIEWS[2],
+                    SUPPORTED_VIEWS[3]
+                ]: 
                     self._generate_raw_excel(
                         data_frame, 
                         excel_file,
                         sheet_name = sheet_name,
-                        column_widths = column_widths
+                        column_widths = column_widths,
+                        column_names = column_names
                     )
                 else:
                     self._log(f'error = {NOT_SUPPORTED}', 1)
@@ -555,7 +659,14 @@ class ViewManager:
         except Exception as ex:
             self._log(f'error = {str(ex)}', 2)
 
-    def _generate_raw_excel(self, data_frame : pd.DataFrame, file_name, sheet_name = 'Sheet1', column_widths='')-> None:
+    def _generate_raw_excel(
+        self, 
+        data_frame : pd.DataFrame, 
+        file_name, 
+        sheet_name = 'Sheet1', 
+        column_widths='',
+        column_names = '')-> None:
+
         try:
             self._writer = pd.ExcelWriter(file_name, engine='xlsxwriter')
             
@@ -564,6 +675,9 @@ class ViewManager:
             footer_format = self._workbook.add_format(SHEET_CELL_FOOTER)
             cell_wrap_noborder = self._workbook.add_format(SHEET_CELL_WRAP_NOBORDER)
         
+            if len(column_names) > 0:
+                data_frame.columns = column_names
+
             data_frame.to_excel(
                 self._writer, 
                 sheet_name=sheet_name, 

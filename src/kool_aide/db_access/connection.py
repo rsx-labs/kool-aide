@@ -47,6 +47,7 @@ class Connection:
             self.attendance = Table('attendance', metadata, autoload = True)
             self.commendation = Table('commendations', metadata, autoload = True)
             self.commendation_view = Table('vw_commendation', metadata, autoload = True)
+            self.contact_view = Table('vw_contactlist', metadata, autoload = True)
 
             self._session = sessionmaker(bind=engine)()
             
