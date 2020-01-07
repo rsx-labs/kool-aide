@@ -48,7 +48,7 @@ class Connection:
             self.commendation = Table('commendations', metadata, autoload = True)
             self.commendation_view = Table('vw_commendation', metadata, autoload = True)
             self.contact_view = Table('vw_contactlist', metadata, autoload = True)
-
+            self.leave_sumarry_view = Table('vw_LeaveSummary', metadata, autoload=True)
             self._session = sessionmaker(bind=engine)()
             
             #self._log(week.columns.key())

@@ -12,7 +12,8 @@ from datetime import datetime
 from kool_aide.library.app_setting import AppSetting
 from kool_aide.library.custom_logger import CustomLogger
 from kool_aide.library.constants import *
-from kool_aide.library.utilities import append_date_to_file_name, get_param_value
+from kool_aide.library.utilities import append_date_to_file_name, \
+    get_param_value, get_version
 
 from kool_aide.db_access.connection import Connection
 from kool_aide.db_access.dbhelper.view_helper \
@@ -64,8 +65,10 @@ class ViewManager:
         elif arguments.view == SUPPORTED_VIEWS[3]:
             self._retrieve_contact_view(arguments)
             return True, DATA_RETRIEVED
+        elif arguments.view == SUPPORTED_VIEWS[4]:
+            self._retrieve_leave_summary_view(arguments)
+            return True, DATA_RETRIEVED
 
-        
         return False, NOT_SUPPORTED
 
     def get_status_report_data_frame(self, arguments : CliArgument):
@@ -220,24 +223,26 @@ class ViewManager:
         
         columns = None
         sort_keys = None
-        months = [datetime.today().month]
-        year = datetime.today().year
+        months = None
+        year = None
         projects = None
+        fys = None
 
         col_names =[
                 'Employee', 'Project', 'Sent By', 'Date Sent',
-                'Month', 'Year', 'Reason'
+                'Month', 'Year', 'Reason', 'Fiscal Year'
             ]
         
         try:
             if arguments.parameters is not None:
                 try:
                     json_parameters = json.loads(arguments.parameters)
-                    sort_keys = None if PARAM_SORT not in json_parameters else json_parameters[PARAM_SORT]
-                    months = months if PARAM_MONTHS not in json_parameters else json_parameters[PARAM_MONTHS] 
-                    year = year if PARAM_YEAR not in json_parameters else json_parameters[PARAM_YEAR] 
-                    projects = None if PARAM_PROJECT not in json_parameters else json_parameters[PARAM_PROJECT] 
-                    columns = None if PARAM_COLUMNS not in json_parameters else json_parameters[PARAM_COLUMNS] 
+                    sort_keys = get_param_value(PARAM_SORT, json_parameters)
+                    months = get_param_value(PARAM_MONTHS, json_parameters, months)
+                    year = get_param_value(PARAM_YEAR, json_parameters, year)
+                    projects = get_param_value(PARAM_PROJECT, json_parameters)
+                    fys = get_param_value(PARAM_FYS, json_parameters)
+                    columns = get_param_value(PARAM_COLUMNS, json_parameters)
                 except Exception as ex:
                     self._log(f'error reading parameters . {str(ex)}',2)
             
@@ -251,10 +256,13 @@ class ViewManager:
                 data_frame = data_frame[data_frame['Project'].isin(projects)]
 
             if year is not None:
-                 data_frame = data_frame[data_frame['Year'] == year]
+                data_frame = data_frame[data_frame['Year'] == year]
             
             if months is not None and len(months)>0:
-                  data_frame = data_frame[data_frame['Month'].isin(months)]
+                data_frame = data_frame[data_frame['Month'].isin(months)]
+
+            if fys is not None and len(fys)>0:
+                data_frame = data_frame[data_frame['FiscalYear'].isin(fys)]
 
             if sort_keys is not None and len(sort_keys) > 0:
                 data_frame.sort_values(by=sort_keys, inplace= True)
@@ -345,6 +353,78 @@ class ViewManager:
         except Exception as ex:
             self._log(f'error getting data frame. {str(ex)}',2)
     
+    def get_leave_summary_view_data_frame(self, arguments: CliArgument):
+
+        columns = None
+        sort_keys = None
+        ids = None
+        departments = None
+        divisions = None
+        isActive = None
+        fys = None
+        types = None
+        col_names =[
+                'Employee ID', 'Employee Name', 'Leave Type', 'Total Leaves',
+                'Used Leaves', 'Remaining Leaves', 'Remaining Mandatory Leaves',
+                'Fiscal Year', 'DivisionID','DepartmentID','IsActive','LeaveType'
+            ]
+        try:
+            if arguments.parameters is not None:
+                try:
+                    json_parameters = json.loads(arguments.parameters)
+                    sort_keys = get_param_value(PARAM_SORT, json_parameters)
+                    columns = get_param_value(PARAM_COLUMNS, json_parameters)
+                    ids = get_param_value(PARAM_IDS, json_parameters)
+                    departments = get_param_value(PARAM_DEPARTMENTS, json_parameters)
+                    divisions = get_param_value(PARAM_DIVISIONS, json_parameters)
+                    isActive = get_param_value(PARAM_FLAG, json_parameters)
+                    fys= get_param_value(PARAM_FYS, json_parameters)
+                    types = get_param_value(PARAM_TYPES, json_parameters)
+                except Exception as ex:
+                    self._log(f'error reading parameters . {str(ex)}',2)
+            
+            results = self._db_helper.get_leave_summary_view(fys)
+            data_frame = pd.DataFrame(results.fetchall()) 
+            data_frame.columns = results.keys()
+
+            if ids is not None and len(ids)>0:
+                data_frame = data_frame[data_frame['EmployeeID'].isin(ids)]
+
+            if departments is not None and len(departments)>0:
+                 data_frame = data_frame[data_frame['DepartmentID'].isin(departments)]
+            
+            if divisions is not None and len(divisions)>0:
+                  data_frame = data_frame[data_frame['DivisionID'].isin(divisions)]
+
+            if types is not None and len(types)>0:
+                  data_frame = data_frame[data_frame['LeaveType'].isin(types)]
+
+            if isActive is not None:
+                try:
+                    data_frame = data_frame[data_frame['IsActive'] == int(isActive)]
+                except:
+                    pass
+
+            if sort_keys is not None and len(sort_keys) > 0:
+                data_frame.sort_values(by=sort_keys, inplace= True)
+     
+            limit = int(arguments.result_limit)
+
+            if columns is not None and len(columns) > 0:        
+                data_frame = data_frame[columns].head(limit)
+            else:
+                data_frame.columns = col_names
+                data_frame = data_frame.head(limit)
+            
+            try:
+                data_frame.drop(['DepartmentID','DivisionID','IsActive','LeaveType'], inplace=True, axis=1)
+            except:
+                pass
+
+            return data_frame
+
+        except Exception as ex:
+            self._log(f'error getting data frame. {str(ex)}',2)
 
     def _retrieve_status_report_view(self, arguments: CliArgument)->None:
         
@@ -414,6 +494,24 @@ class ViewManager:
         except Exception as ex:
             self._log(f'error parsing parameter. {str(ex)}',2)
 
+    def _retrieve_leave_summary_view(self, arguments: CliArgument) ->None:
+        try:
+            data_frame = self.get_leave_summary_view_data_frame(arguments)
+            col_widths = [[0,15],[1,30],[2,15],[3,12],[4,12],[5,12],[6,12],[7,10]]
+            
+            self._send_to_output(
+                data_frame, 
+                arguments.display_format, 
+                arguments.output_file,
+                arguments.view,
+                sheet_name = 'Leave Summary',
+                column_widths=col_widths
+            )
+
+            self._log(f"retrieved [ {len(data_frame)} ] records")
+        except Exception as ex:
+            self._log(f'error parsing parameter. {str(ex)}',2)
+
     def _send_to_output(
         self, 
         data_frame: pd.DataFrame, 
@@ -453,7 +551,8 @@ class ViewManager:
                     )
                 elif view in [
                     SUPPORTED_VIEWS[2],
-                    SUPPORTED_VIEWS[3]
+                    SUPPORTED_VIEWS[3],
+                    SUPPORTED_VIEWS[4],
                 ]: 
                     self._generate_raw_excel(
                         data_frame, 
@@ -548,7 +647,7 @@ class ViewManager:
             worksheet.write(
                 total_row + 4, 
                 0, 
-                f'Report generated : {datetime.now()}', 
+                f'Report generated : {datetime.now()} by {get_version()}', 
                 footer_format
             )
                  
@@ -609,7 +708,7 @@ class ViewManager:
             worksheet.write(
                 total_row + 4, 
                 0, 
-                f'Report generated : {datetime.now()}', 
+                f'Report generated : {datetime.now()} by {get_version()}', 
                 footer_format
             )
                
@@ -648,7 +747,7 @@ class ViewManager:
             worksheet.write(
                 total_row + 4, 
                 0, 
-                f'Report generated : {datetime.now()}', 
+                f'Report generated : {datetime.now()} by {get_version()}', 
                 footer_format
             )
                
@@ -697,7 +796,7 @@ class ViewManager:
             worksheet.write(
                 total_row + 4, 
                 0, 
-                f'Report generated : {datetime.now()}', 
+                f'Report generated : {datetime.now()} by {get_version()}', 
                 footer_format
             )
                

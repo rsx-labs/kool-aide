@@ -15,7 +15,8 @@ SUPPORTED_MODELS = [
 ]
 
 SUPPORTED_VIEWS = [
-    'status-report','asset-inventory','commendation', 'contact-list'
+    'status-report','asset-inventory','commendation', 'contact-list', 
+    'leave-summary'
 ]
 
 OUTPUT_FORMAT = [
@@ -48,6 +49,8 @@ PARAM_END_DATE = 'enddate'
 PARAM_MONTHS = 'months'
 PARAM_YEAR = 'year'
 PARAM_FLAG = 'flag'
+PARAM_FYS = 'fys'
+PARAM_TYPES = 'types'
 
 # excel formats
 SHEET_TOP_HEADER = {

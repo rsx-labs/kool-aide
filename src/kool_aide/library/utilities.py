@@ -2,6 +2,7 @@ import json
 from datetime import datetime, time
 
 from kool_aide.library.constants import *
+from kool_aide.assets.resources.version import *
 
 def get_salt() -> str:
     # dont use
@@ -74,3 +75,9 @@ def get_param_value(parameter_name: str, json_parameters, default_value = None)-
         return default_value
     else:
         return json_parameters[parameter_name]
+
+def get_version() -> str:
+    try:
+        return APP_TITLE + ' v' + APP_VERSION
+    except:
+        return ""
