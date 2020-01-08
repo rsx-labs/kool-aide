@@ -12,6 +12,7 @@ from kool_aide.processor.common_manager import CommonManager
 from kool_aide.report.excel.status_report import StatusReport
 from kool_aide.report.excel.asset_inventory_report import AssetInventoryReport
 from kool_aide.library.utilities import print_to_screen
+from kool_aide.assets.resources.messages import *
 
 class ReportManager:
     def __init__(self, logger: CustomLogger, config: AppSetting,

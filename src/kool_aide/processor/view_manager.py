@@ -42,6 +42,7 @@ class ViewManager:
 
         self._report_settings = None
         self._report_schedules = None
+        self._report_defaults = None
 
         self._load_report_settings()
 
@@ -251,6 +252,10 @@ class ViewManager:
             data_frame.columns = results.keys()
 
             # data_frame['Month'] =data_frame['DateSent'].dt.month
+            if arguments.auto_mode:
+                fys=[self._report_defaults['fiscal_year']]
+                months = None
+                year = None
 
             if projects is not None and len(projects)>0:
                 data_frame = data_frame[data_frame['Project'].isin(projects)]
@@ -383,6 +388,10 @@ class ViewManager:
                 except Exception as ex:
                     self._log(f'error reading parameters . {str(ex)}',2)
             
+
+            if arguments.auto_mode:
+                fys = [self._report_defaults['fiscal_year']]
+
             results = self._db_helper.get_leave_summary_view(fys)
             data_frame = pd.DataFrame(results.fetchall()) 
             data_frame.columns = results.keys()
@@ -531,11 +540,11 @@ class ViewManager:
             if format == OUTPUT_FORMAT[1]:
                 json_file = f"{file}.json" if out_file is None else out_file
                 data_frame.to_json(json_file, orient='records')
-                print(f"the file was saved : {json_file}")
+                #print(f"the file was saved : {json_file}")
             elif format == OUTPUT_FORMAT[2]:
                 csv_file = f"{file}.csv" if out_file is None else out_file
                 data_frame.to_csv(csv_file)
-                print(f"the file was saved : {csv_file}")
+                #print(f"the file was saved : {csv_file}")
             elif format == OUTPUT_FORMAT[3]:
                 excel_file = f"{file}.xlsx" if out_file is None else out_file
 
@@ -653,7 +662,7 @@ class ViewManager:
                  
             self._writer.save()
             # data_frame.to_excel(file_name, index=False)
-            print(f'the file was saved : {file_name}') 
+            #print(f'the file was saved : {file_name}') 
        
         except Exception as ex:
             self._log(f'error = {str(ex)}', 2)
@@ -714,7 +723,7 @@ class ViewManager:
                
             self._writer.save()
             # data_frame.to_excel(file_name, index=False)
-            print(f'the file was saved : {file_name}') 
+            #print(f'the file was saved : {file_name}') 
        
         except Exception as ex:
             self._log(f'error = {str(ex)}', 2)
@@ -753,7 +762,7 @@ class ViewManager:
                
             self._writer.save()
             # data_frame.to_excel(file_name, index=False)
-            print(f'the file was saved : {file_name}') 
+            #print(f'the file was saved : {file_name}') 
        
         except Exception as ex:
             self._log(f'error = {str(ex)}', 2)
@@ -802,7 +811,7 @@ class ViewManager:
                
             self._writer.save()
             # data_frame.to_excel(file_name, index=False)
-            print(f'the file was saved : {file_name}') 
+            #print(f'the file was saved : {file_name}') 
        
         except Exception as ex:
             self._log(f'error = {str(ex)}', 2)
@@ -810,6 +819,7 @@ class ViewManager:
     def _load_report_settings(self) -> None:
         self._report_settings = self._config.get_section('reports')
         self._report_schedules = self._report_settings['schedules']
+        self._report_defaults = self._report_settings['defaults']
 
     def _get_report_schedule(self, month: int) -> List[str]:
         return self._report_schedules[month-1]

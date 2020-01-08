@@ -37,6 +37,9 @@ class CliArgument:
         self.view = result.view
         self.template_only = result.template_only
 
+        if self.auto_mode:
+            self.quiet_mode = True
+
     def __str__(self):
         return f"[arguments = [action : {self.action} ; model : {self.model} ; " +\
                 f"input_file : {self.input_file} ; out_file : {self.output_file} ; " +\
