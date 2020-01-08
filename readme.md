@@ -14,7 +14,7 @@
 ```
 
 ## Installation
-- Download the executable file to your machine. [Please check the release section](https://github.com/rsx-labs/kool-aide/releases)
+- Download the executable file to your machine. [Please check the release section](https://github.com/rsx-labs/kool-aide/releases) (latest v.0.0.4)
 - Download the initial kool-aide-settings.json file and modify the user information.
 - Fire up your command line and type away!
 
@@ -178,4 +178,5 @@ When things go wrong, we look at the logs :) Kool-aide logs are created on the s
 |  0.0.1 	|  - status report generation, retrieve project list, retrieve week range list	|
 |   0.0.2	|  - asset inventory report generation, retrieve employee list, refactoring	|
 |   0.0.3	|  - batch upload (employee, project, division, department, commendation) using json input file,  refactoring	|
-|   	|   	|
+|  0.0.4	| - commendation, contact list, sl summary, vl summary report  	|
+|     |     |
