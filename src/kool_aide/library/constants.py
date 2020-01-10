@@ -6,7 +6,8 @@ CMD_ACTIONS =[
 ]
 REPORT_TYPES = [
     'status-report',
-    'asset-inventory'
+    'asset-inventory',
+    'task-report'
 ]
 
 SUPPORTED_MODELS = [
@@ -16,7 +17,7 @@ SUPPORTED_MODELS = [
 
 SUPPORTED_VIEWS = [
     'status-report','asset-inventory','commendation', 'contact-list', 
-    'leave-summary'
+    'leave-summary', 'task'
 ]
 
 OUTPUT_FORMAT = [
@@ -51,6 +52,8 @@ PARAM_YEAR = 'year'
 PARAM_FLAG = 'flag'
 PARAM_FYS = 'fys'
 PARAM_TYPES = 'types'
+PARAM_PHASES = 'phases'
+PARAM_STATUS = 'status'
 
 # excel formats
 SHEET_TOP_HEADER = {
@@ -117,8 +120,9 @@ SHEET_CELL_FOOTER = {
     'font_size':8
 }
 
-# mapping
+# mapping  report:view
 MAP_VIEW_TO_REPORT ={
     'status-report': 'status-report',
-    'asset-inventory': 'asset-inventory'
+    'asset-inventory': 'asset-inventory',
+    'task-report': 'task'
 }

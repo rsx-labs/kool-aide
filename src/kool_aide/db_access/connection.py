@@ -36,6 +36,8 @@ class Connection:
             self._connection = engine.connect()
             
             metadata = MetaData(engine)
+
+            # add new table/view belo
             self.status_report_view = Table('vw_statusreport', metadata, autoload = True)
             self.week_range = Table('week_range', metadata, autoload = True)
             self.project = Table('project', metadata, autoload = True)
@@ -49,6 +51,8 @@ class Connection:
             self.commendation_view = Table('vw_commendation', metadata, autoload = True)
             self.contact_view = Table('vw_contactlist', metadata, autoload = True)
             self.leave_sumarry_view = Table('vw_LeaveSummary', metadata, autoload=True)
+            self.task_view = Table('vw_Tasks', metadata, autoload=True)
+
             self._session = sessionmaker(bind=engine)()
             
             #self._log(week.columns.key())

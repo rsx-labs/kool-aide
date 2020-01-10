@@ -92,4 +92,21 @@ class ViewHelper:
         except Exception as ex:
             self._log(f"error getting db values. {str(ex)}")
             return False
+
+    def get_task_view(self, status=[]):
+        try:
+            if status is not None:
+                if len(status) > 0:
+                    query = self._connection.task_view.select(
+                        self._connection.task_view.c.TaskStatusID.in_(status)
+                    )
+                else:
+                    query = self._connection.task_view.select()
+            else:
+                query = self._connection.task_view.select()
+            result = query.execute()
+            return result
+        except Exception as ex:
+            self._log(f"error getting db values. {str(ex)}")
+            return False
     
