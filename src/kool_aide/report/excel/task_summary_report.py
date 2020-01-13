@@ -28,6 +28,7 @@ class TaskSummaryReport:
         self._main_header_format = None
         self._header_format_orange = None
         self._header_format_gray = None
+        self._cell_lt_gray = None
         self._cell_wrap_noborder = None
         self._cell_total = None
         self._cell_sub_total = None
@@ -54,6 +55,7 @@ class TaskSummaryReport:
             self._cell_total = self._workbook.add_format(SHEET_HEADER_LT_GREEN)
             self._cell_sub_total = self._workbook.add_format(SHEET_HEADER_GAINSBORO)
             self._footer_format = self._workbook.add_format(SHEET_CELL_FOOTER)
+            #self._footer_format = self._workbook.add_format(SHEET_CELL_FOOTER)
             # drop_columns = ['WeekRangeStart', 'WeekRangeId', 'ProjectId']
             # column_headers = [
             #     'Project',
@@ -99,8 +101,7 @@ class TaskSummaryReport:
             grouped_per_project = data_frame.groupby('ProjectName')
 
             sheet_name = 'Task Per Project'
-
-          
+ 
             worksheet = self._writer.book.add_worksheet(sheet_name)
             worksheet.set_column(0,0,25)
             worksheet.set_column(1,1,15)
@@ -123,7 +124,10 @@ class TaskSummaryReport:
                 df_per_group = pd.DataFrame(grouped_per_project.get_group(key))
                 df_per_group.sort_values(by=['EmployeeName'], inplace= True)
 
+                issue_count = len(df_per_group)
+
                 worksheet.write(current_row, current_col, key, self._header_format_orange) 
+                worksheet.write(current_row, current_col+1, f'Task Count : {issue_count}', self._cell_sub_total) 
                 current_row +=1
 
                 worksheet.write(current_row, current_col, 'Assigned Employee', self._header_format_gray) 
@@ -136,7 +140,6 @@ class TaskSummaryReport:
 
                 df_employee_tasks = df_per_group[['EmployeeName','RefID','Description','IncidentType','Phase','TaskStatus']]
                
-                issue_count = 0
                 for index, row in df_employee_tasks.iterrows():
                     worksheet.write(current_row, current_col, row['EmployeeName'], self._cell_wrap_noborder) 
                     worksheet.write(current_row, current_col+1, row['RefID'], self._cell_wrap_noborder) 
@@ -144,15 +147,8 @@ class TaskSummaryReport:
                     worksheet.write(current_row, current_col+3, row['IncidentType'], self._cell_wrap_noborder) 
                     worksheet.write(current_row, current_col+4, row['Phase'], self._cell_wrap_noborder) 
                     worksheet.write(current_row, current_col+5, row['TaskStatus'], self._cell_wrap_noborder) 
-                    issue_count += 1
                     current_row += 1
 
-                worksheet.write(current_row, current_col, f'Issue Count : {issue_count}', self._header_format_gray) 
-                worksheet.write(current_row, current_col+1, '', self._header_format_gray) 
-                worksheet.write(current_row, current_col+2, '', self._header_format_gray) 
-                worksheet.write(current_row, current_col+3, '', self._header_format_gray) 
-                worksheet.write(current_row, current_col+4, '', self._header_format_gray) 
-                worksheet.write(current_row, current_col+5, '', self._header_format_gray) 
                 current_row += 2
 
                 worksheet.write(
@@ -196,7 +192,10 @@ class TaskSummaryReport:
                 df_per_group = pd.DataFrame(grouped_per_project.get_group(key))
                 df_per_group.sort_values(by=['ProjectName'], inplace= True)
 
+                issue_count = len(df_per_group)
+
                 worksheet.write(current_row, current_col, key, self._header_format_orange) 
+                worksheet.write(current_row, current_col+1, f'Task Count : {issue_count}', self._cell_sub_total) 
                 current_row +=1
 
                 worksheet.write(current_row, current_col, 'Project', self._header_format_gray) 
@@ -209,7 +208,6 @@ class TaskSummaryReport:
 
                 df_project_tasks = df_per_group[['ProjectName','RefID','Description','IncidentType','Phase','TaskStatus']]
                 
-                issue_count = 0
                 for index, row in df_project_tasks.iterrows():
                     worksheet.write(current_row, current_col, row['ProjectName'], self._cell_wrap_noborder) 
                     worksheet.write(current_row, current_col+1, row['RefID'], self._cell_wrap_noborder) 
@@ -217,15 +215,8 @@ class TaskSummaryReport:
                     worksheet.write(current_row, current_col+3, row['IncidentType'], self._cell_wrap_noborder) 
                     worksheet.write(current_row, current_col+4, row['Phase'], self._cell_wrap_noborder) 
                     worksheet.write(current_row, current_col+5, row['TaskStatus'], self._cell_wrap_noborder) 
-                    issue_count += 1
                     current_row += 1
 
-                worksheet.write(current_row, current_col, f'Issue Count : {issue_count}', self._header_format_gray) 
-                worksheet.write(current_row, current_col+1, '', self._header_format_gray) 
-                worksheet.write(current_row, current_col+2, '', self._header_format_gray) 
-                worksheet.write(current_row, current_col+3, '', self._header_format_gray) 
-                worksheet.write(current_row, current_col+4, '', self._header_format_gray) 
-                worksheet.write(current_row, current_col+5, '', self._header_format_gray)
                 current_row += 2
 
                 worksheet.write(

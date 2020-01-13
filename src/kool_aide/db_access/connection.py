@@ -52,6 +52,8 @@ class Connection:
             self.contact_view = Table('vw_contactlist', metadata, autoload = True)
             self.leave_sumarry_view = Table('vw_LeaveSummary', metadata, autoload=True)
             self.task_view = Table('vw_Tasks', metadata, autoload=True)
+            self.action_list_view = Table('vw_ActionList', metadata, autoload = True)
+            self.lesson_learnt_view = Table('vw_LessonLearnt', metadata, autoload=True)
 
             self._session = sessionmaker(bind=engine)()
             

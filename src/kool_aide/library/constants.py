@@ -17,7 +17,7 @@ SUPPORTED_MODELS = [
 
 SUPPORTED_VIEWS = [
     'status-report','asset-inventory','commendation', 'contact-list', 
-    'leave-summary', 'task'
+    'leave-summary', 'task', 'action-list', 'lesson-learnt'
 ]
 
 OUTPUT_FORMAT = [
@@ -79,6 +79,15 @@ SHEET_HEADER_GRAY = {
     'fg_color': '#BBB9B5',
     'border': 0
 }
+
+SHEET_HEADER_LT_GRAY = {
+    'bold': True,
+    'text_wrap':False,
+    'valign': 'top',
+    'fg_color': '#EEEDEA',
+    'border': 0
+}
+
 SHEET_HEADER_LT_GREEN = {
     'bold': True,
     'text_wrap':False,

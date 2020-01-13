@@ -109,4 +109,38 @@ class ViewHelper:
         except Exception as ex:
             self._log(f"error getting db values. {str(ex)}")
             return False
+
+    def get_action_list_view(self, fys=[]):
+        try:
+            if fys is not None:
+                if len(fys) > 0:
+                    query = self._connection.action_list_view.select(
+                        self._connection.action_list_view.c.FiscalYear.in_(fys)
+                    )
+                else:
+                    query = self._connection.action_list_view.select()
+            else:
+                query = self._connection.action_list_view.select()
+            result = query.execute()
+            return result
+        except Exception as ex:
+            self._log(f"error getting db values. {str(ex)}")
+            return False
+
+    def get_lesson_learnt_view(self, fys=[]):
+        try:
+            if fys is not None:
+                if len(fys) > 0:
+                    query = self._connection.lesson_learnt_view.select(
+                        self._connection.lesson_learnt_view.c.FiscalYear.in_(fys)
+                    )
+                else:
+                    query = self._connection.lesson_learnt_view.select()
+            else:
+                query = self._connection.lesson_learnt_view.select()
+            result = query.execute()
+            return result
+        except Exception as ex:
+            self._log(f"error getting db values. {str(ex)}")
+            return False
     
