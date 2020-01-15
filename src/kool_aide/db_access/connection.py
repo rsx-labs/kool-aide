@@ -55,6 +55,7 @@ class Connection:
             self.action_list_view = Table('vw_ActionList', metadata, autoload = True)
             self.lesson_learnt_view = Table('vw_LessonLearnt', metadata, autoload=True)
             self.project_billability_view = Table('vw_BillabilityByProjectPerWeek', metadata, autoload=True)
+            self.employee_billability_view = Table('vw_BillabilityByEmployeePerWeek', metadata, autoload=True)
 
             self._session = sessionmaker(bind=engine)()
             

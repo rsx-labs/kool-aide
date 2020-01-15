@@ -81,6 +81,9 @@ class ViewManager:
         elif arguments.view == SUPPORTED_VIEWS[8]:
             self._retrieve_project_billability_view(arguments)
             return True, DATA_RETRIEVED
+        elif arguments.view == SUPPORTED_VIEWS[9]:
+            self._retrieve_employee_billability_view(arguments)
+            return True, DATA_RETRIEVED
 
 
         return False, NOT_SUPPORTED
@@ -858,6 +861,105 @@ class ViewManager:
         except Exception as ex:
             self._log(f'error getting data frame. {str(ex)}',2)
     
+    def get_employee_billability_view_data_frame(self, arguments: CliArgument):
+
+        columns = None
+        sort_keys = None
+        projects = None
+        ids = None
+        departments = None
+        divisions = None
+        months = None
+        fys = None
+        flag = None
+        col_names =[
+                'EmployeeID', 'Employee Name', 'ProjectID', 'Project',
+                'WeekID', 'Hours', 'IsBillable','Fiscal Year', 'DivisionID',
+                'DepartmentID','Month', 'Week Range'
+            ] 
+
+        try:
+            if arguments.parameters is not None:
+                try:
+                    json_parameters = json.loads(arguments.parameters)
+                    sort_keys = get_param_value(PARAM_SORT, json_parameters)
+                    columns = get_param_value(PARAM_COLUMNS, json_parameters)
+                    projects = get_param_value(PARAM_PROJECT, json_parameters)
+                    ids = get_param_value(PARAM_IDS, json_parameters)
+                    departments = get_param_value(PARAM_DEPARTMENTS, json_parameters)
+                    divisions = get_param_value(PARAM_DIVISIONS, json_parameters)
+                    months= get_param_value(PARAM_MONTHS, json_parameters)
+                    flag = get_param_value(PARAM_FLAG, json_parameters)
+                    fys = get_param_value(PARAM_FYS, json_parameters)
+                except Exception as ex:
+                    self._log(f'error reading parameters . {str(ex)}',2)
+            
+            if arguments.auto_mode:
+                fys=[self._report_defaults['fiscal_year']]
+                months = [datetime.month]
+                
+            if fys is not None and len(fys)>0:
+                results = self._db_helper.get_employee_billability_view(fys)
+            else:
+                results = self._db_helper.get_employee_billability_view()
+
+            data_frame = pd.DataFrame(results.fetchall()) 
+            data_frame.columns = results.keys()
+
+            if projects is not None and len(projects)>0:
+                data_frame = data_frame[data_frame['ProjectID'].isin(projects)]
+
+            if departments is not None and len(departments)>0:
+                 data_frame = data_frame[data_frame['DepartmentID'].isin(departments)]
+            
+            if divisions is not None and len(divisions)>0:
+                data_frame = data_frame[data_frame['DivisionID'].isin(divisions)]
+
+            if months is not None and len(months)>0:
+                data_frame = data_frame[data_frame['Month'].isin(months)]
+
+            if ids is not None and len(ids)>0:
+                data_frame = data_frame[data_frame['EmployeeID'].isin(ids)]
+
+            if flag is not None:
+                try:
+                    data_frame = data_frame[data_frame['IsBillable'] == int(flag)]
+                except:
+                    pass
+
+            if sort_keys is not None and len(sort_keys) > 0:
+                data_frame.sort_values(by=sort_keys, inplace= True)
+     
+            limit = int(arguments.result_limit)
+
+            if columns is not None:        
+                data_frame = data_frame[columns].head(limit)
+            else:
+                data_frame.columns = col_names
+                data_frame = data_frame.head(limit)
+            
+            try:
+                if arguments.action == CMD_ACTIONS[1]:
+                    data_frame.drop(
+                        [
+                            'DepartmentID',
+                            'DivisionID',
+                            'ProjectID',
+                            'IsBillable',
+                            'WeekID',
+                            'Month'
+                        ], 
+                        inplace=True, 
+                        axis=1
+                    )
+            except:
+                pass
+
+            return data_frame
+
+        except Exception as ex:
+            self._log(f'error getting data frame. {str(ex)}',2)
+    
 
     def _retrieve_status_report_view(self, arguments: CliArgument)->None:
         
@@ -980,8 +1082,7 @@ class ViewManager:
             self._log(f"retrieved [ {len(data_frame)} ] records")
         except Exception as ex:
             self._log(f'error parsing parameter. {str(ex)}',2)
-
-    
+   
     def _retrieve_action_list_view(self, arguments: CliArgument) ->None:
         try:
             data_frame = self.get_action_list_view_data_frame(arguments)
@@ -1015,6 +1116,26 @@ class ViewManager:
                 arguments.output_file,
                 arguments.view,
                 sheet_name = 'Project Billability',
+                column_widths=col_widths
+            )
+
+            self._log(f"retrieved [ {len(data_frame)} ] records")
+        except Exception as ex:
+            self._log(f'error parsing parameter. {str(ex)}',2)
+
+    def _retrieve_employee_billability_view(self, arguments: CliArgument) ->None:
+        try:
+            data_frame = self.get_employee_billability_view_data_frame(arguments)
+            
+            col_widths= None
+            col_widths = [[0,15],[1,30],[2,15],[3,10],[4,15],[5,15]]
+            
+            self._send_to_output(
+                data_frame, 
+                arguments.display_format, 
+                arguments.output_file,
+                arguments.view,
+                sheet_name = 'Employee Billability',
                 column_widths=col_widths
             )
 
@@ -1067,7 +1188,8 @@ class ViewManager:
                     SUPPORTED_VIEWS[5],
                     SUPPORTED_VIEWS[6],
                     SUPPORTED_VIEWS[7],
-                    SUPPORTED_VIEWS[8]
+                    SUPPORTED_VIEWS[8],
+                    SUPPORTED_VIEWS[9]
                 ]: 
                     self._generate_raw_excel(
                         data_frame, 

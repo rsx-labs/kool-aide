@@ -7,7 +7,7 @@ CMD_ACTIONS =[
 REPORT_TYPES = [
     'status-report','asset-inventory',
     'task-report', 'project-billability',
-    'employee-billability'
+    'employee-billability', 'non-billables'
 ]
 
 SUPPORTED_MODELS = [
@@ -59,7 +59,7 @@ PARAM_STATUS = 'status'
 # excel formats
 SHEET_TOP_HEADER = {
     'bold': True,
-    'text_wrap': True,
+    'text_wrap': False,
     'valign': 'top',
     'fg_color': '#CC0000',
     'font_color': '#ffffff',
@@ -135,5 +135,7 @@ MAP_VIEW_TO_REPORT ={
     'status-report': 'status-report',
     'asset-inventory': 'asset-inventory',
     'task-report': 'task',
-    'project-billability': 'project-billability'
+    'project-billability': 'project-billability',
+    'employee-billability':'employee-billability',
+    'non-billables':'employee-billability'
 }

@@ -211,7 +211,8 @@ class ProjectBillabilityReport:
                 df_per_week = pd.DataFrame(grouped_per_week.get_group(key))
             
                 range_date = datetime.strptime(key,"%Y%m%d")
-                key_string = f'WeekEnding_{range_date.month}{range_date.day}'
+                range_date_string ='{:02d}'.format(range_date.month)+'{:02d}'.format(range_date.day)
+                key_string = f'WeekEnding_{range_date_string}'
 
                 sheet_name = key_string
             
