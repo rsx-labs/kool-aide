@@ -5,9 +5,9 @@ CMD_ACTIONS =[
     'add','get','edit','delete','generate-report'
 ]
 REPORT_TYPES = [
-    'status-report',
-    'asset-inventory',
-    'task-report'
+    'status-report','asset-inventory',
+    'task-report', 'project-billability',
+    'employee-billability'
 ]
 
 SUPPORTED_MODELS = [
@@ -17,7 +17,8 @@ SUPPORTED_MODELS = [
 
 SUPPORTED_VIEWS = [
     'status-report','asset-inventory','commendation', 'contact-list', 
-    'leave-summary', 'task', 'action-list', 'lesson-learnt'
+    'leave-summary', 'task', 'action-list', 'lesson-learnt',
+    'project-billability', 'employee-billability'
 ]
 
 OUTPUT_FORMAT = [
@@ -133,5 +134,6 @@ SHEET_CELL_FOOTER = {
 MAP_VIEW_TO_REPORT ={
     'status-report': 'status-report',
     'asset-inventory': 'asset-inventory',
-    'task-report': 'task'
+    'task-report': 'task',
+    'project-billability': 'project-billability'
 }

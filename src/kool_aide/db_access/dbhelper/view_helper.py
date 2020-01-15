@@ -144,3 +144,20 @@ class ViewHelper:
             self._log(f"error getting db values. {str(ex)}")
             return False
     
+    def get_project_billability_view(self, fys=[]):
+        try:
+            if fys is not None:
+                if len(fys) > 0:
+                    query = self._connection.project_billability_view.select(
+                        self._connection.project_billability_view.c.FiscalYear.in_(fys)
+                    )
+                else:
+                    query = self._connection.project_billability_view.select()
+            else:
+                query = self._connection.project_billability_view.select()
+            result = query.execute()
+            return result
+        except Exception as ex:
+            self._log(f"error getting db values. {str(ex)}")
+            return False
+    
