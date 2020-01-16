@@ -14,6 +14,7 @@ from kool_aide.report.excel.asset_inventory_report import AssetInventoryReport
 from kool_aide.report.excel.task_summary_report import TaskSummaryReport
 from kool_aide.report.excel.project_billability_report import ProjectBillabilityReport
 from kool_aide.report.excel.employee_billability_report import EmployeeBillabilityReport
+from kool_aide.report.excel.non_billables_report import NonBillablesReport
 from kool_aide.library.utilities import print_to_screen
 from kool_aide.assets.resources.messages import *
 
@@ -76,6 +77,15 @@ class ReportManager:
             print_to_screen('Generating employee billabilty report ...',arguments.quiet_mode)
             try:
                 self._generate_employee_billability_report(arguments)
+                return True, ''
+            except:
+                print_to_screen('Error generating report ...',arguments.quiet_mode)
+                return False, REPORT_NOT_GENERATED
+
+        elif self._arguments.report == REPORT_TYPES[5]: # non billable
+            print_to_screen('Generating non billables report ...',arguments.quiet_mode)
+            try:
+                self._generate_non_billables_report(arguments)
                 return True, ''
             except:
                 print_to_screen('Error generating report ...',arguments.quiet_mode)
@@ -201,7 +211,6 @@ class ReportManager:
             print_to_screen('Error generating report ...',arguments.quiet_mode)
             return False, REPORT_NOT_GENERATED   
 
-
     def _generate_employee_billability_report(self, arguments: CliArgument):
         print_to_screen('Getting data ...',arguments.quiet_mode)
         view_manager = ViewManager(
@@ -220,6 +229,36 @@ class ReportManager:
             out_file = append_date_to_file_name(out_file)
             writer = pd.ExcelWriter(out_file, engine='xlsxwriter')
             report = EmployeeBillabilityReport(
+                self._logger, 
+                self._config, 
+                data_frame, 
+                writer
+            )
+            # generate excel report
+            print_to_screen(f'Writing report to : {out_file}',arguments.quiet_mode)
+            return report.generate(OUTPUT_FORMAT[3])
+        else:
+            print_to_screen('Error generating report ...',arguments.quiet_mode)
+            return False, REPORT_NOT_GENERATED 
+    
+    def _generate_non_billables_report(self, arguments: CliArgument):
+        print_to_screen('Getting data ...',arguments.quiet_mode)
+        view_manager = ViewManager(
+            self._logger, 
+            self._config, 
+            self._connection
+        )
+        data_frame = view_manager.get_employee_billability_view_data_frame(arguments)
+        
+        if data_frame is not None:
+            print_to_screen('Data retrieved.',arguments.quiet_mode)
+            out_file = arguments.output_file
+            if arguments.output_file is None:
+                out_file = DEFAULT_FILENAME
+            
+            out_file = append_date_to_file_name(out_file)
+            writer = pd.ExcelWriter(out_file, engine='xlsxwriter')
+            report = NonBillablesReport(
                 self._logger, 
                 self._config, 
                 data_frame, 

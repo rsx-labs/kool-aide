@@ -101,6 +101,8 @@ class EmployeeBillabilityReport:
             format_vertical_text.set_align('bottom')
             employee_dict = {}
             start_row = current_row
+
+            worksheet.write(current_row, current_col, "", self._header_format_gray)
             for index,row in employee_df.iterrows():
                 worksheet.write(current_row, current_col+index+1, str(row['Employee Name']).strip(), format_vertical_text) 
                 employee_dict[row['Employee Name'].strip()]=1+index
@@ -210,6 +212,8 @@ class EmployeeBillabilityReport:
                 format_vertical_text.set_align('bottom')
                 employee_dict = {}
                 start_row = current_row
+
+                worksheet.write(current_row, current_col, "", self._header_format_gray)
                 for index,row in employee_df.iterrows():
                     worksheet.write(current_row, current_col+index+1, str(row['Employee Name']).strip(), format_vertical_text) 
                     employee_dict[row['Employee Name'].strip()]=1+index

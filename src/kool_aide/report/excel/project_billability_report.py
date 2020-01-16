@@ -102,10 +102,13 @@ class ProjectBillabilityReport:
             current_row += 1
             start_row = current_row
             total = sum(data_frame['Hours'])
-            for key, values in grouped_per_project['Hours'].sum().items():
-                worksheet.write(current_row, current_col, key)       
-                worksheet.write(current_row, current_col+1, values, self._number_two_places)
-                percentage = (float(values) / total) * 100
+            
+            df_sum_project_hours = grouped_per_project['Hours'].sum().reset_index()
+            df_sum_project_hours.sort_values(by=['Hours'], inplace=True)
+            for key, row in df_sum_project_hours.iterrows():
+                worksheet.write(current_row, current_col, row['Project'])       
+                worksheet.write(current_row, current_col+1, row['Hours'], self._number_two_places)
+                percentage = (float(row['Hours']) / total) * 100
                 worksheet.write(current_row, current_col+2, percentage, self._number_two_places) 
                 current_row +=1
 
@@ -126,15 +129,18 @@ class ProjectBillabilityReport:
                 sheet=sheet_name
             )
 
-            chart = self._writer.book.add_chart({'type':'pie'})
+            chart = self._writer.book.add_chart({'type':'bar'})
             chart.add_series({
                 'categories': f'={categories_address}',
                 'values':     f'={values_address}',
                 'data_labels' : {'value':True}
                 })
             
-            chart.set_style(10)
-            chart.set_title({'name':'Summary of Project Billability'})
+            chart.set_x_axis({'name': 'Hours'}) 
+            chart.set_y_axis({'name': 'Projects'}) 
+            chart.set_legend({'none': True})
+            chart.set_style(20)
+            chart.set_title({'name':'Project Billability Summary'})
             worksheet.insert_chart('A2',chart,{'x_scale': 1, 'y_scale': 1.7,'x_offset':10,'y_offset':10})
 
             current_row = 28
@@ -250,12 +256,22 @@ class ProjectBillabilityReport:
 
                 grouped_per_project = df_per_week.groupby(['Project'])
                 total = sum(df_per_week['Hours'])
-                for key, values in grouped_per_project['Hours'].sum().items():
-                    worksheet.write(current_row, current_col, key)       
-                    worksheet.write(current_row, current_col+1, values, self._number_two_places)
-                    percentage = (float(values) / total) * 100
+
+                df_sum_project_hours = grouped_per_project['Hours'].sum().reset_index()
+                df_sum_project_hours.sort_values(by=['Hours'], inplace=True)
+                for key, row in df_sum_project_hours.iterrows():
+                    worksheet.write(current_row, current_col, row['Project'])       
+                    worksheet.write(current_row, current_col+1, row['Hours'], self._number_two_places)
+                    percentage = (float(row['Hours']) / total) * 100
                     worksheet.write(current_row, current_col+2, percentage, self._number_two_places) 
                     current_row +=1
+
+                # for key, values in grouped_per_project['Hours'].sum().items():
+                #     worksheet.write(current_row, current_col, key)       
+                #     worksheet.write(current_row, current_col+1, values, self._number_two_places)
+                #     percentage = (float(values) / total) * 100
+                #     worksheet.write(current_row, current_col+2, percentage, self._number_two_places) 
+                #     current_row +=1
 
                 worksheet.write(current_row, current_col, "Total Hours", self._header_format_gray) 
                 worksheet.write(current_row, current_col+1, total, self._header_format_gray) 
@@ -274,15 +290,18 @@ class ProjectBillabilityReport:
                     sheet=sheet_name
                 )
 
-                chart = self._writer.book.add_chart({'type':'pie'})
+                chart = self._writer.book.add_chart({'type':'bar'})
                 chart.add_series({
                     'categories': f'={categories_address}',
                     'values':     f'={values_address}',
                     'data_labels' : {'value':True}
                     })
                 
-                chart.set_style(10)
-                chart.set_title({'name':'Project Billability for the Month'})
+                chart.set_x_axis({'name': 'Hours'}) 
+                chart.set_y_axis({'name': 'Projects'}) 
+                chart.set_legend({'none': True})
+                chart.set_style(25)
+                chart.set_title({'name':'Project Billability for the Week'})
                 worksheet.insert_chart('A2',chart,{'x_scale': 1, 'y_scale': 1.7,'x_offset':10,'y_offset':10})
 
                 current_row = 28
