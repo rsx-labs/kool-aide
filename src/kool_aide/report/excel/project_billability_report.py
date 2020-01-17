@@ -257,7 +257,7 @@ class ProjectBillabilityReport:
                 worksheet.write(
                     current_row, 
                     current_col, 
-                    f"Billability Report for {week_ending", 
+                    f"Billability Report for {week_ending}", 
                     self._main_header_format
                 )
 
