@@ -58,9 +58,7 @@ class ProjectBillabilityReport:
             self._create_week_summary()
                
             self._writer.save()
-            # data_frame.to_excel(file_name, index=False)
-            # print(f'the file was saved : {file_name}') 
-       
+        
         except Exception as ex:
             self._log(f'error = {str(ex)}', 2)
 
@@ -74,7 +72,12 @@ class ProjectBillabilityReport:
             current_col = 0
 
             worksheet = self._writer.book.add_worksheet(sheet_name)
-            worksheet.write(current_row, current_col, "Billability Report", self._main_header_format)       
+            worksheet.write(
+                current_row, 
+                current_col, 
+                "Billability Report", 
+                self._main_header_format
+            )       
             worksheet.set_column(0,0,40,self._cell_wrap_noborder)
             worksheet.set_column(1,1,15,self._cell_wrap_noborder)
             worksheet.set_column(2,2,15,self._cell_wrap_noborder)
@@ -84,12 +87,22 @@ class ProjectBillabilityReport:
             worksheet.set_column(6,6,15,self._cell_wrap_noborder)
 
             for col in range(1,7):
-                worksheet.write(current_row, current_col+col, "", self._main_header_format) 
-            current_row += 2
-
+                worksheet.write(
+                    current_row, 
+                    current_col+col, 
+                    "", 
+                    self._main_header_format
+                )
+                 
             current_row = 28
      
-            worksheet.write(current_row, current_col, "Billability Per Project", self._header_format_orange)       
+            worksheet.write(
+                current_row, 
+                current_col, 
+                "Billability Per Project", 
+                self._header_format_orange
+            )
+
             worksheet.write(current_row, current_col+1, "", self._header_format_orange) 
             worksheet.write(current_row, current_col+2, "", self._header_format_orange) 
 
@@ -105,6 +118,7 @@ class ProjectBillabilityReport:
             
             df_sum_project_hours = grouped_per_project['Hours'].sum().reset_index()
             df_sum_project_hours.sort_values(by=['Hours'], inplace=True)
+            
             for key, row in df_sum_project_hours.iterrows():
                 worksheet.write(current_row, current_col, row['Project'])       
                 worksheet.write(current_row, current_col+1, row['Hours'], self._number_two_places)
@@ -141,12 +155,23 @@ class ProjectBillabilityReport:
             chart.set_legend({'none': True})
             chart.set_style(20)
             chart.set_title({'name':'Project Billability Summary'})
-            worksheet.insert_chart('A2',chart,{'x_scale': 1, 'y_scale': 1.7,'x_offset':10,'y_offset':10})
+            
+            worksheet.insert_chart(
+                'A2',
+                chart,
+                {'x_scale': 1, 'y_scale': 1.7,'x_offset':10,'y_offset':10}
+            )
 
             current_row = 28
             current_col = 4
      
-            worksheet.write(current_row, current_col, "Billable \ Non Billable", self._header_format_orange)       
+            worksheet.write(
+                current_row, 
+                current_col, 
+                "Billable \ Non Billable", 
+                self._header_format_orange
+            )   
+
             worksheet.write(current_row, current_col+1, "", self._header_format_orange) 
             worksheet.write(current_row, current_col+2, "", self._header_format_orange) 
             current_row += 1
@@ -193,8 +218,11 @@ class ProjectBillabilityReport:
             chart.set_style(10)
             chart.set_title({'name':'Billable vs Non-Billable'})
             chart.set_legend({'position': 'top'})
-            worksheet.insert_chart('E2',chart,{'x_scale': 1, 'y_scale': 1.7,'x_offset':10,'y_offset':10})
-
+            worksheet.insert_chart(
+                'E2',
+                chart,
+                {'x_scale': 1, 'y_scale': 1.7,'x_offset':10,'y_offset':10}
+            )
 
             end_row += 2
             worksheet.write(
@@ -219,14 +247,20 @@ class ProjectBillabilityReport:
                 range_date = datetime.strptime(key,"%Y%m%d")
                 range_date_string ='{:02d}'.format(range_date.month)+'{:02d}'.format(range_date.day)
                 key_string = f'WeekEnding_{range_date_string}'
-
+                week_ending = f'Week Ending {range_date_string}'
                 sheet_name = key_string
             
                 current_row = 0
                 current_col = 0
 
                 worksheet = self._writer.book.add_worksheet(sheet_name)
-                worksheet.write(current_row, current_col, f"Billability Report for {key_string}", self._main_header_format)       
+                worksheet.write(
+                    current_row, 
+                    current_col, 
+                    f"Billability Report for {week_ending", 
+                    self._main_header_format
+                )
+
                 worksheet.set_column(0,0,40,self._cell_wrap_noborder)
                 worksheet.set_column(1,1,15,self._cell_wrap_noborder)
                 worksheet.set_column(2,2,15,self._cell_wrap_noborder)
@@ -241,7 +275,13 @@ class ProjectBillabilityReport:
 
                 current_row = 28
         
-                worksheet.write(current_row, current_col, "Billability Per Project", self._header_format_orange)       
+                worksheet.write(
+                    current_row, 
+                    current_col, 
+                    "Billability Per Project", 
+                    self._header_format_orange
+                )
+
                 worksheet.write(current_row, current_col+1, "", self._header_format_orange) 
                 worksheet.write(current_row, current_col+2, "", self._header_format_orange) 
 
@@ -265,13 +305,6 @@ class ProjectBillabilityReport:
                     percentage = (float(row['Hours']) / total) * 100
                     worksheet.write(current_row, current_col+2, percentage, self._number_two_places) 
                     current_row +=1
-
-                # for key, values in grouped_per_project['Hours'].sum().items():
-                #     worksheet.write(current_row, current_col, key)       
-                #     worksheet.write(current_row, current_col+1, values, self._number_two_places)
-                #     percentage = (float(values) / total) * 100
-                #     worksheet.write(current_row, current_col+2, percentage, self._number_two_places) 
-                #     current_row +=1
 
                 worksheet.write(current_row, current_col, "Total Hours", self._header_format_gray) 
                 worksheet.write(current_row, current_col+1, total, self._header_format_gray) 
@@ -302,12 +335,23 @@ class ProjectBillabilityReport:
                 chart.set_legend({'none': True})
                 chart.set_style(25)
                 chart.set_title({'name':'Project Billability for the Week'})
-                worksheet.insert_chart('A2',chart,{'x_scale': 1, 'y_scale': 1.7,'x_offset':10,'y_offset':10})
+                
+                worksheet.insert_chart(
+                    'A2',
+                    chart,
+                    {'x_scale': 1, 'y_scale': 1.7,'x_offset':10,'y_offset':10}
+                )
 
                 current_row = 28
                 current_col = 4
         
-                worksheet.write(current_row, current_col, "Billable \ Non Billable", self._header_format_orange)       
+                worksheet.write(
+                    current_row, 
+                    current_col, 
+                    "Billable \ Non Billable", 
+                    self._header_format_orange
+                )
+
                 worksheet.write(current_row, current_col+1, "", self._header_format_orange) 
                 worksheet.write(current_row, current_col+2, "", self._header_format_orange) 
                 current_row += 1
@@ -354,8 +398,12 @@ class ProjectBillabilityReport:
                 chart.set_style(10)
                 chart.set_title({'name':'Billable vs Non-Billable'})
                 chart.set_legend({'position': 'top'})
-                worksheet.insert_chart('E2',chart,{'x_scale': 1, 'y_scale': 1.7,'x_offset':10,'y_offset':10})
-
+                
+                worksheet.insert_chart(
+                    'E2',
+                    chart,
+                    {'x_scale': 1, 'y_scale': 1.7,'x_offset':10,'y_offset':10}
+                )
 
                 end_row += 2
                 worksheet.write(

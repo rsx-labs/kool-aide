@@ -66,12 +66,9 @@ class NonBillablesReport:
             self._number_two_places = self._workbook.add_format({'num_format':'0.00'})
 
             self._create_data_summary()
-            
-               
+                      
             self._writer.save()
-            # data_frame.to_excel(file_name, index=False)
-            # print(f'the file was saved : {file_name}') 
-       
+          
         except Exception as ex:
             self._log(f'error = {str(ex)}', 2)
 
@@ -89,7 +86,12 @@ class NonBillablesReport:
             current_col = 0
 
             worksheet = self._writer.book.add_worksheet(sheet_name)
-            worksheet.write(current_row, current_col, "Non Billable Report Summary", self._main_header_format)
+            worksheet.write(
+                current_row, 
+                current_col, 
+                "Non Billable Report Summary", 
+                self._main_header_format
+            )
 
             worksheet.set_column(0,0,25,self._cell_wrap_noborder)
             worksheet.set_column(1,50,8,self._cell_wrap_noborder)
@@ -98,7 +100,12 @@ class NonBillablesReport:
                 worksheet.write(current_row, current_col+col, "", self._main_header_format) 
             current_row += 2
 
-            worksheet.write(current_row, current_col, "Employee Non Billable Hours", self._header_format_orange)       
+            worksheet.write(
+                current_row, 
+                current_col, 
+                "Employee Non Billable Hours", 
+                self._header_format_orange
+            )       
             worksheet.write(current_row, current_col+1, "", self._header_format_orange) 
             worksheet.write(current_row, current_col+2, "", self._header_format_orange) 
 
@@ -112,7 +119,12 @@ class NonBillablesReport:
             employee_dict = {}
             worksheet.write(current_row, current_col, "", self._header_format_gray)
             for index,row in employee_df.iterrows():
-                worksheet.write(current_row, current_col+index+1, str(row['Employee Name']).strip(), format_vertical_text) 
+                worksheet.write(
+                    current_row, 
+                    current_col+index+1, 
+                    str(row['Employee Name']).strip(), 
+                    format_vertical_text
+                ) 
                 employee_dict[row['Employee Name'].strip()]=1+index
 
             current_row +=1
@@ -131,14 +143,27 @@ class NonBillablesReport:
             self._end_employee_data_row = current_row
             
             for col in range(0,len(employee_dict)+1):
-                worksheet.write(current_row, current_col+col, "", self._header_format_gray) 
+                worksheet.write(current_row, 
+                    current_col+col, 
+                    "", 
+                    self._header_format_gray
+                ) 
             current_row += 1
             group_per_project_emp = data_frame.groupby(['Project','Employee Name']) 
             for key, values in group_per_project_emp['Hours'].sum().items():
-                  worksheet.write(project_dict[key[0].strip()], employee_dict[key[1].strip()], values)        
+                worksheet.write(
+                    project_dict[key[0].strip()], 
+                    employee_dict[key[1].strip()], 
+                    values
+                )        
             current_row += 1
 
-            worksheet.write(current_row, current_col, "Weekly Non Billable Hours", self._header_format_orange)       
+            worksheet.write(
+                current_row, 
+                current_col, 
+                "Weekly Non Billable Hours", 
+                self._header_format_orange
+            )       
             worksheet.write(current_row, current_col+1, "", self._header_format_orange) 
             worksheet.write(current_row, current_col+2, "", self._header_format_orange) 
             current_row += 1
@@ -149,10 +174,19 @@ class NonBillablesReport:
             worksheet.set_row(current_row, 100)    
             worksheet.write(current_row, 0, "", self._header_format_gray)
             for index,row in week_df.iterrows():
-                range_date = datetime.strptime(str(row['Week Range']).strip(),"%Y%m%d")
-                range_date_string ='{:02d}'.format(range_date.month)+'{:02d}'.format(range_date.day)
+                range_date = datetime.strptime(
+                    str(row['Week Range']).strip(),
+                    "%Y%m%d"
+                )
+                range_date_string ='{:02d}'.format(range_date.month) \
+                    +'{:02d}'.format(range_date.day)
                 key_string = f'Week Ending {range_date_string}'
-                worksheet.write(current_row, current_col+index+1, key_string, format_vertical_text) 
+                worksheet.write(
+                    current_row, 
+                    current_col+index+1, 
+                    key_string, 
+                    format_vertical_text
+                ) 
                 week_dict[row['Week Range'].strip()]=1+index
             current_row += 1
 
@@ -166,13 +200,22 @@ class NonBillablesReport:
             
             group_by_prj_week = data_frame.groupby(['Project','Week Range'])    
             for key, values in group_by_prj_week['Hours'].sum().items():
-                  worksheet.write(project_set2_dict[key[0].strip()], week_dict[key[1].strip()], values)        
+                worksheet.write(
+                    project_set2_dict[key[0].strip()], 
+                    week_dict[key[1].strip()], 
+                    values
+                )        
           
             for col in range(0,len(week_dict)+1):
                 worksheet.write(current_row, current_col+col, "", self._header_format_gray) 
             current_row += 2
 
-            worksheet.write(current_row, current_col, "Total Weekly Non Billable Hours", self._header_format_orange)       
+            worksheet.write(
+                current_row, 
+                current_col, 
+                "Total Weekly Non Billable Hours", 
+                self._header_format_orange
+            )       
             worksheet.write(current_row, current_col+1, "", self._header_format_orange) 
             current_row += 1
 
@@ -196,7 +239,12 @@ class NonBillablesReport:
             worksheet.write(current_row, current_col+1, "", self._header_format_gray)
 
             current_row += 2
-            worksheet.write(current_row, current_col, "Total Non Billable Hours", self._header_format_orange)       
+            worksheet.write(
+                current_row, 
+                current_col, 
+                "Total Non Billable Hours", 
+                self._header_format_orange
+            )       
             worksheet.write(current_row, current_col+1, "", self._header_format_orange) 
             current_row += 1
             worksheet.set_row(current_row, 45)
@@ -208,13 +256,23 @@ class NonBillablesReport:
             self._start_total_row= current_row
             for key, values in grouped_per_proj['Hours'].sum().items():
                 worksheet.write(current_row, current_col, key)  
-                worksheet.write(current_row, current_col+1, values, self._number_two_places)  
+                worksheet.write(
+                    current_row, 
+                    current_col+1, 
+                    values, 
+                    self._number_two_places
+                )  
                 current_row +=1
             self._end_total_row = current_row
             worksheet.write(current_row, current_col, "", self._header_format_gray)
             worksheet.write(current_row, current_col+1, "", self._header_format_gray)
             
-            self._create_charts(employee_dict, project_dict, week_dict, project_set2_dict)
+            self._create_charts(
+                employee_dict, 
+                project_dict, 
+                week_dict, 
+                project_set2_dict
+            )
 
             end_row = 100
             end_row += 2
@@ -236,7 +294,12 @@ class NonBillablesReport:
             current_col = 0
 
             worksheet = self._writer.book.add_worksheet(sheet_name)
-            worksheet.write(current_row, current_col, "Non Billable Hours Report Summary", self._main_header_format)
+            worksheet.write(
+                current_row, 
+                current_col, 
+                "Non Billable Hours Report Summary", 
+                self._main_header_format
+            )
 
             worksheet.set_column(0,0,25,self._cell_wrap_noborder)
             worksheet.set_column(1,50,8,self._cell_wrap_noborder)
@@ -281,7 +344,11 @@ class NonBillablesReport:
             chart.set_style(10)
             chart.set_title({'name':'Non Billable Hours Summary'})
             chart.set_legend({'position': 'bottom'})
-            worksheet.insert_chart('A2',chart,{'x_scale': 2, 'y_scale': 1.5,'x_offset':10,'y_offset':10})
+            worksheet.insert_chart(
+                'A2',
+                chart,
+                {'x_scale': 2, 'y_scale': 1.5,'x_offset':10,'y_offset':10}
+            )
         
         except Exception as ex:
             self._log(f'error = {str(ex)}', 2)
@@ -313,7 +380,11 @@ class NonBillablesReport:
             chart.set_style(10)
             chart.set_title({'name':'Weekly Total Non Billables Hours Summary'})
             chart.set_legend({'none': True})
-            worksheet.insert_chart('A24',chart,{'x_scale': 2, 'y_scale': 1,'x_offset':10,'y_offset':10})
+            worksheet.insert_chart(
+                'A24',
+                chart,
+                {'x_scale': 2, 'y_scale': 1,'x_offset':10,'y_offset':10}
+            )
         
         except Exception as ex:
             self._log(f'error = {str(ex)}', 2)
@@ -345,7 +416,11 @@ class NonBillablesReport:
             column_chart.set_style(10)
             column_chart.set_title({'name':'Weekly Non Billables Hours Summary'})
             column_chart.set_legend({'position': 'bottom'})
-            worksheet.insert_chart('A39',column_chart,{'x_scale': 2, 'y_scale': 1,'x_offset':10,'y_offset':10})
+            worksheet.insert_chart(
+                'A39',
+                column_chart,
+                {'x_scale': 2, 'y_scale': 1,'x_offset':10,'y_offset':10}
+            )
         
         except Exception as ex:
             self._log(f'error = {str(ex)}', 2)
@@ -379,9 +454,12 @@ class NonBillablesReport:
             chart.set_y_axis({'name': 'Hours'}) 
             chart.set_style(10)
             chart.set_title({'name':'Employee Non Billable Hours Summary'})
-            worksheet.insert_chart('A54',chart,{'x_scale': 2, 'y_scale': 2,'x_offset':10,'y_offset':10})
-
-           
+            worksheet.insert_chart(
+                'A54',
+                chart,
+                {'x_scale': 2, 'y_scale': 2,'x_offset':10,'y_offset':10}
+            )
+ 
         except Exception as ex:
             self._log(f'error = {str(ex)}', 2)
 
