@@ -69,6 +69,22 @@ class ViewManager:
         elif arguments.view == SUPPORTED_VIEWS[4]:
             self._retrieve_leave_summary_view(arguments)
             return True, DATA_RETRIEVED
+        elif arguments.view == SUPPORTED_VIEWS[5]:
+            self._retrieve_task_view(arguments)
+            return True, DATA_RETRIEVED
+        elif arguments.view == SUPPORTED_VIEWS[6]:
+            self._retrieve_action_list_view(arguments)
+            return True, DATA_RETRIEVED
+        elif arguments.view == SUPPORTED_VIEWS[7]:
+            self._retrieve_lesson_learnt_view(arguments)
+            return True, DATA_RETRIEVED
+        elif arguments.view == SUPPORTED_VIEWS[8]:
+            self._retrieve_project_billability_view(arguments)
+            return True, DATA_RETRIEVED
+        elif arguments.view == SUPPORTED_VIEWS[9]:
+            self._retrieve_employee_billability_view(arguments)
+            return True, DATA_RETRIEVED
+
 
         return False, NOT_SUPPORTED
 
@@ -435,6 +451,516 @@ class ViewManager:
         except Exception as ex:
             self._log(f'error getting data frame. {str(ex)}',2)
 
+    def get_task_view_data_frame(self, arguments: CliArgument):
+
+        columns = None
+        sort_keys = None
+        ids = None
+        departments = None
+        divisions = None
+        isActive = None
+        types = None
+        projects = None
+        phases = None
+        status = None
+        col_names =[
+                'Employee ID', 'Employee Name', 'Project', 'Ref ID',
+                'Description', 'Incident', 'Date Created',
+                'Date Started', 'Target Date','Completed Date','Phase',
+                'Status','Comments','Estimated Effort','Actual Effort',
+                'Department','Division'
+            ]
+        try:
+            if arguments.parameters is not None:
+                try:
+                    json_parameters = json.loads(arguments.parameters)
+                    sort_keys = get_param_value(PARAM_SORT, json_parameters)
+                    columns = get_param_value(PARAM_COLUMNS, json_parameters)
+                    ids = get_param_value(PARAM_IDS, json_parameters)
+                    departments = get_param_value(PARAM_DEPARTMENTS, json_parameters)
+                    divisions = get_param_value(PARAM_DIVISIONS, json_parameters)
+                    isActive = get_param_value(PARAM_FLAG, json_parameters)
+                    types = get_param_value(PARAM_TYPES, json_parameters)
+                    phases = get_param_value(PARAM_PHASES, json_parameters)
+                    projects = get_param_value(PARAM_PROJECT, json_parameters)
+                    status = get_param_value(PARAM_STATUS, json_parameters)
+                except Exception as ex:
+                    self._log(f'error reading parameters . {str(ex)}',2)
+            
+            results = self._db_helper.get_task_view(status)
+            
+            data_frame = pd.DataFrame(results.fetchall()) 
+            data_frame.columns = results.keys()
+
+            if ids is not None and len(ids)>0:
+                data_frame = data_frame[data_frame['EmployeeID'].isin(ids)]
+
+            if departments is not None and len(departments)>0:
+                 data_frame = data_frame[data_frame['DepartmentID'].isin(departments)]
+            
+            if divisions is not None and len(divisions)>0:
+                  data_frame = data_frame[data_frame['DivisionID'].isin(divisions)]
+
+            if types is not None and len(types)>0:
+                  data_frame = data_frame[data_frame['IncidentTypeID'].isin(types)]
+
+            if isActive is not None:
+                try:
+                    data_frame = data_frame[data_frame['IsActive'] == int(isActive)]
+                except:
+                    pass
+
+            if projects is not None and len(projects)>0:
+                  data_frame = data_frame[data_frame['ProjectID'].isin(projects)]
+
+            if phases is not None and len(phases)>0:
+                  data_frame = data_frame[data_frame['PhaseID'].isin(phases)]
+
+            if sort_keys is not None and len(sort_keys) > 0:
+                data_frame.sort_values(by=sort_keys, inplace= True)
+     
+            limit = int(arguments.result_limit)
+
+            if columns is not None and len(columns) > 0:        
+                data_frame = data_frame[columns].head(limit)
+            else:
+                #data_frame.columns = col_names
+                data_frame = data_frame.head(limit)
+            
+            try:
+                data_frame.drop([
+                    'ProjectID','DepartmentID','DivisionID',
+                    'IsActive','IncidentTypeID', 'PhaseID',
+                    'TaskStatusID'
+                    ], 
+                    inplace=True, 
+                    axis=1
+                )
+            except:
+                pass
+
+            return data_frame
+
+        except Exception as ex:
+            self._log(f'error getting data frame. {str(ex)}',2)
+
+    def get_action_list_view_data_frame(self, arguments: CliArgument):
+
+        columns = None
+        sort_keys = None
+        ids = None
+        departments = None
+        divisions = None
+        isActive = None
+        status= None
+        fys = None
+        months = None
+        year = None
+        col_names =[
+                'Action ID', 'Action', 'EmployeeID', 'Employee', 'Date Created',
+                'Due Date', 'Date Closed', 'DivisionID','Division','DepartmentID',
+                'Department','Status','IsActive','Month','Year','FiscalYear'
+            ] 
+
+        try:
+            if arguments.parameters is not None:
+                try:
+                    json_parameters = json.loads(arguments.parameters)
+                    sort_keys = get_param_value(PARAM_SORT, json_parameters)
+                    columns = get_param_value(PARAM_COLUMNS, json_parameters)
+                    ids = get_param_value(PARAM_IDS, json_parameters)
+                    departments = get_param_value(PARAM_DEPARTMENTS, json_parameters)
+                    divisions = get_param_value(PARAM_DIVISIONS, json_parameters)
+                    isActive = get_param_value(PARAM_FLAG, json_parameters)
+                    months = get_param_value(PARAM_MONTHS, json_parameters, months)
+                    year = get_param_value(PARAM_YEAR, json_parameters, year)
+                    status = get_param_value(PARAM_STATUS, json_parameters)
+                    fys = get_param_value(PARAM_FYS, json_parameters)
+                except Exception as ex:
+                    self._log(f'error reading parameters . {str(ex)}',2)
+            
+            if months is not None and arguments.auto_mode:
+                months=[datetime.month]
+                fys= None
+                year = datetime.year
+            elif arguments.auto_mode:
+                fys=[self._report_defaults['fiscal_year']]
+                months = None
+                year = None
+
+            if fys is not None and len(fys)>0:
+                results = self._db_helper.get_action_list_view(fys)
+            else:
+                results = self._db_helper.get_action_list_view()
+
+            data_frame = pd.DataFrame(results.fetchall()) 
+            data_frame.columns = results.keys()
+
+            if ids is not None and len(ids)>0:
+                data_frame = data_frame[data_frame['EmployeeID'].isin(ids)]
+
+            if departments is not None and len(departments)>0:
+                 data_frame = data_frame[data_frame['DepartmentID'].isin(departments)]
+            
+            if divisions is not None and len(divisions)>0:
+                  data_frame = data_frame[data_frame['DivisionID'].isin(divisions)]
+
+            if year is not None:
+                data_frame = data_frame[data_frame['Year'] == year]
+            
+            if months is not None and len(months)>0:
+                data_frame = data_frame[data_frame['Month'].isin(months)]
+
+            if status is not None and len(status)>0:
+                data_frame = data_frame[data_frame['Status'].isin(status)]
+
+            if isActive is not None:
+                try:
+                    data_frame = data_frame[data_frame['IsActive'] == int(isActive)]
+                except:
+                    pass
+
+            if sort_keys is not None and len(sort_keys) > 0:
+                data_frame.sort_values(by=sort_keys, inplace= True)
+     
+            limit = int(arguments.result_limit)
+
+            if columns is not None:        
+                data_frame = data_frame[columns].head(limit)
+            else:
+                if self._get_parameters(arguments, PARAM_COLUMNS) is None:
+                    data_frame.columns = col_names
+                data_frame = data_frame.head(limit)
+            
+            try:
+                if columns is None:
+                    data_frame.drop(
+                        [
+                            'DepartmentID',
+                            'DivisionID',
+                            'IsActive',
+                            'EmployeeID',
+                            'IsActive',
+                            'Month',
+                            'Year',
+                            'Status',
+                            'FiscalYear'
+
+                        ], 
+                        inplace=True, 
+                        axis=1
+                    )
+            except:
+                pass
+
+            return data_frame
+
+        except Exception as ex:
+            self._log(f'error getting data frame. {str(ex)}',2)
+    
+    def get_lesson_learnt_view_data_frame(self, arguments: CliArgument):
+
+        columns = None
+        sort_keys = None
+        ids = None
+        departments = None
+        divisions = None
+        isActive = None
+        fys = None
+        months = None
+        year = None
+        col_names =[
+                'Learning ID', 'EmployeeID', 'Employee', 'Problem',
+                'Resolution','Date Created', 'Related Action',
+                'DepartmentID','Department',
+                'DivisionID','Division',
+                'Month','Year','FiscalYear','IsActive'
+            ] 
+
+        try:
+            if arguments.parameters is not None:
+                try:
+                    json_parameters = json.loads(arguments.parameters)
+                    sort_keys = get_param_value(PARAM_SORT, json_parameters)
+                    columns = get_param_value(PARAM_COLUMNS, json_parameters)
+                    ids = get_param_value(PARAM_IDS, json_parameters)
+                    departments = get_param_value(PARAM_DEPARTMENTS, json_parameters)
+                    divisions = get_param_value(PARAM_DIVISIONS, json_parameters)
+                    isActive = get_param_value(PARAM_FLAG, json_parameters)
+                    months = get_param_value(PARAM_MONTHS, json_parameters, months)
+                    year = get_param_value(PARAM_YEAR, json_parameters, year)
+                    fys = get_param_value(PARAM_FYS, json_parameters)
+                except Exception as ex:
+                    self._log(f'error reading parameters . {str(ex)}',2)
+            
+            if months is not None and arguments.auto_mode:
+                months=[datetime.month]
+                fys= None
+                year = datetime.year
+            elif arguments.auto_mode:
+                fys=[self._report_defaults['fiscal_year']]
+                months = None
+                year = None
+
+            if fys is not None and len(fys)>0:
+                results = self._db_helper.get_lesson_learnt_view(fys)
+            else:
+                results = self._db_helper.get_lesson_learnt_view()
+
+            data_frame = pd.DataFrame(results.fetchall()) 
+            data_frame.columns = results.keys()
+
+            if ids is not None and len(ids)>0:
+                data_frame = data_frame[data_frame['EmployeeID'].isin(ids)]
+
+            if departments is not None and len(departments)>0:
+                 data_frame = data_frame[data_frame['DepartmentID'].isin(departments)]
+            
+            if divisions is not None and len(divisions)>0:
+                  data_frame = data_frame[data_frame['DivisionID'].isin(divisions)]
+
+            if year is not None:
+                data_frame = data_frame[data_frame['Year'] == year]
+            
+            if months is not None and len(months)>0:
+                data_frame = data_frame[data_frame['Month'].isin(months)]
+
+            if isActive is not None:
+                try:
+                    data_frame = data_frame[data_frame['IsActive'] == int(isActive)]
+                except:
+                    pass
+
+            if sort_keys is not None and len(sort_keys) > 0:
+                data_frame.sort_values(by=sort_keys, inplace= True)
+     
+            limit = int(arguments.result_limit)
+
+            if columns is not None:        
+                data_frame = data_frame[columns].head(limit)
+            else:
+                if self._get_parameters(arguments, PARAM_COLUMNS) is None:
+                    data_frame.columns = col_names
+                data_frame = data_frame.head(limit)
+            
+            try:
+                if columns is None:
+                    data_frame.drop(
+                        [
+                            'DepartmentID',
+                            'DivisionID',
+                            'IsActive',
+                            'EmployeeID',
+                            'Month',
+                            'Year',
+                            'FiscalYear'
+                        ], 
+                        inplace=True, 
+                        axis=1
+                    )
+            except:
+                pass
+
+            return data_frame
+
+        except Exception as ex:
+            self._log(f'error getting data frame. {str(ex)}',2)
+    
+    def get_project_billability_view_data_frame(self, arguments: CliArgument):
+
+        columns = None
+        sort_keys = None
+        projects = None
+        departments = None
+        divisions = None
+        months = None
+        fys = None
+        flag = None
+        col_names =[
+                'ProjectID', 'Project', 'WeekID', 'Hours',
+                'IsBillable','Fiscal Year', 'DivisionID',
+                'DepartmentID','Week Range','Month'
+            ] 
+
+        try:
+            if arguments.parameters is not None:
+                try:
+                    json_parameters = json.loads(arguments.parameters)
+                    sort_keys = get_param_value(PARAM_SORT, json_parameters)
+                    columns = get_param_value(PARAM_COLUMNS, json_parameters)
+                    projects = get_param_value(PARAM_PROJECT, json_parameters)
+                    departments = get_param_value(PARAM_DEPARTMENTS, json_parameters)
+                    divisions = get_param_value(PARAM_DIVISIONS, json_parameters)
+                    months= get_param_value(PARAM_MONTHS, json_parameters)
+                    flag = get_param_value(PARAM_FLAG, json_parameters)
+                    fys = get_param_value(PARAM_FYS, json_parameters)
+                except Exception as ex:
+                    self._log(f'error reading parameters . {str(ex)}',2)
+            
+            if arguments.auto_mode:
+                fys=[self._report_defaults['fiscal_year']]
+                months = [datetime.month]
+                
+
+            if fys is not None and len(fys)>0:
+                results = self._db_helper.get_project_billability_view(fys)
+            else:
+                results = self._db_helper.get_project_billability_view()
+
+            data_frame = pd.DataFrame(results.fetchall()) 
+            data_frame.columns = results.keys()
+
+            if projects is not None and len(projects)>0:
+                data_frame = data_frame[data_frame['ProjectID'].isin(ids)]
+
+            if departments is not None and len(departments)>0:
+                 data_frame = data_frame[data_frame['DepartmentID'].isin(departments)]
+            
+            if divisions is not None and len(divisions)>0:
+                data_frame = data_frame[data_frame['DivisionID'].isin(divisions)]
+
+            if months is not None and len(months)>0:
+                data_frame = data_frame[data_frame['Month'].isin(months)]
+
+            if flag is not None:
+                try:
+                    data_frame = data_frame[data_frame['IsBillable'] == int(flag)]
+                except:
+                    pass
+
+            if sort_keys is not None and len(sort_keys) > 0:
+                data_frame.sort_values(by=sort_keys, inplace= True)
+     
+            limit = int(arguments.result_limit)
+
+            if columns is not None:        
+                data_frame = data_frame[columns].head(limit)
+            else:
+                data_frame.columns = col_names
+                data_frame = data_frame.head(limit)
+            
+            try:
+                if arguments.action == CMD_ACTIONS[1]:
+                    data_frame.drop(
+                        [
+                            'DepartmentID',
+                            'DivisionID',
+                            'ProjectID',
+                            'IsBillable',
+                            'WeekID',
+                            'Month'
+                        ], 
+                        inplace=True, 
+                        axis=1
+                    )
+            except:
+                pass
+
+            return data_frame
+
+        except Exception as ex:
+            self._log(f'error getting data frame. {str(ex)}',2)
+    
+    def get_employee_billability_view_data_frame(self, arguments: CliArgument):
+
+        columns = None
+        sort_keys = None
+        projects = None
+        ids = None
+        departments = None
+        divisions = None
+        months = None
+        fys = None
+        flag = None
+        col_names =[
+                'EmployeeID', 'Employee Name', 'ProjectID', 'Project',
+                'WeekID', 'Hours', 'IsBillable','Fiscal Year', 'DivisionID',
+                'DepartmentID','Month', 'Week Range'
+            ] 
+
+        try:
+            if arguments.parameters is not None:
+                try:
+                    json_parameters = json.loads(arguments.parameters)
+                    sort_keys = get_param_value(PARAM_SORT, json_parameters)
+                    columns = get_param_value(PARAM_COLUMNS, json_parameters)
+                    projects = get_param_value(PARAM_PROJECT, json_parameters)
+                    ids = get_param_value(PARAM_IDS, json_parameters)
+                    departments = get_param_value(PARAM_DEPARTMENTS, json_parameters)
+                    divisions = get_param_value(PARAM_DIVISIONS, json_parameters)
+                    months= get_param_value(PARAM_MONTHS, json_parameters)
+                    flag = get_param_value(PARAM_FLAG, json_parameters)
+                    fys = get_param_value(PARAM_FYS, json_parameters)
+                except Exception as ex:
+                    self._log(f'error reading parameters . {str(ex)}',2)
+            
+            if arguments.auto_mode:
+                fys=[self._report_defaults['fiscal_year']]
+                months = [datetime.month]
+                
+            if fys is not None and len(fys)>0:
+                results = self._db_helper.get_employee_billability_view(fys)
+            else:
+                results = self._db_helper.get_employee_billability_view()
+
+            data_frame = pd.DataFrame(results.fetchall()) 
+            data_frame.columns = results.keys()
+
+            if projects is not None and len(projects)>0:
+                data_frame = data_frame[data_frame['ProjectID'].isin(projects)]
+
+            if departments is not None and len(departments)>0:
+                 data_frame = data_frame[data_frame['DepartmentID'].isin(departments)]
+            
+            if divisions is not None and len(divisions)>0:
+                data_frame = data_frame[data_frame['DivisionID'].isin(divisions)]
+
+            if months is not None and len(months)>0:
+                data_frame = data_frame[data_frame['Month'].isin(months)]
+
+            if ids is not None and len(ids)>0:
+                data_frame = data_frame[data_frame['EmployeeID'].isin(ids)]
+
+            if flag is not None:
+                try:
+                    data_frame = data_frame[data_frame['IsBillable'] == int(flag)]
+                except:
+                    pass
+
+            if sort_keys is not None and len(sort_keys) > 0:
+                data_frame.sort_values(by=sort_keys, inplace= True)
+     
+            limit = int(arguments.result_limit)
+
+            if columns is not None:        
+                data_frame = data_frame[columns].head(limit)
+            else:
+                data_frame.columns = col_names
+                data_frame = data_frame.head(limit)
+            
+            try:
+                if arguments.action == CMD_ACTIONS[1]:
+                    data_frame.drop(
+                        [
+                            'DepartmentID',
+                            'DivisionID',
+                            'ProjectID',
+                            'IsBillable',
+                            'WeekID',
+                            'Month'
+                        ], 
+                        inplace=True, 
+                        axis=1
+                    )
+            except:
+                pass
+
+            return data_frame
+
+        except Exception as ex:
+            self._log(f'error getting data frame. {str(ex)}',2)
+    
+
     def _retrieve_status_report_view(self, arguments: CliArgument)->None:
         
         try:
@@ -521,6 +1047,103 @@ class ViewManager:
         except Exception as ex:
             self._log(f'error parsing parameter. {str(ex)}',2)
 
+    def _retrieve_task_view(self, arguments: CliArgument) ->None:
+        try:
+            data_frame = self.get_task_view_data_frame(arguments)
+            col_widths = [[0,15],[1,30],[2,20],[3,12],[4,35],[5,15],[6,15],[7,15],[8,15],[9,15],[10,15],[11,15],[12,20],[15,15],[16,15]]
+            
+            self._send_to_output(
+                data_frame, 
+                arguments.display_format, 
+                arguments.output_file,
+                arguments.view,
+                sheet_name = 'Tasks',
+                column_widths=col_widths
+            )
+
+            self._log(f"retrieved [ {len(data_frame)} ] records")
+        except Exception as ex:
+            self._log(f'error parsing parameter. {str(ex)}',2)
+
+    def _retrieve_lesson_learnt_view(self, arguments: CliArgument) ->None:
+        try:
+            data_frame = self.get_lesson_learnt_view_data_frame(arguments)
+            col_widths = [[0,15],[1,30],[2,35],[3,35],[4,15],[5,35],[6,15],[7,15]]
+            
+            self._send_to_output(
+                data_frame, 
+                arguments.display_format, 
+                arguments.output_file,
+                arguments.view,
+                sheet_name = 'Lesson Learnt',
+                column_widths=col_widths
+            )
+
+            self._log(f"retrieved [ {len(data_frame)} ] records")
+        except Exception as ex:
+            self._log(f'error parsing parameter. {str(ex)}',2)
+   
+    def _retrieve_action_list_view(self, arguments: CliArgument) ->None:
+        try:
+            data_frame = self.get_action_list_view_data_frame(arguments)
+            
+            col_widths= None
+            col_widths = [[0,17],[1,40],[2,25],[3,12],[4,12],[5,12],[6,15],[7,15]]
+            
+            self._send_to_output(
+                data_frame, 
+                arguments.display_format, 
+                arguments.output_file,
+                arguments.view,
+                sheet_name = 'Action List',
+                column_widths=col_widths
+            )
+
+            self._log(f"retrieved [ {len(data_frame)} ] records")
+        except Exception as ex:
+            self._log(f'error parsing parameter. {str(ex)}',2)
+
+    def _retrieve_project_billability_view(self, arguments: CliArgument) ->None:
+        try:
+            data_frame = self.get_project_billability_view_data_frame(arguments)
+            
+            col_widths= None
+            col_widths = [[0,17],[1,10],[2,15],[3,25]]
+            
+            self._send_to_output(
+                data_frame, 
+                arguments.display_format, 
+                arguments.output_file,
+                arguments.view,
+                sheet_name = 'Project Billability',
+                column_widths=col_widths
+            )
+
+            self._log(f"retrieved [ {len(data_frame)} ] records")
+        except Exception as ex:
+            self._log(f'error parsing parameter. {str(ex)}',2)
+
+    def _retrieve_employee_billability_view(self, arguments: CliArgument) ->None:
+        try:
+            data_frame = self.get_employee_billability_view_data_frame(arguments)
+            
+            col_widths= None
+            col_widths = [[0,15],[1,30],[2,15],[3,10],[4,15],[5,15]]
+            
+            self._send_to_output(
+                data_frame, 
+                arguments.display_format, 
+                arguments.output_file,
+                arguments.view,
+                sheet_name = 'Employee Billability',
+                column_widths=col_widths
+            )
+
+            self._log(f"retrieved [ {len(data_frame)} ] records")
+        except Exception as ex:
+            self._log(f'error parsing parameter. {str(ex)}',2)
+
+
     def _send_to_output(
         self, 
         data_frame: pd.DataFrame, 
@@ -562,6 +1185,11 @@ class ViewManager:
                     SUPPORTED_VIEWS[2],
                     SUPPORTED_VIEWS[3],
                     SUPPORTED_VIEWS[4],
+                    SUPPORTED_VIEWS[5],
+                    SUPPORTED_VIEWS[6],
+                    SUPPORTED_VIEWS[7],
+                    SUPPORTED_VIEWS[8],
+                    SUPPORTED_VIEWS[9]
                 ]: 
                     self._generate_raw_excel(
                         data_frame, 
@@ -823,3 +1451,14 @@ class ViewManager:
 
     def _get_report_schedule(self, month: int) -> List[str]:
         return self._report_schedules[month-1]
+
+    def _get_parameters(self, arguments: CliArgument, parameter_name: str):
+        param_value = None
+        try:
+            if arguments.parameters is not None:
+                json_parameters = json.loads(arguments.parameters) 
+                param_value = get_param_value(PARAM_SORT, json_parameters)
+
+            return param_value
+        except:
+            return None

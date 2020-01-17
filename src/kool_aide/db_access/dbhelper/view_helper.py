@@ -92,4 +92,89 @@ class ViewHelper:
         except Exception as ex:
             self._log(f"error getting db values. {str(ex)}")
             return False
+
+    def get_task_view(self, status=[]):
+        try:
+            if status is not None:
+                if len(status) > 0:
+                    query = self._connection.task_view.select(
+                        self._connection.task_view.c.TaskStatusID.in_(status)
+                    )
+                else:
+                    query = self._connection.task_view.select()
+            else:
+                query = self._connection.task_view.select()
+            result = query.execute()
+            return result
+        except Exception as ex:
+            self._log(f"error getting db values. {str(ex)}")
+            return False
+
+    def get_action_list_view(self, fys=[]):
+        try:
+            if fys is not None:
+                if len(fys) > 0:
+                    query = self._connection.action_list_view.select(
+                        self._connection.action_list_view.c.FiscalYear.in_(fys)
+                    )
+                else:
+                    query = self._connection.action_list_view.select()
+            else:
+                query = self._connection.action_list_view.select()
+            result = query.execute()
+            return result
+        except Exception as ex:
+            self._log(f"error getting db values. {str(ex)}")
+            return False
+
+    def get_lesson_learnt_view(self, fys=[]):
+        try:
+            if fys is not None:
+                if len(fys) > 0:
+                    query = self._connection.lesson_learnt_view.select(
+                        self._connection.lesson_learnt_view.c.FiscalYear.in_(fys)
+                    )
+                else:
+                    query = self._connection.lesson_learnt_view.select()
+            else:
+                query = self._connection.lesson_learnt_view.select()
+            result = query.execute()
+            return result
+        except Exception as ex:
+            self._log(f"error getting db values. {str(ex)}")
+            return False
+    
+    def get_project_billability_view(self, fys=[]):
+        try:
+            if fys is not None:
+                if len(fys) > 0:
+                    query = self._connection.project_billability_view.select(
+                        self._connection.project_billability_view.c.FiscalYear.in_(fys)
+                    )
+                else:
+                    query = self._connection.project_billability_view.select()
+            else:
+                query = self._connection.project_billability_view.select()
+            result = query.execute()
+            return result
+        except Exception as ex:
+            self._log(f"error getting db values. {str(ex)}")
+            return False
+
+    def get_employee_billability_view(self, fys=[]):
+        try:
+            if fys is not None:
+                if len(fys) > 0:
+                    query = self._connection.employee_billability_view.select(
+                        self._connection.employee_billability_view.c.FiscalYear.in_(fys)
+                    )
+                else:
+                    query = self._connection.employee_billability_view.select()
+            else:
+                query = self._connection.employee_billability_view.select()
+            result = query.execute()
+            return result
+        except Exception as ex:
+            self._log(f"error getting db values. {str(ex)}")
+            return False
     

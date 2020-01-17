@@ -81,3 +81,20 @@ def get_version() -> str:
         return APP_TITLE + ' v' + APP_VERSION
     except:
         return ""
+
+def get_cell_address(col:int, row:int, absolute=True)->str:
+    columns='ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    column = columns[col]
+
+    if absolute:
+        return f'${column}${row}'
+    else:
+        return f'{column}{row}'
+
+def get_cell_range_address(address1:str, address2:str, sheet='')-> str:
+    if len(sheet)>0:
+        return f'{sheet}!{address1}:{address2}'
+    else:
+        return f'{address1}:{address2}'
+
+

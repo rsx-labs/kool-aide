@@ -5,8 +5,9 @@ CMD_ACTIONS =[
     'add','get','edit','delete','generate-report'
 ]
 REPORT_TYPES = [
-    'status-report',
-    'asset-inventory'
+    'status-report','asset-inventory',
+    'task-report', 'project-billability',
+    'employee-billability', 'non-billables'
 ]
 
 SUPPORTED_MODELS = [
@@ -16,7 +17,8 @@ SUPPORTED_MODELS = [
 
 SUPPORTED_VIEWS = [
     'status-report','asset-inventory','commendation', 'contact-list', 
-    'leave-summary'
+    'leave-summary', 'task', 'action-list', 'lesson-learnt',
+    'project-billability', 'employee-billability'
 ]
 
 OUTPUT_FORMAT = [
@@ -51,11 +53,13 @@ PARAM_YEAR = 'year'
 PARAM_FLAG = 'flag'
 PARAM_FYS = 'fys'
 PARAM_TYPES = 'types'
+PARAM_PHASES = 'phases'
+PARAM_STATUS = 'status'
 
 # excel formats
 SHEET_TOP_HEADER = {
     'bold': True,
-    'text_wrap': True,
+    'text_wrap': False,
     'valign': 'top',
     'fg_color': '#CC0000',
     'font_color': '#ffffff',
@@ -76,6 +80,15 @@ SHEET_HEADER_GRAY = {
     'fg_color': '#BBB9B5',
     'border': 0
 }
+
+SHEET_HEADER_LT_GRAY = {
+    'bold': True,
+    'text_wrap':False,
+    'valign': 'top',
+    'fg_color': '#EEEDEA',
+    'border': 0
+}
+
 SHEET_HEADER_LT_GREEN = {
     'bold': True,
     'text_wrap':False,
@@ -117,8 +130,12 @@ SHEET_CELL_FOOTER = {
     'font_size':8
 }
 
-# mapping
+# mapping  report:view
 MAP_VIEW_TO_REPORT ={
     'status-report': 'status-report',
-    'asset-inventory': 'asset-inventory'
+    'asset-inventory': 'asset-inventory',
+    'task-report': 'task',
+    'project-billability': 'project-billability',
+    'employee-billability':'employee-billability',
+    'non-billables':'employee-billability'
 }
