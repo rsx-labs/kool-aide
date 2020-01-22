@@ -1,0 +1,2 @@
+@echo off
+"C:\Program Files (x86)\GDC PH\kool-aide\kool-aide" generate-report -r employee-billability --format excel --output "e:\\AIDE Generated Reports\\Billability\\Retail Services Employee Billability [LM][Y].xlsx" --params {\"months\":[1],\"sorts\":[\"EmployeeName\"],\"departments\":[1],\"divisions\":[1]}

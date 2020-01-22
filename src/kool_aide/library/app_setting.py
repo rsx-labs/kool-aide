@@ -1,4 +1,4 @@
-import json
+import json, os, sys
 
 class UserSetting:
     def __init__(self, email, vsts_email='' ):
@@ -42,7 +42,8 @@ class AppSetting:
 
     def load(self):
         settings = {}
-        with open('kool-aide-settings.json') as json_setting:
+        setting_file = os.path.join(os.path.dirname(sys.argv[0]),'kool-aide-settings.json')
+        with open(setting_file) as json_setting:
             self._settings = json.load(json_setting)
 
         self.user_setting.email = self._settings['user']['email']
