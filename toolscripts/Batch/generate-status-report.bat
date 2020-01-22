@@ -1,0 +1,2 @@
+@echo off
+"C:\Program Files (x86)\GDC PH\kool-aide\kool-aide" generate-report -r status-report --format excel --output "e:\\AIDE Generated Reports\\Status Reports\\Retail Services DEV Weekly Status Report [LM] [Y].xlsx" --autorun

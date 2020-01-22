@@ -1,0 +1,2 @@
+@echo off
+"C:\Program Files (x86)\GDC PH\kool-aide\kool-aide" get -vw lesson-learnt --format excel --output "e:\\AIDE Generated Reports\\Retail Services Lesson Learnt.xlsx" --params {\"sorts\":[\"EmployeeName\"],\"departments\":[1],\"divisions\":[1],\"flag\":1} --autorun

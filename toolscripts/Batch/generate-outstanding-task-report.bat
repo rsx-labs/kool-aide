@@ -1,0 +1,2 @@
+@echo off
+"C:\Program Files (x86)\GDC PH\kool-aide\kool-aide" generate-report -r task-report --format excel --output "e:\\AIDE Generated Reports\\Retail Services Outstanding Tasks List.xlsx" --params {\"status\":[2,5,6],\"flag\":1,\"divisions\":[1]} --autorun

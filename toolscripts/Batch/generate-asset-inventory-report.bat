@@ -1,0 +1,2 @@
+@echo off
+"C:\Program Files (x86)\GDC PH\kool-aide\kool-aide" generate-report -r asset-inventory --format excel --output "e:\\AIDE Generated Reports\\Asset Inventory\\Retail Services DEV Hardware Inventory as of [Y][M][D].xlsx" --autorun  --params {\"sorts\":[\"EmployeeName\",\"Description\",\"Manufacturer\",\"Model\"],\"divisions\":[1]}

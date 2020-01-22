@@ -36,7 +36,7 @@ pyinstaller --onedir --name %APP% main.py --paths ..\..\..\kool-aide-venv\Lib\si
 
 cd ../../../build/%BUILD_FOLDER%
 
-copy ..\..\src\kool_aide\cli\dist\kool-aide
+xcopy ..\..\src\kool_aide\cli\dist\kool-aide /e
 copy ..\..\src\kool-aide-settings.debug.json kool-aide-settings.json 
 
 
