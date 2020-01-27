@@ -1,2 +1,2 @@
 @echo off
-"C:\Program Files (x86)\GDC PH\kool-aide\kool-aide" generate-report -r late-tracking --format excel --output "e:\\AIDE Generated Reports\\Billability\\Retail Services Late Tracking Report for FY2020.xlsx" --params {\"departments\":[1],\"divisions\":[1],\"status\":[11]} --autorun
+"C:\Program Files (x86)\kool-aide\kool-aide" generate-report -r late-tracking --format excel --output "e:\\AIDE Generated Reports\\Billability\\Retail Services Late Tracking Report for FY2020.xlsx" --params {\"departments\":[1],\"divisions\":[1],\"status\":[11]} --autorun

@@ -1,2 +1,2 @@
 @echo off
-"C:\Program Files (x86)\GDC PH\kool-aide\kool-aide" get -vw success-register --format excel --output "e:\\AIDE Generated Reports\\Retail Services Success Registers FY2020.xlsx" --params {\"departments\":[1],\"divisions\":[1]} --autorun
+"C:\Program Files (x86)\kool-aide\kool-aide" get -vw success-register --format excel --output "e:\\AIDE Generated Reports\\Retail Services Success Registers FY2020.xlsx" --params {\"departments\":[1],\"divisions\":[1]} --autorun

@@ -1,2 +1,2 @@
 @echo off
-"C:\Program Files (x86)\GDC PH\kool-aide\kool-aide" get -vw commendation --format excel --output "e:\\AIDE Generated Reports\\Retail Services Commendation List.xlsx" --params {\"flag\":1} --autorun
+"C:\Program Files (x86)\kool-aide\kool-aide" get -vw commendation --format excel --output "e:\\AIDE Generated Reports\\Retail Services Commendation List.xlsx" --params {\"flag\":1} --autorun
