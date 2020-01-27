@@ -59,6 +59,7 @@ class NonBillablesReport:
         try:
             self._workbook = self._writer.book
             self._main_header_format = self._workbook.add_format(SHEET_TOP_HEADER)
+            self._report_title = self._workbook.add_format(SHEET_TITLE)
             self._footer_format = self._workbook.add_format(SHEET_CELL_FOOTER)
             self._wrap_content = self._workbook.add_format(SHEET_CELL_WRAP)
             self._header_format_orange = self._workbook.add_format(SHEET_HEADER_ORANGE)
@@ -86,28 +87,34 @@ class NonBillablesReport:
             current_col = 0
 
             worksheet = self._writer.book.add_worksheet(sheet_name)
+
+            title_range = get_cell_range_address(
+                get_cell_address(0,1),
+                get_cell_address(15,1)
+            )
+            worksheet.merge_range(title_range,'','')
+
             worksheet.write(
                 current_row, 
                 current_col, 
                 "Non Billable Report Summary", 
-                self._main_header_format
+                self._report_title
             )
 
             worksheet.set_column(0,0,25,self._cell_wrap_noborder)
             worksheet.set_column(1,50,8,self._cell_wrap_noborder)
          
-            for col in range(1,18):
-                worksheet.write(current_row, current_col+col, "", self._main_header_format) 
+            
             current_row += 2
 
             worksheet.write(
                 current_row, 
                 current_col, 
                 "Employee Non Billable Hours", 
-                self._header_format_orange
+                self._main_header_format
             )       
-            worksheet.write(current_row, current_col+1, "", self._header_format_orange) 
-            worksheet.write(current_row, current_col+2, "", self._header_format_orange) 
+            worksheet.write(current_row, current_col+1, "", self._main_header_format) 
+            worksheet.write(current_row, current_col+2, "", self._main_header_format) 
 
             current_row += 1
 
@@ -162,10 +169,10 @@ class NonBillablesReport:
                 current_row, 
                 current_col, 
                 "Weekly Non Billable Hours", 
-                self._header_format_orange
+                self._main_header_format
             )       
-            worksheet.write(current_row, current_col+1, "", self._header_format_orange) 
-            worksheet.write(current_row, current_col+2, "", self._header_format_orange) 
+            worksheet.write(current_row, current_col+1, "", self._main_header_format) 
+            worksheet.write(current_row, current_col+2, "", self._main_header_format) 
             current_row += 1
            
             week_dict={}
@@ -214,9 +221,9 @@ class NonBillablesReport:
                 current_row, 
                 current_col, 
                 "Total Weekly Non Billable Hours", 
-                self._header_format_orange
+                self._main_header_format
             )       
-            worksheet.write(current_row, current_col+1, "", self._header_format_orange) 
+            worksheet.write(current_row, current_col+1, "", self._main_header_format) 
             current_row += 1
 
             worksheet.set_row(current_row, 50)    
@@ -243,9 +250,9 @@ class NonBillablesReport:
                 current_row, 
                 current_col, 
                 "Total Non Billable Hours", 
-                self._header_format_orange
+                self._main_header_format
             )       
-            worksheet.write(current_row, current_col+1, "", self._header_format_orange) 
+            worksheet.write(current_row, current_col+1, "", self._main_header_format) 
             current_row += 1
             worksheet.set_row(current_row, 45)
             worksheet.write(current_row, current_col, '', format_vertical_text)
@@ -294,18 +301,25 @@ class NonBillablesReport:
             current_col = 0
 
             worksheet = self._writer.book.add_worksheet(sheet_name)
+
+            title_range = get_cell_range_address(
+                get_cell_address(0,1),
+                get_cell_address(13,1)
+            )
+            worksheet.merge_range(title_range,'','')
+
+
             worksheet.write(
                 current_row, 
                 current_col, 
                 "Non Billable Hours Report Summary", 
-                self._main_header_format
+                self._report_title
             )
 
             worksheet.set_column(0,0,25,self._cell_wrap_noborder)
             worksheet.set_column(1,50,8,self._cell_wrap_noborder)
             
-            for col in range(1,15):
-                worksheet.write(current_row, current_col+col, "", self._main_header_format) 
+          
             current_row += 2
 
             self._create_totals_chart(worksheet)
@@ -388,7 +402,6 @@ class NonBillablesReport:
         
         except Exception as ex:
             self._log(f'error = {str(ex)}', 2)
-
 
     def _create_weekly_chart(self, worksheet, week_dict, project_dict):
         try:

@@ -177,4 +177,91 @@ class ViewHelper:
         except Exception as ex:
             self._log(f"error getting db values. {str(ex)}")
             return False
+
+    def get_concern_list_view(self, fys=[]):
+        try:
+            if fys is not None:
+                if len(fys) > 0:
+                    query = self._connection.concern_list_view.select(
+                        self._connection.concern_list_view.c.FiscalYear.in_(fys)
+                    )
+                else:
+                    query = self._connection.concern_list_view.select()
+            else:
+                query = self._connection.concern_list_view.select()
+            result = query.execute()
+            return result
+        except Exception as ex:
+            self._log(f"error getting db values. {str(ex)}")
+            return False
+
+    def get_success_register_view(self, fys=[]):
+        try:
+            if fys is not None:
+                if len(fys) > 0:
+                    query = self._connection.success_register_view.select(
+                        self._connection.success_register_view.c.FiscalYear.in_(fys)
+                    )
+                else:
+                    query = self._connection.success_register_view.select()
+            else:
+                query = self._connection.success_register_view.select()
+            result = query.execute()
+            return result
+        except Exception as ex:
+            self._log(f"error getting db values. {str(ex)}")
+            return False
+
+    def get_comcell_schedule_view(self, fys=[]):
+        try:
+            if fys is not None:
+                if len(fys) > 0:
+                    query = self._connection.comcell_schedule_view.select(
+                        self._connection.comcell_schedule_view.c.FiscalYear.in_(fys)
+                    )
+                else:
+                    query = self._connection.comcell_schedule_view.select()
+            else:
+                query = self._connection.comcell_schedule_view.select()
+            result = query.execute()
+            return result
+        except Exception as ex:
+            self._log(f"error getting db values. {str(ex)}")
+            return False
+    
+    def get_kpi_summary_view(self, fys=[]):
+        try:
+            if fys is not None:
+                if len(fys) > 0:
+                    query = self._connection.kpi_summary_view.select(
+                        self._connection.kpi_summary_view.c.FiscalYear.in_(fys)
+                    )
+                else:
+                    query = self._connection.kpi_summary_view.select()
+            else:
+                query = self._connection.kpi_summary_view.select()
+            result = query.execute()
+            return result
+        except Exception as ex:
+            self._log(f"error getting db values. {str(ex)}")
+            return False
+
+    def get_attendance_view(self, status=[]):
+        try:
+            if status is not None:
+                if len(status) > 0:
+                    query = self._connection.attendance_view.select(
+                        self._connection.attendance_view.c.StatusID.in_(status)
+                    )
+                else:
+                    query = self._connection.attendance_view.select()
+            else:
+                query = self._connection.attendance_view.select()
+            result = query.execute()
+            return result
+        except Exception as ex:
+            self._log(f"error getting db values. {str(ex)}")
+            return False
+
+
     

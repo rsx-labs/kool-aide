@@ -38,6 +38,6 @@ cd ../../../build/%BUILD_FOLDER%
 
 xcopy ..\..\src\kool_aide\cli\dist\kool-aide /e
 copy ..\..\src\kool-aide-settings.debug.json kool-aide-settings.json 
-
+xcopy ..\..\toolscripts\Batch /e
 
 echo build --onedir done

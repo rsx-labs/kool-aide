@@ -13,7 +13,7 @@ from kool_aide.library.app_setting import AppSetting
 from kool_aide.library.custom_logger import CustomLogger
 from kool_aide.library.constants import *
 from kool_aide.library.utilities import append_date_to_file_name, \
-    get_param_value, get_version
+    get_param_value, get_version, get_cell_range_address, get_cell_address
 
 from kool_aide.db_access.connection import Connection
 from kool_aide.db_access.dbhelper.view_helper \
@@ -84,8 +84,23 @@ class ViewManager:
         elif arguments.view == SUPPORTED_VIEWS[9]:
             self._retrieve_employee_billability_view(arguments)
             return True, DATA_RETRIEVED
-
-
+        elif arguments.view == SUPPORTED_VIEWS[10]:
+            self._retrieve_concern_list_view(arguments)
+            return True, DATA_RETRIEVED
+        elif arguments.view == SUPPORTED_VIEWS[11]:
+            self._retrieve_success_register_view(arguments)
+            return True, DATA_RETRIEVED
+        elif arguments.view == SUPPORTED_VIEWS[12]:
+            self._retrieve_comcell_schedule_view(arguments)
+            return True, DATA_RETRIEVED
+        elif arguments.view == SUPPORTED_VIEWS[13]:
+            self._retrieve_kpi_summary_view(arguments)
+            return True, DATA_RETRIEVED
+        elif arguments.view == SUPPORTED_VIEWS[14]:
+            self._retrieve_attendance_view(arguments)
+            return True, DATA_RETRIEVED
+        
+       
         return False, NOT_SUPPORTED
 
     def get_status_report_data_frame(self, arguments : CliArgument):
@@ -696,7 +711,7 @@ class ViewManager:
             if months is not None and arguments.auto_mode:
                 months=[datetime.month]
                 fys= None
-                year = datetime.year
+                year = datetime.now().year
             elif arguments.auto_mode:
                 fys=[self._report_defaults['fiscal_year']]
                 months = None
@@ -777,10 +792,10 @@ class ViewManager:
         fys = None
         flag = None
         col_names =[
-                'ProjectID', 'Project', 'WeekID', 'Hours',
-                'IsBillable','Fiscal Year', 'DivisionID',
-                'DepartmentID','Week Range','Month'
-            ] 
+            'ProjectID', 'Project', 'WeekID', 'Hours',
+            'IsBillable','Fiscal Year', 'DivisionID',
+            'DepartmentID','Week Range','Month'
+        ] 
 
         try:
             if arguments.parameters is not None:
@@ -799,7 +814,7 @@ class ViewManager:
             
             if arguments.auto_mode:
                 fys=[self._report_defaults['fiscal_year']]
-                months = [datetime.month]
+                months = [datetime.now().month]
                 
 
             if fys is not None and len(fys)>0:
@@ -896,7 +911,7 @@ class ViewManager:
             
             if arguments.auto_mode:
                 fys=[self._report_defaults['fiscal_year']]
-                months = [datetime.month]
+                months = [datetime.now().month]
                 
             if fys is not None and len(fys)>0:
                 results = self._db_helper.get_employee_billability_view(fys)
@@ -960,7 +975,505 @@ class ViewManager:
         except Exception as ex:
             self._log(f'error getting data frame. {str(ex)}',2)
     
+    def get_concern_list_view_data_frame(self, arguments: CliArgument):
 
+        columns = None
+        sort_keys = None
+        ids = None
+        departments = None
+        divisions = None
+        isActive = None
+        fys = None
+        months = None
+        flag = None
+        col_names =[
+                'Concern ID', 'Concern', 'Cause', 'Countermeasure',
+                'RaisedByID','Raised By', 'Date Raised',
+                'Date Due','DivisionID','Division',
+                'DepartmentID','Department','StatusID','Status',
+                'IsActive','Month','Year','Fiscal Year'
+            ] 
+
+        try:
+            if arguments.parameters is not None:
+                try:
+                    json_parameters = json.loads(arguments.parameters)
+                    sort_keys = get_param_value(PARAM_SORT, json_parameters)
+                    columns = get_param_value(PARAM_COLUMNS, json_parameters)
+                    ids = get_param_value(PARAM_IDS, json_parameters)
+                    departments = get_param_value(PARAM_DEPARTMENTS, json_parameters)
+                    divisions = get_param_value(PARAM_DIVISIONS, json_parameters)
+                    months = get_param_value(PARAM_MONTHS, json_parameters, months)
+                    fys = get_param_value(PARAM_FYS, json_parameters)
+                    flag = get_param_value(PARAM_FLAG,json_parameters)
+                except Exception as ex:
+                    self._log(f'error reading parameters . {str(ex)}',2)
+            
+            if months is not None and arguments.auto_mode:
+                months=[datetime.month]
+                fys= None
+            elif arguments.auto_mode:
+                fys=[self._report_defaults['fiscal_year']]
+                months = None
+                
+            if fys is not None and len(fys)>0:
+                results = self._db_helper.get_concern_list_view(fys)
+            else:
+                results = self._db_helper.get_concern_list_view()
+
+            data_frame = pd.DataFrame(results.fetchall()) 
+            data_frame.columns = results.keys()
+
+            if ids is not None and len(ids)>0:
+                data_frame = data_frame[data_frame['RaisedByID'].isin(ids)]
+
+            if departments is not None and len(departments)>0:
+                 data_frame = data_frame[data_frame['DepartmentID'].isin(departments)]
+            
+            if divisions is not None and len(divisions)>0:
+                  data_frame = data_frame[data_frame['DivisionID'].isin(divisions)]
+
+            if months is not None and len(months)>0:
+                data_frame = data_frame[data_frame['Month'].isin(months)]
+
+            if flag is not None:
+                try:
+                    data_frame = data_frame[data_frame['IsActive'] == int(flag)]
+                except:
+                    pass
+            
+            if arguments.auto_mode:
+                data_frame.sort_values(by=['DateRaised'], inplace= True)
+      
+            if sort_keys is not None and len(sort_keys) > 0:
+                data_frame.sort_values(by=sort_keys, inplace= True)
+
+            
+     
+            limit = int(arguments.result_limit)
+
+            if columns is not None:        
+                data_frame = data_frame[columns].head(limit)
+            else:
+                if self._get_parameters(arguments, PARAM_COLUMNS) is None:
+                    data_frame.columns = col_names
+                data_frame = data_frame.head(limit)
+            
+            try:
+                if columns is None:
+                    data_frame.drop(
+                        [
+                            'DepartmentID',
+                            'DivisionID',
+                            'IsActive',
+                            'RaisedByID',
+                            'Month',
+                            'Year',
+                            'Division',
+                            'Department',
+                            'StatusID'
+                        ], 
+                        inplace=True, 
+                        axis=1
+                    )
+            except:
+                pass
+
+            return data_frame
+
+        except Exception as ex:
+            self._log(f'error getting data frame. {str(ex)}',2)
+    
+    def get_success_register_view_data_frame(self, arguments: CliArgument):
+
+        columns = None
+        sort_keys = None
+        departments = None
+        divisions = None
+        isActive = None
+        fys = None
+        months = None
+        flag = None
+        col_names =[
+                'SuccessID', 'RaisedByID', 'Submitted By', 'Date Submitted',
+                'Participants','Details', 'Additional Information',
+                'DivisionID','Division','DepartmentID','Department',
+                'IsActive','Month','Year','FiscalYear'
+            ] 
+
+        try:
+            if arguments.parameters is not None:
+                try:
+                    json_parameters = json.loads(arguments.parameters)
+                    sort_keys = get_param_value(PARAM_SORT, json_parameters)
+                    columns = get_param_value(PARAM_COLUMNS, json_parameters)
+                    departments = get_param_value(PARAM_DEPARTMENTS, json_parameters)
+                    divisions = get_param_value(PARAM_DIVISIONS, json_parameters)
+                    flag = get_param_value(PARAM_FLAG, json_parameters)
+                    months = get_param_value(PARAM_MONTHS, json_parameters, months)
+                    fys = get_param_value(PARAM_FYS, json_parameters)
+                except Exception as ex:
+                    self._log(f'error reading parameters . {str(ex)}',2)
+            
+            if months is not None and arguments.auto_mode:
+                months=[datetime.month]
+                fys= None
+            elif arguments.auto_mode:
+                fys=[self._report_defaults['fiscal_year']]
+                months = None
+          
+            if fys is not None and len(fys)>0:
+                results = self._db_helper.get_success_register_view(fys)
+            else:
+                results = self._db_helper.get_success_register_view()
+
+            data_frame = pd.DataFrame(results.fetchall()) 
+            data_frame.columns = results.keys()
+
+            if departments is not None and len(departments)>0:
+                 data_frame = data_frame[data_frame['DepartmentID'].isin(departments)]
+            
+            if divisions is not None and len(divisions)>0:
+                  data_frame = data_frame[data_frame['DivisionID'].isin(divisions)]
+
+            if months is not None and len(months)>0:
+                data_frame = data_frame[data_frame['Month'].isin(months)]
+
+            if flag is not None:
+                try:
+                    data_frame = data_frame[data_frame['IsActive'] == int(flag)]
+                except:
+                    pass
+                
+            if arguments.auto_mode:
+                data_frame.sort_values(by=['DateSubmitted'], inplace= True)
+
+            if sort_keys is not None and len(sort_keys) > 0:
+                data_frame.sort_values(by=sort_keys, inplace= True)
+     
+            limit = int(arguments.result_limit)
+
+            if columns is not None:        
+                data_frame = data_frame[columns].head(limit)
+            else:
+                if self._get_parameters(arguments, PARAM_COLUMNS) is None:
+                    data_frame.columns = col_names
+                data_frame = data_frame.head(limit)
+            
+            try:
+                if columns is None:
+                    data_frame.drop(
+                        [
+                            'DepartmentID',
+                            'DivisionID',
+                            'IsActive',
+                            'RaisedByID',
+                            'Month',
+                            'Year',
+                            'Division',
+                            'Department',
+                            'SuccessID'
+                        ], 
+                        inplace=True, 
+                        axis=1
+                    )
+            except Exception as ex:
+                print(ex)
+
+            return data_frame
+
+        except Exception as ex:
+            self._log(f'error getting data frame. {str(ex)}',2)
+    
+    def get_comcell_schedule_view_data_frame(self, arguments: CliArgument):
+
+        columns = None
+        sort_keys = None
+        departments = None
+        divisions = None
+        fys = None
+        isActive = None
+        col_names =[
+                'ComCellID', 'CreatedByID', 'Month','Facilitator', 
+                'Minute Taker','DivisionID','Division',
+                'DepartmentID','Department',
+                'IsActive', 'MonthID','Fiscal Year'
+            ] 
+
+        try:
+            if arguments.parameters is not None:
+                try:
+                    json_parameters = json.loads(arguments.parameters)
+                    sort_keys = get_param_value(PARAM_SORT, json_parameters)
+                    columns = get_param_value(PARAM_COLUMNS, json_parameters)
+                    ids = get_param_value(PARAM_IDS, json_parameters)
+                    departments = get_param_value(PARAM_DEPARTMENTS, json_parameters)
+                    divisions = get_param_value(PARAM_DIVISIONS, json_parameters)
+                    isActive = get_param_value(PARAM_FLAG, json_parameters)
+                    fys = get_param_value(PARAM_FYS, json_parameters)
+                except Exception as ex:
+                    self._log(f'error reading parameters . {str(ex)}',2)
+            
+            if arguments.auto_mode:
+                fys=[self._report_defaults['fiscal_year']]
+             
+            if fys is not None and len(fys)>0:
+                results = self._db_helper.get_comcell_schedule_view(fys)
+            else:
+                results = self._db_helper.get_comcell_schedule_view()
+
+            data_frame = pd.DataFrame(results.fetchall()) 
+            data_frame.columns = results.keys()
+
+            if departments is not None and len(departments)>0:
+                 data_frame = data_frame[data_frame['DepartmentID'].isin(departments)]
+            
+            if divisions is not None and len(divisions)>0:
+                  data_frame = data_frame[data_frame['DivisionID'].isin(divisions)]
+
+            if isActive is not None:
+                try:
+                    data_frame = data_frame[data_frame['IsActive'] == int(isActive)]
+                except:
+                    pass
+
+            if sort_keys is not None and len(sort_keys) > 0:
+                data_frame.sort_values(by=sort_keys, inplace= True)
+            else:
+                data_frame.sort_values(by=['MonthID'], inplace= True)
+     
+            limit = int(arguments.result_limit)
+
+            if columns is not None:        
+                data_frame = data_frame[columns].head(limit)
+            else:
+                if self._get_parameters(arguments, PARAM_COLUMNS) is None:
+                    data_frame.columns = col_names
+                data_frame = data_frame.head(limit)
+            
+            try:
+                if columns is None:
+                    data_frame.drop(
+                        [
+                            'DepartmentID',
+                            'DivisionID',
+                            'IsActive',
+                            'CreatedByID',
+                            'Division',
+                            'Department',
+                            'MonthID',
+                            'ComCellID'
+                        ], 
+                        inplace=True, 
+                        axis=1
+                    )
+            except:
+                pass
+
+            return data_frame
+
+        except Exception as ex:
+            self._log(f'error getting data frame. {str(ex)}',2)
+    
+    def get_kpi_summary_view_data_frame(self, arguments: CliArgument):
+
+        columns = None
+        sort_keys = None
+        departments = None
+        divisions = None
+        months = None
+        fys = None
+        col_names =[
+                'KPIRefID', 'Subject', 'Description', 'Target',
+                'Actual','Overall','MonthID','Month','Fiscal Year',
+                'DivisionID','DepartmentID','DatePosted'
+            ] 
+
+        try:
+            if arguments.parameters is not None:
+                try:
+                    json_parameters = json.loads(arguments.parameters)
+                    sort_keys = get_param_value(PARAM_SORT, json_parameters)
+                    columns = get_param_value(PARAM_COLUMNS, json_parameters)
+                    departments = get_param_value(PARAM_DEPARTMENTS, json_parameters)
+                    divisions = get_param_value(PARAM_DIVISIONS, json_parameters)
+                    months = get_param_value(PARAM_MONTHS, json_parameters, months)
+                    fys = get_param_value(PARAM_FYS, json_parameters)
+                except Exception as ex:
+                    self._log(f'error reading parameters . {str(ex)}',2)
+            
+            if arguments.auto_mode:
+                fys=[self._report_defaults['fiscal_year']]
+                months = None
+          
+            if fys is not None and len(fys)>0:
+                results = self._db_helper.get_kpi_summary_view(fys)
+            else:
+                results = self._db_helper.get_kpi_summary_view()
+
+            data_frame = pd.DataFrame(results.fetchall()) 
+            data_frame.columns = results.keys()
+
+            if departments is not None and len(departments)>0:
+                 data_frame = data_frame[data_frame['DepartmentID'].isin(departments)]
+            
+            if divisions is not None and len(divisions)>0:
+                  data_frame = data_frame[data_frame['DivisionID'].isin(divisions)]
+
+            if months is not None and len(months)>0:
+                data_frame = data_frame[data_frame['MonthID'].isin(months)]
+
+           
+            data_frame.sort_values(by=['MonthID'], inplace= True)
+
+            if sort_keys is not None and len(sort_keys) > 0:
+                data_frame.sort_values(by=sort_keys, inplace= True)
+     
+            limit = int(arguments.result_limit)
+
+            if columns is not None:        
+                data_frame = data_frame[columns].head(limit)
+            else:
+                if self._get_parameters(arguments, PARAM_COLUMNS) is None:
+                    data_frame.columns = col_names
+                data_frame = data_frame.head(limit)
+            
+            try:
+                if arguments.action == CMD_ACTIONS[1]:
+                    data_frame.drop(
+                        [
+                            'DepartmentID',
+                            'DivisionID',
+                            'MonthID',
+                            'DatePosted'
+                        ], 
+                        inplace=True, 
+                        axis=1
+                    )
+                else:
+                    data_frame.drop(
+                        [
+                            'DepartmentID',
+                            'DivisionID',
+                            'DatePosted'
+                        ], 
+                        inplace=True, 
+                        axis=1
+                    )
+            except Exception as ex:
+                print(ex)
+
+            return data_frame
+
+        except Exception as ex:
+            self._log(f'error getting data frame. {str(ex)}',2)
+    
+    def get_attendance_view_data_frame(self, arguments: CliArgument):
+
+        columns = None
+        sort_keys = None
+        departments = None
+        divisions = None
+        months = None
+        fys = None
+        status = None
+        isActive = None
+        col_names =[
+                'EmployeeID', 'Employee Name', 'Time In', 'Status',
+                'StatusID','Fiscal Year',
+                'DivisionID','Division','DepartmentID','Department',
+                'IsActive','MonthID', 'Month'
+            ] 
+
+        try:
+            if arguments.parameters is not None:
+                try:
+                    json_parameters = json.loads(arguments.parameters)
+                    sort_keys = get_param_value(PARAM_SORT, json_parameters)
+                    columns = get_param_value(PARAM_COLUMNS, json_parameters)
+                    departments = get_param_value(PARAM_DEPARTMENTS, json_parameters)
+                    divisions = get_param_value(PARAM_DIVISIONS, json_parameters)
+                    months = get_param_value(PARAM_MONTHS, json_parameters, months)
+                    fys = get_param_value(PARAM_FYS, json_parameters)
+                    status = get_param_value(PARAM_STATUS, json_parameters)
+                    isActive = get_param_value(PARAM_FLAG, json_parameters)
+                except Exception as ex:
+                    self._log(f'error reading parameters . {str(ex)}',2)
+            
+            if arguments.auto_mode:
+                fys=[self._report_defaults['fiscal_year']]
+                months = None
+          
+            if status is not None and len(status)>0:
+                results = self._db_helper.get_attendance_view(status)
+            else:
+                results = self._db_helper.get_attendance_view()
+
+            data_frame = pd.DataFrame(results.fetchall()) 
+            data_frame.columns = results.keys()
+
+            if departments is not None and len(departments)>0:
+                 data_frame = data_frame[data_frame['DepartmentID'].isin(departments)]
+            
+            if divisions is not None and len(divisions)>0:
+                  data_frame = data_frame[data_frame['DivisionID'].isin(divisions)]
+
+            if fys is not None and len(fys)>0:
+                  data_frame = data_frame[data_frame['FiscalYear'].isin(fys)]
+
+            if months is not None and len(months)>0:
+                data_frame = data_frame[data_frame['MonthID'].isin(months)]
+
+            if isActive is not None:
+                try:
+                    data_frame = data_frame[data_frame['IsActive'] == int(isActive)]
+                except:
+                    pass
+
+            data_frame.sort_values(by=['MonthID'], inplace= True)
+
+            if sort_keys is not None and len(sort_keys) > 0:
+                data_frame.sort_values(by=sort_keys, inplace= True)
+     
+            limit = int(arguments.result_limit)
+
+            if columns is not None:        
+                data_frame = data_frame[columns].head(limit)
+            else:
+                if self._get_parameters(arguments, PARAM_COLUMNS) is None:
+                    data_frame.columns = col_names
+                data_frame = data_frame.head(limit)
+            
+            try:
+                if arguments.action == CMD_ACTIONS[1]:
+                    data_frame.drop(
+                        [
+                            'DepartmentID',
+                            'DivisionID',
+                            'MonthID',
+                            'IsActive',
+                            'StatusID'
+                        ], 
+                        inplace=True, 
+                        axis=1
+                    )
+                else:
+                    data_frame.drop(
+                        [
+                            'DepartmentID',
+                            'DivisionID'
+                        ], 
+                        inplace=True, 
+                        axis=1
+                    )
+            except Exception as ex:
+                print(ex)
+
+            return data_frame
+
+        except Exception as ex:
+            self._log(f'error getting data frame. {str(ex)}',2)
+    
     def _retrieve_status_report_view(self, arguments: CliArgument)->None:
         
         try:
@@ -1050,7 +1563,7 @@ class ViewManager:
     def _retrieve_task_view(self, arguments: CliArgument) ->None:
         try:
             data_frame = self.get_task_view_data_frame(arguments)
-            col_widths = [[0,15],[1,30],[2,20],[3,12],[4,35],[5,15],[6,15],[7,15],[8,15],[9,15],[10,15],[11,15],[12,20],[15,15],[16,15]]
+            col_widths = [[0,15],[1,30],[2,20],[3,12],[4,35],[5,15],[6,15],[7,15],[8,15],[9,15],[10,15],[11,15],[12,20],[13,15],[14,15],[15,15],[16,15]]
             
             self._send_to_output(
                 data_frame, 
@@ -1058,7 +1571,8 @@ class ViewManager:
                 arguments.output_file,
                 arguments.view,
                 sheet_name = 'Tasks',
-                column_widths=col_widths
+                column_widths=col_widths,
+                title='Outstanding Tasks'
             )
 
             self._log(f"retrieved [ {len(data_frame)} ] records")
@@ -1076,7 +1590,8 @@ class ViewManager:
                 arguments.output_file,
                 arguments.view,
                 sheet_name = 'Lesson Learnt',
-                column_widths=col_widths
+                column_widths=col_widths,
+                title='Lesson Learnt'
             )
 
             self._log(f"retrieved [ {len(data_frame)} ] records")
@@ -1096,7 +1611,8 @@ class ViewManager:
                 arguments.output_file,
                 arguments.view,
                 sheet_name = 'Action List',
-                column_widths=col_widths
+                column_widths=col_widths,
+                title='Action List'
             )
 
             self._log(f"retrieved [ {len(data_frame)} ] records")
@@ -1143,7 +1659,101 @@ class ViewManager:
         except Exception as ex:
             self._log(f'error parsing parameter. {str(ex)}',2)
 
+    def _retrieve_concern_list_view(self, arguments: CliArgument) ->None:
+        try:
+            data_frame = self.get_concern_list_view_data_frame(arguments)
+            col_widths = [[0,15],[1,35],[2,35],[3,35],[4,25],[5,15],[6,15],[7,15],[8,10]]
+            
+            self._send_to_output(
+                data_frame, 
+                arguments.display_format, 
+                arguments.output_file,
+                arguments.view,
+                sheet_name = "3 C's",
+                column_widths=col_widths,
+                title = 'Concern, Cause and Countermeasure'
+            )
 
+            self._log(f"retrieved [ {len(data_frame)} ] records")
+        except Exception as ex:
+            self._log(f'error parsing parameter. {str(ex)}',2)
+
+    def _retrieve_success_register_view(self, arguments: CliArgument) ->None:
+        try:
+            data_frame = self.get_success_register_view_data_frame(arguments)
+            col_widths = [[0,25],[1,13],[2,30],[3,40],[4,40],[5,10]]
+            
+            self._send_to_output(
+                data_frame, 
+                arguments.display_format, 
+                arguments.output_file,
+                arguments.view,
+                sheet_name = 'Success Registers',
+                column_widths=col_widths,
+                title='Success Registers'
+            )
+
+            self._log(f"retrieved [ {len(data_frame)} ] records")
+        except Exception as ex:
+            self._log(f'error parsing parameter. {str(ex)}',2)
+   
+    def _retrieve_comcell_schedule_view(self, arguments: CliArgument) ->None:
+        try:
+            data_frame = self.get_comcell_schedule_view_data_frame(arguments)
+            col_widths = [[0,15],[1,30],[2,30],[3,15]]
+            
+            self._send_to_output(
+                data_frame, 
+                arguments.display_format, 
+                arguments.output_file,
+                arguments.view,
+                sheet_name = 'Schedule',
+                column_widths=col_widths,
+                title='Comm Cell Schedule'
+            )
+
+            self._log(f"retrieved [ {len(data_frame)} ] records")
+        except Exception as ex:
+            self._log(f'error parsing parameter. {str(ex)}',2)
+   
+    def _retrieve_kpi_summary_view(self, arguments: CliArgument) ->None:
+        try:
+            data_frame = self.get_kpi_summary_view_data_frame(arguments)
+            col_widths = [[0,15],[1,20],[2,30],[3,15],[4,15],[5,15],[6,16],[7,16]]
+            
+            self._send_to_output(
+                data_frame, 
+                arguments.display_format, 
+                arguments.output_file,
+                arguments.view,
+                sheet_name = 'KPI',
+                column_widths=col_widths,
+                title='KPI Target Summary'
+            )
+
+            self._log(f"retrieved [ {len(data_frame)} ] records")
+        except Exception as ex:
+            self._log(f'error parsing parameter. {str(ex)}',2)
+
+    def _retrieve_attendance_view(self, arguments: CliArgument) ->None:
+        try:
+            data_frame = self.get_attendance_view_data_frame(arguments)
+            col_widths = [[0,12],[1,30],[2,18],[3,10],[4,10],[5,12],[6,12],[7,12]]
+            
+            self._send_to_output(
+                data_frame, 
+                arguments.display_format, 
+                arguments.output_file,
+                arguments.view,
+                sheet_name = 'Attendance',
+                column_widths=col_widths,
+                title='Attendance Report'
+            )
+
+            self._log(f"retrieved [ {len(data_frame)} ] records")
+        except Exception as ex:
+            self._log(f'error parsing parameter. {str(ex)}',2)
+   
     def _send_to_output(
         self, 
         data_frame: pd.DataFrame, 
@@ -1152,7 +1762,8 @@ class ViewManager:
         view, 
         column_widths='', 
         column_names = '',
-        sheet_name='Sheet1') -> None:
+        sheet_name='Sheet1',
+        title='') -> None:
         
         if out_file is None:
             file = DEFAULT_FILENAME
@@ -1189,14 +1800,20 @@ class ViewManager:
                     SUPPORTED_VIEWS[6],
                     SUPPORTED_VIEWS[7],
                     SUPPORTED_VIEWS[8],
-                    SUPPORTED_VIEWS[9]
+                    SUPPORTED_VIEWS[9],
+                    SUPPORTED_VIEWS[10],
+                    SUPPORTED_VIEWS[11],
+                    SUPPORTED_VIEWS[12],
+                    SUPPORTED_VIEWS[13],
+                    SUPPORTED_VIEWS[14]
                 ]: 
                     self._generate_raw_excel(
                         data_frame, 
                         excel_file,
                         sheet_name = sheet_name,
                         column_widths = column_widths,
-                        column_names = column_names
+                        column_names = column_names,
+                        title = title
                     )
                 else:
                     self._log(f'error = {NOT_SUPPORTED}', 1)
@@ -1401,7 +2018,8 @@ class ViewManager:
         file_name, 
         sheet_name = 'Sheet1', 
         column_widths='',
-        column_names = '')-> None:
+        column_names = '',
+        title = '')-> None:
 
         try:
             self._writer = pd.ExcelWriter(file_name, engine='xlsxwriter')
@@ -1410,6 +2028,7 @@ class ViewManager:
             main_header_format = self._workbook.add_format(SHEET_TOP_HEADER)
             footer_format = self._workbook.add_format(SHEET_CELL_FOOTER)
             cell_wrap_noborder = self._workbook.add_format(SHEET_CELL_WRAP_NOBORDER)
+            report_title = self._workbook.add_format(SHEET_TITLE)
         
             if len(column_names) > 0:
                 data_frame.columns = column_names
@@ -1417,17 +2036,29 @@ class ViewManager:
             data_frame.to_excel(
                 self._writer, 
                 sheet_name=sheet_name, 
-                index= False 
+                index= False ,
+                startrow = 1 if len(title)>0 else 0
             )
 
             worksheet = self._writer.sheets[sheet_name]
+            current_row = 0
+
+            if len(title) >0:
+                title_range = get_cell_range_address(
+                    get_cell_address(0,1),
+                    get_cell_address(len(column_widths) - 1,1)
+                )
+                worksheet.merge_range(title_range,'','')
+                worksheet.write(current_row, 0, title,report_title) 
+                current_row += 1 
+
             if column_widths != '' and len(column_widths) >0:
                 for col_width in column_widths:
                     worksheet.set_column(col_width[0],col_width[0], col_width[1], cell_wrap_noborder)
 
             
             for col_num, value in enumerate(data_frame.columns.values):
-                worksheet.write(0, col_num, value, main_header_format)       
+                worksheet.write(current_row, col_num, value, main_header_format)       
 
             total_row = len(data_frame)
             worksheet.write(

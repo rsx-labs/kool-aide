@@ -7,6 +7,7 @@ from typing import List
 from kool_aide.library.app_setting import AppSetting
 from kool_aide.library.custom_logger import CustomLogger
 from kool_aide.library.constants import *
+from kool_aide.library.utilities import get_cell_address, get_cell_range_address
 
 from kool_aide.model.cli_argument import CliArgument
 from kool_aide.assets.resources.messages import *
@@ -23,6 +24,7 @@ class AssetInventoryReport:
         self._writer = writer
         self._workbook = None
         self._main_header_format = None
+        self._report_title = None
         self._header_format_orange = None
         self._header_format_gray = None
         self._cell_wrap_noborder = None
@@ -47,6 +49,7 @@ class AssetInventoryReport:
             main_header_format = self._workbook.add_format(SHEET_TOP_HEADER)
             footer_format = self._workbook.add_format(SHEET_CELL_FOOTER)
             wrap_content = self._workbook.add_format(SHEET_CELL_WRAP)
+            report_title = self._workbook.add_format(SHEET_TITLE)
 
             drop_columns=[
                 'DateAssigned',
@@ -71,10 +74,12 @@ class AssetInventoryReport:
             data_frame.drop(drop_columns, inplace=True, axis=1)
             data_frame.columns = column_headers
         
+           
             data_frame.to_excel(
                 self._writer, 
                 sheet_name='Asset Inventory', 
-                index= False 
+                index= False ,
+                startrow = 1
             )
 
             worksheet = self._writer.sheets['Asset Inventory']
@@ -83,9 +88,16 @@ class AssetInventoryReport:
             worksheet.set_column(2,3,14)
             worksheet.set_column(4,7,22)
             worksheet.set_column(8,9,25, wrap_content)
-            
+            current_row = 0
+            title_range = get_cell_range_address(
+                get_cell_address(0,1),
+                get_cell_address(len(column_headers) - 1,1)
+            )
+            worksheet.merge_range(title_range,'','')
+            worksheet.write(current_row,0,'Asset Inventory Report', report_title)
+            current_row += 1
             for col_num, value in enumerate(data_frame.columns.values):
-                worksheet.write(0, col_num, value, main_header_format)       
+                worksheet.write(current_row, col_num, value, main_header_format)       
 
             total_row = len(data_frame)
             worksheet.write(

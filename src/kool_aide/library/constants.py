@@ -7,7 +7,8 @@ CMD_ACTIONS =[
 REPORT_TYPES = [
     'status-report','asset-inventory',
     'task-report', 'project-billability',
-    'employee-billability', 'non-billables'
+    'employee-billability', 'non-billables',
+    'kpi-summary','late-tracking'
 ]
 
 SUPPORTED_MODELS = [
@@ -18,7 +19,8 @@ SUPPORTED_MODELS = [
 SUPPORTED_VIEWS = [
     'status-report','asset-inventory','commendation', 'contact-list', 
     'leave-summary', 'task', 'action-list', 'lesson-learnt',
-    'project-billability', 'employee-billability'
+    'project-billability', 'employee-billability', 'concern-list',
+    'success-register', 'comcell-schedule', 'kpi-summary', 'attendance'
 ]
 
 OUTPUT_FORMAT = [
@@ -35,6 +37,12 @@ SHORT_MONTHS = [
     'Jan', 'Feb', 'Mar', 'Apr',
     'May', 'Jun', 'Jul', 'Aug',
     'Sep', 'Oct', 'Nov', 'Dec'
+]
+
+FISCAL_MONTHS = [
+    'April', 'May', 'June', 'July', 'August',
+    'September', 'October', 'November', 
+    'December','January', 'February', 'March'
 ]
 
 DEFAULT_FILENAME = 'result'
@@ -57,9 +65,19 @@ PARAM_PHASES = 'phases'
 PARAM_STATUS = 'status'
 
 # excel formats
+
+SHEET_TITLE = {
+    'bold': True,
+    'valign': 'top',
+    'fg_color': '#000005',
+    'font_color': '#ffffff',
+    'border': 0,
+    'font_size':17
+}
+
 SHEET_TOP_HEADER = {
     'bold': True,
-    'text_wrap': False,
+    'text_wrap': True,
     'valign': 'top',
     'fg_color': '#CC0000',
     'font_color': '#ffffff',
@@ -137,5 +155,7 @@ MAP_VIEW_TO_REPORT ={
     'task-report': 'task',
     'project-billability': 'project-billability',
     'employee-billability':'employee-billability',
-    'non-billables':'employee-billability'
+    'non-billables':'employee-billability',
+    'kpi-summary':'kpi-summary',
+    'late-tracking':'attendance'
 }

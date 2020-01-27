@@ -56,6 +56,11 @@ class Connection:
             self.lesson_learnt_view = Table('vw_LessonLearnt', metadata, autoload=True)
             self.project_billability_view = Table('vw_BillabilityByProjectPerWeek', metadata, autoload=True)
             self.employee_billability_view = Table('vw_BillabilityByEmployeePerWeek', metadata, autoload=True)
+            self.concern_list_view = Table('vw_ConcernList', metadata, autoload=True)
+            self.success_register_view = Table('vw_SuccessRegisters', metadata, autoload=True)
+            self.comcell_schedule_view = Table('vw_ComCellSchedule', metadata, autoload=True)
+            self.kpi_summary_view = Table('vw_KPISummary', metadata, autoload = True)
+            self.attendance_view = Table('vw_Attendance', metadata, autoload = True)
 
             self._session = sessionmaker(bind=engine)()
             

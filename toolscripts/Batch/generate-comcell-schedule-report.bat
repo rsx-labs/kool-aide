@@ -1,0 +1,2 @@
+@echo off
+"C:\Program Files (x86)\GDC PH\kool-aide\kool-aide" get -vw comcell-schedule --format excel --output "e:\\AIDE Generated Reports\\Retail Services CommCell Schedule FY2020.xlsx" --params {\"departments\":[1],\"divisions\":[1]} --autorun

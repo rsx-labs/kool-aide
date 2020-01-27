@@ -54,13 +54,12 @@ class EmployeeBillabilityReport:
             self._header_format_orange = self._workbook.add_format(SHEET_HEADER_ORANGE)
             self._header_format_gray = self._workbook.add_format(SHEET_HEADER_GRAY)
             self._number_two_places = self._workbook.add_format({'num_format':'0.00'})
+            self._report_title = self._workbook.add_format(SHEET_TITLE)
         
             self._create_summary()
             self._create_week_summary()
                
             self._writer.save()
-            # data_frame.to_excel(file_name, index=False)
-            # print(f'the file was saved : {file_name}') 
        
         except Exception as ex:
             self._log(f'error = {str(ex)}', 2)
@@ -68,27 +67,30 @@ class EmployeeBillabilityReport:
     def _create_summary(self):
         try:
             data_frame = self._data
-            # grouped_per_project_emp =  data_frame.groupby(['Project','Employee Name'])
             sheet_name = 'Summary'
             
             current_row = 0
             current_col = 0
 
             worksheet = self._writer.book.add_worksheet(sheet_name)
+
+            title_range = get_cell_range_address(
+                get_cell_address(0,1),
+                get_cell_address(25,1)
+            )
+            worksheet.merge_range(title_range,'','')
+
             worksheet.write(
                 current_row, 
                 current_col, 
                 "Billability Report Summary", 
-                self._main_header_format
+                self._report_title
             )
 
             worksheet.set_column(0,0,25,self._cell_wrap_noborder)
             worksheet.set_column(1,50,5,self._cell_wrap_noborder)
             worksheet.set_row(32, 152)     
 
-            
-            for col in range(1,27):
-                worksheet.write(current_row, current_col+col, "", self._main_header_format) 
             current_row += 2
 
             current_row = 31
@@ -97,11 +99,11 @@ class EmployeeBillabilityReport:
                 current_row, 
                 current_col, 
                 "Billability Per Employee", 
-                self._header_format_orange
+                self._main_header_format
             )
 
-            worksheet.write(current_row, current_col+1, "", self._header_format_orange) 
-            worksheet.write(current_row, current_col+2, "", self._header_format_orange) 
+            worksheet.write(current_row, current_col+1, "", self._main_header_format) 
+            worksheet.write(current_row, current_col+2, "", self._main_header_format) 
 
             current_row += 1
 
@@ -179,7 +181,7 @@ class EmployeeBillabilityReport:
             worksheet.insert_chart(
                 'A2',
                 chart,
-                {'x_scale': 2.5, 'y_scale': 2,'x_offset':10,'y_offset':10}
+                {'x_scale': 2.4, 'y_scale': 2,'x_offset':10,'y_offset':10}
             )
 
             end_row = last_row
@@ -214,20 +216,23 @@ class EmployeeBillabilityReport:
                 current_col = 0
 
                 worksheet = self._writer.book.add_worksheet(sheet_name)
+
+                title_range = get_cell_range_address(
+                    get_cell_address(0,1),
+                    get_cell_address(25,1)
+                )
+                worksheet.merge_range(title_range,'','')
+
                 worksheet.write(
                     current_row, 
                     current_col, 
                     f"Billability Report Summary for {sheet_name}",
-                    self._main_header_format
+                    self._report_title
                 )
 
                 worksheet.set_column(0,0,25,self._cell_wrap_noborder)
                 worksheet.set_column(1,50,5,self._cell_wrap_noborder)
                 worksheet.set_row(32, 152)     
-
-                for col in range(1,27):
-                    worksheet.write(current_row, current_col+col, "", self._main_header_format) 
-                current_row += 2
 
                 current_row = 31
         
@@ -235,11 +240,11 @@ class EmployeeBillabilityReport:
                     current_row, 
                     current_col, 
                     "Billability Per Employee", 
-                    self._header_format_orange
+                    self._main_header_format
                 )
 
-                worksheet.write(current_row, current_col+1, "", self._header_format_orange) 
-                worksheet.write(current_row, current_col+2, "", self._header_format_orange) 
+                worksheet.write(current_row, current_col+1, "", self._main_header_format) 
+                worksheet.write(current_row, current_col+2, "", self._main_header_format) 
 
                 current_row += 1
 
@@ -313,7 +318,7 @@ class EmployeeBillabilityReport:
                 worksheet.insert_chart(
                     'A2',
                     chart,
-                    {'x_scale': 2.5, 'y_scale': 2,'x_offset':10,'y_offset':10}
+                    {'x_scale': 2.4, 'y_scale': 2,'x_offset':10,'y_offset':10}
                 )
 
             end_row = last_row

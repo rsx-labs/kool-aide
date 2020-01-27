@@ -15,6 +15,8 @@ from kool_aide.report.excel.task_summary_report import TaskSummaryReport
 from kool_aide.report.excel.project_billability_report import ProjectBillabilityReport
 from kool_aide.report.excel.employee_billability_report import EmployeeBillabilityReport
 from kool_aide.report.excel.non_billables_report import NonBillablesReport
+from kool_aide.report.excel.kpi_summary_report import KPISummaryReport
+from kool_aide.report.excel.late_tracking_report import LateTrackingReport
 from kool_aide.library.utilities import print_to_screen
 from kool_aide.assets.resources.messages import *
 
@@ -86,6 +88,22 @@ class ReportManager:
             print_to_screen('Generating non billables report ...',arguments.quiet_mode)
             try:
                 self._generate_non_billables_report(arguments)
+                return True, ''
+            except:
+                print_to_screen('Error generating report ...',arguments.quiet_mode)
+                return False, REPORT_NOT_GENERATED
+        elif self._arguments.report == REPORT_TYPES[6]: # kpi summary
+            print_to_screen('Generating kpi summary report ...',arguments.quiet_mode)
+            try:
+                self._generate_kpi_summary_report(arguments)
+                return True, ''
+            except:
+                print_to_screen('Error generating report ...',arguments.quiet_mode)
+                return False, REPORT_NOT_GENERATED
+        elif self._arguments.report == REPORT_TYPES[7]: # late
+            print_to_screen('Generating late tracking report ...',arguments.quiet_mode)
+            try:
+                self._generate_late_tracking_report(arguments)
                 return True, ''
             except:
                 print_to_screen('Error generating report ...',arguments.quiet_mode)
@@ -270,4 +288,65 @@ class ReportManager:
         else:
             print_to_screen('Error generating report ...',arguments.quiet_mode)
             return False, REPORT_NOT_GENERATED 
+
+    def _generate_kpi_summary_report(self, arguments: CliArgument):
+        print_to_screen('Getting data ...',arguments.quiet_mode)
+        view_manager = ViewManager(
+            self._logger, 
+            self._config, 
+            self._connection
+        )
+        data_frame = view_manager.get_kpi_summary_view_data_frame(arguments)
+        
+        if data_frame is not None:
+            print_to_screen('Data retrieved.',arguments.quiet_mode)
+            out_file = arguments.output_file
+            if arguments.output_file is None:
+                out_file = DEFAULT_FILENAME
+            
+            out_file = append_date_to_file_name(out_file)
+            writer = pd.ExcelWriter(out_file, engine='xlsxwriter')
+            report = KPISummaryReport(
+                self._logger, 
+                self._config, 
+                data_frame, 
+                writer
+            )
+            # generate excel report
+            print_to_screen(f'Writing report to : {out_file}',arguments.quiet_mode)
+            return report.generate(OUTPUT_FORMAT[3])
+        else:
+            print_to_screen('Error generating report ...',arguments.quiet_mode)
+            return False, REPORT_NOT_GENERATED 
+
+    def _generate_late_tracking_report(self, arguments: CliArgument):
+        print_to_screen('Getting data ...',arguments.quiet_mode)
+        view_manager = ViewManager(
+            self._logger, 
+            self._config, 
+            self._connection
+        )
+        data_frame = view_manager.get_attendance_view_data_frame(arguments)
+        
+        if data_frame is not None:
+            print_to_screen('Data retrieved.',arguments.quiet_mode)
+            out_file = arguments.output_file
+            if arguments.output_file is None:
+                out_file = DEFAULT_FILENAME
+            
+            out_file = append_date_to_file_name(out_file)
+            writer = pd.ExcelWriter(out_file, engine='xlsxwriter')
+            report = LateTrackingReport(
+                self._logger, 
+                self._config, 
+                data_frame, 
+                writer
+            )
+            # generate excel report
+            print_to_screen(f'Writing report to : {out_file}',arguments.quiet_mode)
+            return report.generate(OUTPUT_FORMAT[3])
+        else:
+            print_to_screen('Error generating report ...',arguments.quiet_mode)
+            return False, REPORT_NOT_GENERATED 
+    
     

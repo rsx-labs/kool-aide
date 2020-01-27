@@ -53,6 +53,7 @@ class ProjectBillabilityReport:
             self._header_format_orange = self._workbook.add_format(SHEET_HEADER_ORANGE)
             self._header_format_gray = self._workbook.add_format(SHEET_HEADER_GRAY)
             self._number_two_places = self._workbook.add_format({'num_format':'0.00'})
+            self._report_title = self._workbook.add_format(SHEET_TITLE)
         
             self._create_month_summary()
             self._create_week_summary()
@@ -72,11 +73,18 @@ class ProjectBillabilityReport:
             current_col = 0
 
             worksheet = self._writer.book.add_worksheet(sheet_name)
+
+            title_range = get_cell_range_address(
+                get_cell_address(0,1),
+                get_cell_address(6,1)
+            )
+            worksheet.merge_range(title_range,'','')
+
             worksheet.write(
                 current_row, 
                 current_col, 
                 "Billability Report", 
-                self._main_header_format
+                self._report_title
             )       
             worksheet.set_column(0,0,40,self._cell_wrap_noborder)
             worksheet.set_column(1,1,15,self._cell_wrap_noborder)
@@ -254,11 +262,18 @@ class ProjectBillabilityReport:
                 current_col = 0
 
                 worksheet = self._writer.book.add_worksheet(sheet_name)
+
+                title_range = get_cell_range_address(
+                    get_cell_address(0,1),
+                    get_cell_address(6,1)
+                )
+                worksheet.merge_range(title_range,'','')
+                
                 worksheet.write(
                     current_row, 
                     current_col, 
                     f"Billability Report for {week_ending}", 
-                    self._main_header_format
+                    self._report_title
                 )
 
                 worksheet.set_column(0,0,40,self._cell_wrap_noborder)
