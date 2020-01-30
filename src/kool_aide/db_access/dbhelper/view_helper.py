@@ -263,5 +263,39 @@ class ViewHelper:
             self._log(f"error getting db values. {str(ex)}")
             return False
 
+    def get_skills_matrix_view(self, divisions=[]):
+        try:
+            if divisions is not None:
+                if len(divisions) > 0:
+                    query = self._connection.skills_matrix_view.select(
+                        self._connection.skills_matrix_view.c.DivisionID.in_(divisions)
+                    )
+                else:
+                    query = self._connection.skills_matrix_view.select()
+            else:
+                query = self._connection.skills_matrix_view.select()
+            result = query.execute()
+            return result
+        except Exception as ex:
+            self._log(f"error getting db values. {str(ex)}")
+            return False
+
+    def get_resource_planner_view(self, months=[]):
+        try:
+            if months is not None:
+                if len(months) > 0:
+                    query = self._connection.resource_planner_view.select(
+                        self._connection.resource_planner_view.c.MonthID.in_(months)
+                    )
+                else:
+                    query = self._connection.resource_planner_view.select()
+            else:
+                query = self._connection.resource_planner_view.select()
+            result = query.execute()
+            return result
+        except Exception as ex:
+            self._log(f"error getting db values. {str(ex)}")
+            return False
+
 
     

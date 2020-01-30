@@ -51,6 +51,8 @@ class KPISummaryReport:
         try:
             self._workbook = self._writer.book
             self._main_header_format = self._workbook.add_format(SHEET_TOP_HEADER)
+            self._sub_header_format = self._workbook.add_format(SHEET_SUB_HEADER)
+            self._sub_header_format2 = self._workbook.add_format(SHEET_SUB_HEADER2)
             self._footer_format = self._workbook.add_format(SHEET_CELL_FOOTER)
             self._wrap_content = self._workbook.add_format(SHEET_CELL_WRAP)
             self._header_format_orange = self._workbook.add_format(SHEET_HEADER_ORANGE)
@@ -90,8 +92,10 @@ class KPISummaryReport:
 
             header = self._main_header_format
             header.set_align('center')
-            sub_header = self._header_format_lt_gray
+            sub_header = self._sub_header_format
             sub_header.set_align('center')
+            sub_header2 = self._sub_header_format2
+            sub_header2.set_align('center')
 
             worksheet.write(current_row, current_col, "Month", header)
             current_col = 1
@@ -105,7 +109,7 @@ class KPISummaryReport:
                     current_row, 
                     current_col, 
                     str(row['Month']).strip(),
-                    header
+                    sub_header2
                 )
                 worksheet.write(
                     current_row+1, 
@@ -124,7 +128,7 @@ class KPISummaryReport:
                 current_col += 2
 
             current_col = 0
-            worksheet.write(current_row+1, current_col, '', self._header_format_gray)
+            worksheet.write(current_row+1, current_col, '', self._sub_header_format2)
             current_row +=2
 
             header_len = len(month2_dict) * 2
@@ -266,7 +270,7 @@ class KPISummaryReport:
             worksheet = self._writer.book.add_worksheet(sheet_name)
 
             worksheet.set_column(0,0,25,self._cell_wrap_noborder)
-            worksheet.set_column(1,50,10,self._cell_wrap_noborder)
+            worksheet.set_column(1,50,11,self._cell_wrap_noborder)
        
             current_row = 2
      
@@ -276,7 +280,7 @@ class KPISummaryReport:
             self._month_dict = {}
             start_row = current_row
 
-            header = self._header_format_gray
+            header = self._sub_header_format
             header.set_align('center')
             sub_header = self._header_format_lt_gray
             sub_header.set_align('center')

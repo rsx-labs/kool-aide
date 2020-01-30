@@ -52,14 +52,18 @@ class LateTrackingReport:
     def _generate_excel_report(self) -> None:
         try:
             self._workbook = self._writer.book
-            self._main_header_format = self._workbook.add_format(SHEET_TOP_HEADER)
+            self._main_header_format = self._workbook.add_format(SHEET_TOP_HEADER_NO_WRAP)
             self._footer_format = self._workbook.add_format(SHEET_CELL_FOOTER)
             self._wrap_content = self._workbook.add_format(SHEET_CELL_WRAP)
-            self._header_format_orange = self._workbook.add_format(SHEET_HEADER_ORANGE)
+            self._sub_header = self._workbook.add_format(SHEET_SUB_HEADER)
+            self._sub_header2 = self._workbook.add_format(SHEET_SUB_HEADER2)
             self._header_format_gray = self._workbook.add_format(SHEET_HEADER_GRAY)
             self._number_two_places = self._workbook.add_format({'num_format':'0.00'})
             self._report_title = self._workbook.add_format(SHEET_TITLE)
-            self._header_format_lt_gray = self._workbook.add_format(SHEET_HEADER_LT_GRAY)
+            self._total = self._workbook.add_format(SHEET_HEADER_LT_GRAY)
+            
+            self._total.set_align('center')
+            self._total.set_align('vcenter')
             
             self._create_by_month()
             self._create_by_employee()
@@ -111,12 +115,12 @@ class LateTrackingReport:
 
             group_by_month = data_frame.groupby(['MonthID','Month'])             
             month_df = pd.DataFrame(group_by_month.size().reset_index())
-            format_vertical_text = self._header_format_gray
+            format_vertical_text = self._sub_header
             format_vertical_text.set_rotation(90)
             format_vertical_text.set_align('bottom')
             start_row = current_row
 
-            worksheet.write(current_row, current_col, "", self._header_format_gray)
+            worksheet.write(current_row, current_col, "", self._sub_header2)
             month_idx = 0
             for month in FISCAL_MONTHS:
                 worksheet.write(
@@ -131,7 +135,7 @@ class LateTrackingReport:
 
             current_row +=1
             group_per_month = data_frame.groupby(['Month']) 
-            worksheet.write(current_row, 0, "Total Count", self._header_format_lt_gray)
+            worksheet.write(current_row, 0, "Total Count", self._total)
             for month in FISCAL_MONTHS:
                 count = 0
                 try:
@@ -212,7 +216,7 @@ class LateTrackingReport:
                 self._report_title
             )
 
-            worksheet.set_column(0,0,25,self._cell_wrap_noborder)
+            worksheet.set_column(0,0,30,self._cell_wrap_noborder)
             worksheet.set_column(1,50,5,self._cell_wrap_noborder)
             worksheet.set_row(26, 70)  
            
@@ -229,12 +233,12 @@ class LateTrackingReport:
 
             group_by_month = data_frame.groupby(['MonthID','Month'])             
             month_df = pd.DataFrame(group_by_month.size().reset_index())
-            format_vertical_text = self._header_format_gray
+            format_vertical_text = self._sub_header
             format_vertical_text.set_rotation(90)
             format_vertical_text.set_align('bottom')
             start_row = current_row
 
-            worksheet.write(current_row, current_col, "", self._header_format_gray)
+            worksheet.write(current_row, current_col, "", self._sub_header2)
             month_idx = 0
             for month in FISCAL_MONTHS:
                 worksheet.write(
@@ -251,7 +255,7 @@ class LateTrackingReport:
                 current_row, 
                 len(self._month1_dict)+1, 
                 "Total", 
-                self._header_format_lt_gray
+                self._header_format_gray
             )
 
             current_row +=1

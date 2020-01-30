@@ -99,6 +99,12 @@ class ViewManager:
         elif arguments.view == SUPPORTED_VIEWS[14]:
             self._retrieve_attendance_view(arguments)
             return True, DATA_RETRIEVED
+        elif arguments.view == SUPPORTED_VIEWS[15]:
+            self._retrieve_skills_matrix_view(arguments)
+            return True, DATA_RETRIEVED
+        elif arguments.view == SUPPORTED_VIEWS[16]:
+            self._retrieve_resource_planner_view(arguments)
+            return True, DATA_RETRIEVED
         
        
         return False, NOT_SUPPORTED
@@ -1474,6 +1480,208 @@ class ViewManager:
         except Exception as ex:
             self._log(f'error getting data frame. {str(ex)}',2)
     
+    def get_skills_matrix_view_data_frame(self, arguments: CliArgument):
+
+        columns = None
+        sort_keys = None
+        departments = None
+        divisions = None
+        ids  = None
+        isActive = None
+        col_names =[
+                'EmployeeID', 'Employee Name', 'Skill', 'ProficiencyLevel',
+                'Proficiency','DisplayOrder','DisplayFlag','ShowToAll',
+                'DepartmentID','Department','DivisionID','Division',
+                'IsActive','Last Reviewed'
+            ] 
+
+        try:
+            if arguments.parameters is not None:
+                try:
+                    json_parameters = json.loads(arguments.parameters)
+                    sort_keys = get_param_value(PARAM_SORT, json_parameters)
+                    columns = get_param_value(PARAM_COLUMNS, json_parameters)
+                    departments = get_param_value(PARAM_DEPARTMENTS, json_parameters)
+                    divisions = get_param_value(PARAM_DIVISIONS, json_parameters)
+                    ids = get_param_value(PARAM_IDS, json_parameters)
+                    isActive = get_param_value(PARAM_FLAG, json_parameters)
+                except Exception as ex:
+                    self._log(f'error reading parameters . {str(ex)}',2)
+            
+            if arguments.auto_mode:
+                isActive = 1
+          
+            if divisions is not None and len(divisions)>0:
+                results = self._db_helper.get_skills_matrix_view(divisions)
+            else:
+                results = self._db_helper.get_skills_matrix_view()
+
+            data_frame = pd.DataFrame(results.fetchall()) 
+            data_frame.columns = results.keys()
+
+            if departments is not None and len(departments)>0:
+                 data_frame = data_frame[data_frame['DepartmentID'].isin(departments)]
+            
+            if ids is not None and len(ids)>0:
+                  data_frame = data_frame[data_frame['EmployeeID'].isin(ids)]
+
+            if isActive is not None:
+                try:
+                    data_frame = data_frame[data_frame['IsActive'] == int(isActive)]
+                except:
+                    pass
+
+            if sort_keys is not None and len(sort_keys) > 0:
+                data_frame.sort_values(by=sort_keys, inplace= True)
+     
+            limit = int(arguments.result_limit)
+
+            if columns is not None:        
+                data_frame = data_frame[columns].head(limit)
+            else:
+                if self._get_parameters(arguments, PARAM_COLUMNS) is None:
+                    data_frame.columns = col_names
+                data_frame = data_frame.head(limit)
+            
+            try:
+                if arguments.action == CMD_ACTIONS[1]:
+                    data_frame.drop(
+                        [
+                            'DepartmentID',
+                            'DivisionID',
+                            'IsActive',
+                            'ProficiencyLevel',
+                            'DisplayOrder',
+                            'DisplayFlag',
+                            'ShowToAll'
+                        ], 
+                        inplace=True, 
+                        axis=1
+                    )
+                else:
+                    data_frame.drop(
+                        [
+                            'DepartmentID',
+                            'DivisionID'
+                        ], 
+                        inplace=True, 
+                        axis=1
+                    )
+            except Exception as ex:
+                print(ex)
+
+            return data_frame
+
+        except Exception as ex:
+            self._log(f'error getting data frame. {str(ex)}',2)
+    
+    def get_resource_planner_view_data_frame(self, arguments: CliArgument):
+
+        columns = None
+        sort_keys = None
+        departments = None
+        divisions = None
+        ids  = None
+        isActive = None
+        months = None
+        year = None
+        col_names =[
+                'EmployeeID', 'Employee Name','StatusID', 'Status', 'Short Status',
+                'Date Entry','DepartmentID','Department','DivisionID','Division',
+                'IsActive','MonthID','YearID','FiscalYear'
+            ] 
+
+        try:
+            if arguments.parameters is not None:
+                try:
+                    json_parameters = json.loads(arguments.parameters)
+                    sort_keys = get_param_value(PARAM_SORT, json_parameters)
+                    columns = get_param_value(PARAM_COLUMNS, json_parameters)
+                    departments = get_param_value(PARAM_DEPARTMENTS, json_parameters)
+                    divisions = get_param_value(PARAM_DIVISIONS, json_parameters)
+                    ids = get_param_value(PARAM_IDS, json_parameters)
+                    isActive = get_param_value(PARAM_FLAG, json_parameters)
+                    months = get_param_value(PARAM_MONTHS, json_parameters)
+                    year = get_param_value(PARAM_YEAR, json_parameters)
+                except Exception as ex:
+                    self._log(f'error reading parameters . {str(ex)}',2)
+            
+            if arguments.auto_mode:
+                isActive = 1
+                months =[datetime.now().month]
+                year = datetime.now().year
+
+            if months == None:
+                months =[datetime.now().month]
+          
+            if months is not None and len(months)>0:
+                results = self._db_helper.get_resource_planner_view(months)
+            else:
+                results = self._db_helper.get_resource_planner_view()
+
+            data_frame = pd.DataFrame(results.fetchall()) 
+            data_frame.columns = results.keys()
+
+            if departments is not None and len(departments)>0:
+                 data_frame = data_frame[data_frame['DepartmentID'].isin(departments)]
+            
+            if ids is not None and len(ids)>0:
+                  data_frame = data_frame[data_frame['EmployeeID'].isin(ids)]
+
+            if isActive is not None:
+                try:
+                    data_frame = data_frame[data_frame['IsActive'] == int(isActive)]
+                except:
+                    pass
+            
+            if year is None:
+                year = datetime.now().year
+
+            data_frame[data_frame['YearID'] == int(year)]
+            
+            if sort_keys is not None and len(sort_keys) > 0:
+                data_frame.sort_values(by=sort_keys, inplace= True)
+     
+            limit = int(arguments.result_limit)
+
+            if columns is not None:        
+                data_frame = data_frame[columns].head(limit)
+            else:
+                if self._get_parameters(arguments, PARAM_COLUMNS) is None:
+                    data_frame.columns = col_names
+                data_frame = data_frame.head(limit)
+            
+            try:
+                if arguments.action == CMD_ACTIONS[1]:
+                    data_frame.drop(
+                        [
+                            'DepartmentID',
+                            'DivisionID',
+                            'IsActive',
+                            'MonthID' ,
+                            'StatusID',
+                            'YearID'                       ], 
+                        inplace=True, 
+                        axis=1
+                    )
+                else:
+                    data_frame.drop(
+                        [
+                            'DepartmentID',
+                            'DivisionID'
+                        ], 
+                        inplace=True, 
+                        axis=1
+                    )
+            except Exception as ex:
+                print(ex)
+
+            return data_frame
+
+        except Exception as ex:
+            self._log(f'error getting data frame. {str(ex)}',2)
+    
+
     def _retrieve_status_report_view(self, arguments: CliArgument)->None:
         
         try:
@@ -1483,7 +1691,10 @@ class ViewManager:
                 data_frame, 
                 arguments.display_format, 
                 arguments.output_file,
-                arguments.view
+                arguments.view,
+                sheet_name = 'Status Report',
+                column_widths='',
+                title='Status Report'
             )
 
             self._log(f"retrieved [ {len(data_frame)} ] records")
@@ -1499,7 +1710,10 @@ class ViewManager:
                 data_frame, 
                 arguments.display_format, 
                 arguments.output_file,
-                arguments.view
+                arguments.view,
+                sheet_name = 'Asset Inventory',
+                column_widths='',
+                title='Asset Inventory'
             )
 
             self._log(f"retrieved [ {len(data_frame)} ] records")
@@ -1517,7 +1731,8 @@ class ViewManager:
                 arguments.output_file,
                 arguments.view,
                 sheet_name = 'Commendations',
-                column_widths = col_widths
+                column_widths = col_widths,
+                title='Commendation List'
             )
 
             self._log(f"retrieved [ {len(data_frame)} ] records")
@@ -1535,7 +1750,8 @@ class ViewManager:
                 arguments.output_file,
                 arguments.view,
                 sheet_name = 'Contacts',
-                column_widths=col_widths
+                column_widths=col_widths,
+                title='Contact List'
             )
 
             self._log(f"retrieved [ {len(data_frame)} ] records")
@@ -1553,7 +1769,8 @@ class ViewManager:
                 arguments.output_file,
                 arguments.view,
                 sheet_name = 'Leave Summary',
-                column_widths=col_widths
+                column_widths=col_widths,
+                title = 'Leave Summary Report'
             )
 
             self._log(f"retrieved [ {len(data_frame)} ] records")
@@ -1632,7 +1849,8 @@ class ViewManager:
                 arguments.output_file,
                 arguments.view,
                 sheet_name = 'Project Billability',
-                column_widths=col_widths
+                column_widths=col_widths,
+                title = 'Project Billability'
             )
 
             self._log(f"retrieved [ {len(data_frame)} ] records")
@@ -1652,7 +1870,8 @@ class ViewManager:
                 arguments.output_file,
                 arguments.view,
                 sheet_name = 'Employee Billability',
-                column_widths=col_widths
+                column_widths=col_widths,
+                title = 'Employee Billability'
             )
 
             self._log(f"retrieved [ {len(data_frame)} ] records")
@@ -1754,6 +1973,45 @@ class ViewManager:
         except Exception as ex:
             self._log(f'error parsing parameter. {str(ex)}',2)
    
+    def _retrieve_skills_matrix_view(self, arguments: CliArgument) ->None:
+        try:
+            data_frame = self.get_skills_matrix_view_data_frame(arguments)
+            col_widths = [[0,12],[1,35],[2,30],[3,30],[4,15],[5,12],[6,12]]
+            
+            self._send_to_output(
+                data_frame, 
+                arguments.display_format, 
+                arguments.output_file,
+                arguments.view,
+                sheet_name = 'Skills Matrix',
+                column_widths=col_widths,
+                title='Skills Matrix'
+            )
+
+            self._log(f"retrieved [ {len(data_frame)} ] records")
+        except Exception as ex:
+            self._log(f'error parsing parameter. {str(ex)}',2)
+    
+    def _retrieve_resource_planner_view(self, arguments: CliArgument) ->None:
+        try:
+            data_frame = self.get_resource_planner_view_data_frame(arguments)
+            col_widths = [[0,12],[1,35],[2,30],[3,30],[4,15],[5,12],[6,12]]
+            
+            self._send_to_output(
+                data_frame, 
+                arguments.display_format, 
+                arguments.output_file,
+                arguments.view,
+                sheet_name = 'Resource Planner',
+                column_widths=col_widths,
+                title='Resource Planner'
+            )
+
+            self._log(f"retrieved [ {len(data_frame)} ] records")
+        except Exception as ex:
+            self._log(f'error parsing parameter. {str(ex)}',2)
+   
+
     def _send_to_output(
         self, 
         data_frame: pd.DataFrame, 
@@ -1792,21 +2050,7 @@ class ViewManager:
                         data_frame, 
                         excel_file
                     )
-                elif view in [
-                    SUPPORTED_VIEWS[2],
-                    SUPPORTED_VIEWS[3],
-                    SUPPORTED_VIEWS[4],
-                    SUPPORTED_VIEWS[5],
-                    SUPPORTED_VIEWS[6],
-                    SUPPORTED_VIEWS[7],
-                    SUPPORTED_VIEWS[8],
-                    SUPPORTED_VIEWS[9],
-                    SUPPORTED_VIEWS[10],
-                    SUPPORTED_VIEWS[11],
-                    SUPPORTED_VIEWS[12],
-                    SUPPORTED_VIEWS[13],
-                    SUPPORTED_VIEWS[14]
-                ]: 
+                elif view in GENERIC_EXCEL_VIEWS: 
                     self._generate_raw_excel(
                         data_frame, 
                         excel_file,

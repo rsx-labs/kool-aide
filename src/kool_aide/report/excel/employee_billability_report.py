@@ -49,6 +49,8 @@ class EmployeeBillabilityReport:
         try:
             self._workbook = self._writer.book
             self._main_header_format = self._workbook.add_format(SHEET_TOP_HEADER)
+            self._sub_header_format = self._workbook.add_format(SHEET_SUB_HEADER)
+            self._sub_header_format2 = self._workbook.add_format(SHEET_SUB_HEADER2)
             self._footer_format = self._workbook.add_format(SHEET_CELL_FOOTER)
             self._wrap_content = self._workbook.add_format(SHEET_CELL_WRAP)
             self._header_format_orange = self._workbook.add_format(SHEET_HEADER_ORANGE)
@@ -109,13 +111,13 @@ class EmployeeBillabilityReport:
 
             group_by_employee = data_frame.groupby(['Employee Name'])             
             employee_df = pd.DataFrame(group_by_employee.size().reset_index())
-            format_vertical_text = self._header_format_gray
+            format_vertical_text = self._sub_header_format
             format_vertical_text.set_rotation(90)
             format_vertical_text.set_align('bottom')
             employee_dict = {}
             start_row = current_row
 
-            worksheet.write(current_row, current_col, "", self._header_format_gray)
+            worksheet.write(current_row, current_col, "", self._sub_header_format2)
             for index,row in employee_df.iterrows():
                 worksheet.write(
                     current_row, 
@@ -250,13 +252,13 @@ class EmployeeBillabilityReport:
 
                 group_by_employee = data_frame.groupby(['Employee Name'])             
                 employee_df = pd.DataFrame(group_by_employee.size().reset_index())
-                format_vertical_text = self._header_format_gray
+                format_vertical_text = self._sub_header_format
                 format_vertical_text.set_rotation(90)
                 format_vertical_text.set_align('bottom')
                 employee_dict = {}
                 start_row = current_row
 
-                worksheet.write(current_row, current_col, "", self._header_format_gray)
+                worksheet.write(current_row, current_col, "", self._sub_header_format2)
                 for index,row in employee_df.iterrows():
                     worksheet.write(
                         current_row, 
