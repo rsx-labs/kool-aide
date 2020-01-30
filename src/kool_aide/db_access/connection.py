@@ -61,7 +61,9 @@ class Connection:
             self.comcell_schedule_view = Table('vw_ComCellSchedule', metadata, autoload=True)
             self.kpi_summary_view = Table('vw_KPISummary', metadata, autoload = True)
             self.attendance_view = Table('vw_Attendance', metadata, autoload = True)
-
+            self.skills_matrix_view = Table('vw_SkillsMatrix', metadata, autoload = True)
+            self.resource_planner_view = Table('vw_ResourcePlanner', metadata, autoload= True)
+            
             self._session = sessionmaker(bind=engine)()
             
             #self._log(week.columns.key())

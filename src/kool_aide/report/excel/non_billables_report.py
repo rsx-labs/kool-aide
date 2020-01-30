@@ -59,12 +59,16 @@ class NonBillablesReport:
         try:
             self._workbook = self._writer.book
             self._main_header_format = self._workbook.add_format(SHEET_TOP_HEADER)
+            self._sub_header_format = self._workbook.add_format(SHEET_SUB_HEADER)
+            self._sub_header_format2 = self._workbook.add_format(SHEET_SUB_HEADER2)
             self._report_title = self._workbook.add_format(SHEET_TITLE)
             self._footer_format = self._workbook.add_format(SHEET_CELL_FOOTER)
             self._wrap_content = self._workbook.add_format(SHEET_CELL_WRAP)
             self._header_format_orange = self._workbook.add_format(SHEET_HEADER_ORANGE)
             self._header_format_gray = self._workbook.add_format(SHEET_HEADER_GRAY)
             self._number_two_places = self._workbook.add_format({'num_format':'0.00'})
+
+            self._sub_header_format.set_align('vcenter')
 
             self._create_data_summary()
                       
@@ -102,9 +106,8 @@ class NonBillablesReport:
             )
 
             worksheet.set_column(0,0,25,self._cell_wrap_noborder)
-            worksheet.set_column(1,50,8,self._cell_wrap_noborder)
-         
-            
+            worksheet.set_column(1,50,7,self._cell_wrap_noborder)
+             
             current_row += 2
 
             worksheet.write(
@@ -118,13 +121,14 @@ class NonBillablesReport:
 
             current_row += 1
 
-            format_vertical_text = self._header_format_gray
+            format_vertical_text = self._sub_header_format
             format_vertical_text.set_rotation(90)
             format_vertical_text.set_align('bottom')
+            format_vertical_text.set_align('center')
             worksheet.set_row(current_row, 152)     
 
             employee_dict = {}
-            worksheet.write(current_row, current_col, "", self._header_format_gray)
+            worksheet.write(current_row, current_col, "", self._sub_header_format2)
             for index,row in employee_df.iterrows():
                 worksheet.write(
                     current_row, 
@@ -179,7 +183,7 @@ class NonBillablesReport:
             group_by_week = data_frame.groupby(['Week Range'])             
             week_df = pd.DataFrame(group_by_week.size().reset_index())
             worksheet.set_row(current_row, 100)    
-            worksheet.write(current_row, 0, "", self._header_format_gray)
+            worksheet.write(current_row, 0, "", self._sub_header_format2)
             for index,row in week_df.iterrows():
                 range_date = datetime.strptime(
                     str(row['Week Range']).strip(),
@@ -227,8 +231,8 @@ class NonBillablesReport:
             current_row += 1
 
             worksheet.set_row(current_row, 50)    
-            worksheet.write(current_row, 0, "", self._header_format_gray)
-            worksheet.write(current_row, 1, 'Hours', self._header_format_gray)
+            worksheet.write(current_row, 0, "", self._sub_header_format2)
+            worksheet.write(current_row, 1, 'Hours', format_vertical_text)
             
             current_row += 1
 
@@ -255,7 +259,7 @@ class NonBillablesReport:
             worksheet.write(current_row, current_col+1, "", self._main_header_format) 
             current_row += 1
             worksheet.set_row(current_row, 45)
-            worksheet.write(current_row, current_col, '', format_vertical_text)
+            worksheet.write(current_row, current_col, '', self._sub_header_format2)
             worksheet.write(current_row, current_col+1, 'Hours', format_vertical_text) 
             current_row +=1
 

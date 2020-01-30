@@ -48,6 +48,8 @@ class ProjectBillabilityReport:
         try:
             self._workbook = self._writer.book
             self._main_header_format = self._workbook.add_format(SHEET_TOP_HEADER)
+            self._sub_header_format = self._workbook.add_format(SHEET_SUB_HEADER)
+            self._sub_header_format2 = self._workbook.add_format(SHEET_SUB_HEADER2)
             self._footer_format = self._workbook.add_format(SHEET_CELL_FOOTER)
             self._wrap_content = self._workbook.add_format(SHEET_CELL_WRAP)
             self._header_format_orange = self._workbook.add_format(SHEET_HEADER_ORANGE)
@@ -108,17 +110,17 @@ class ProjectBillabilityReport:
                 current_row, 
                 current_col, 
                 "Billability Per Project", 
-                self._header_format_orange
+                self._main_header_format
             )
 
-            worksheet.write(current_row, current_col+1, "", self._header_format_orange) 
-            worksheet.write(current_row, current_col+2, "", self._header_format_orange) 
+            worksheet.write(current_row, current_col+1, "", self._main_header_format) 
+            worksheet.write(current_row, current_col+2, "", self._main_header_format) 
 
             current_row += 1
 
-            worksheet.write(current_row, current_col, "Project", self._header_format_gray)       
-            worksheet.write(current_row, current_col+1, "Hours", self._header_format_gray) 
-            worksheet.write(current_row, current_col+2, "Percentage", self._header_format_gray) 
+            worksheet.write(current_row, current_col, "Project", self._sub_header_format2)       
+            worksheet.write(current_row, current_col+1, "Hours", self._sub_header_format) 
+            worksheet.write(current_row, current_col+2, "Percentage", self._sub_header_format) 
 
             current_row += 1
             start_row = current_row
@@ -177,16 +179,16 @@ class ProjectBillabilityReport:
                 current_row, 
                 current_col, 
                 "Billable \ Non Billable", 
-                self._header_format_orange
+                self._main_header_format
             )   
 
-            worksheet.write(current_row, current_col+1, "", self._header_format_orange) 
-            worksheet.write(current_row, current_col+2, "", self._header_format_orange) 
+            worksheet.write(current_row, current_col+1, "", self._main_header_format) 
+            worksheet.write(current_row, current_col+2, "", self._main_header_format) 
             current_row += 1
 
-            worksheet.write(current_row, current_col, "Project", self._header_format_gray)       
-            worksheet.write(current_row, current_col+1, "Hours", self._header_format_gray)  
-            worksheet.write(current_row, current_col+2, "Percentage", self._header_format_gray) 
+            worksheet.write(current_row, current_col, "Project", self._sub_header_format2)       
+            worksheet.write(current_row, current_col+1, "Hours", self._sub_header_format)  
+            worksheet.write(current_row, current_col+2, "Percentage", self._sub_header_format) 
             current_row += 1
 
             grouped_per_billability =  data_frame.groupby('IsBillable')

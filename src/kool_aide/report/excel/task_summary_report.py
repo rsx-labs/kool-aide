@@ -50,6 +50,8 @@ class TaskSummaryReport:
             data_frame = self._data
             self._workbook = self._writer.book
             self._main_header_format = self._workbook.add_format(SHEET_TOP_HEADER)
+            self._sub_header_format = self._workbook.add_format(SHEET_SUB_HEADER)
+            self._sub_header_format = self._workbook.add_format(SHEET_SUB_HEADER2)
             self._header_format_orange = self._workbook.add_format(SHEET_HEADER_ORANGE)
             self._header_format_gray = self._workbook.add_format(SHEET_HEADER_GRAY)
             self._cell_wrap_noborder = self._workbook.add_format(SHEET_CELL_WRAP_NOBORDER)
@@ -78,7 +80,7 @@ class TaskSummaryReport:
             worksheet.set_column(1,1,15)
             worksheet.set_column(2,2,45)
             worksheet.set_column(3,3,20)
-            worksheet.set_column(4,4,20)
+            worksheet.set_column(4,4,22)
             worksheet.set_column(5,5,20)
             current_col = 0
             current_row = 0
@@ -89,8 +91,8 @@ class TaskSummaryReport:
             )
             worksheet.merge_range(title_range, '','')
             worksheet.write(current_row, current_col, "Tasks Summary Report", self._report_title)       
-                  
-            current_row += 2
+            
+            current_row +=2
 
             for key, values in grouped_per_project:
                 df_per_group = pd.DataFrame(grouped_per_project.get_group(key))
@@ -98,16 +100,22 @@ class TaskSummaryReport:
 
                 issue_count = len(df_per_group)
 
-                worksheet.write(current_row, current_col, key, self._header_format_orange) 
+                worksheet.write(current_row, current_col, key, self._main_header_format) 
+                worksheet.merge_range(
+                    get_cell_range_address(
+                        get_cell_address(1,current_row+1),
+                        get_cell_address(5,current_row+1)
+                    ), '',''
+                )
                 worksheet.write(current_row, current_col+1, f'Task Count : {issue_count}', self._cell_sub_total) 
                 current_row +=1
 
-                worksheet.write(current_row, current_col, 'Assigned Employee', self._main_header_format) 
-                worksheet.write(current_row, current_col+1, 'Reference ID',self._main_header_format) 
-                worksheet.write(current_row, current_col+2, 'Description', self._main_header_format) 
-                worksheet.write(current_row, current_col+3, 'Incident', self._main_header_format) 
-                worksheet.write(current_row, current_col+4, 'Phase', self._main_header_format) 
-                worksheet.write(current_row, current_col+5, 'Status', self._main_header_format) 
+                worksheet.write(current_row, current_col, 'Assigned Employee', self._sub_header_format) 
+                worksheet.write(current_row, current_col+1, 'Reference ID',self._sub_header_format) 
+                worksheet.write(current_row, current_col+2, 'Description', self._sub_header_format) 
+                worksheet.write(current_row, current_col+3, 'Incident', self._sub_header_format) 
+                worksheet.write(current_row, current_col+4, 'Phase', self._sub_header_format) 
+                worksheet.write(current_row, current_col+5, 'Status', self._sub_header_format) 
                 current_row += 1
 
                 df_employee_tasks = df_per_group[['EmployeeName','RefID','Description','IncidentType','Phase','TaskStatus']]
@@ -147,7 +155,7 @@ class TaskSummaryReport:
             worksheet.set_column(1,1,15)
             worksheet.set_column(2,2,45)
             worksheet.set_column(3,3,20)
-            worksheet.set_column(4,4,20)
+            worksheet.set_column(4,4,22)
             worksheet.set_column(5,5,20)
             current_col = 0
             current_row = 0
@@ -167,16 +175,22 @@ class TaskSummaryReport:
 
                 issue_count = len(df_per_group)
 
-                worksheet.write(current_row, current_col, key, self._header_format_orange) 
+                worksheet.write(current_row, current_col, key, self._main_header_format) 
+                worksheet.merge_range(
+                    get_cell_range_address(
+                        get_cell_address(1,current_row+1),
+                        get_cell_address(5,current_row+1)
+                    ), '',''
+                )
                 worksheet.write(current_row, current_col+1, f'Task Count : {issue_count}', self._cell_sub_total) 
                 current_row +=1
 
-                worksheet.write(current_row, current_col, 'Project', self._main_header_format) 
-                worksheet.write(current_row, current_col+1, 'Reference ID', self._main_header_format) 
-                worksheet.write(current_row, current_col+2, 'Description', self._main_header_format) 
-                worksheet.write(current_row, current_col+3, 'Incident', self._main_header_format) 
-                worksheet.write(current_row, current_col+4, 'Phase', self._main_header_format) 
-                worksheet.write(current_row, current_col+5, 'Status',self._main_header_format) 
+                worksheet.write(current_row, current_col, 'Project', self._sub_header_format) 
+                worksheet.write(current_row, current_col+1, 'Reference ID', self._sub_header_format) 
+                worksheet.write(current_row, current_col+2, 'Description', self._sub_header_format) 
+                worksheet.write(current_row, current_col+3, 'Incident', self._sub_header_format) 
+                worksheet.write(current_row, current_col+4, 'Phase', self._sub_header_format) 
+                worksheet.write(current_row, current_col+5, 'Status',self._sub_header_format) 
                 current_row += 1
 
                 df_project_tasks = df_per_group[['ProjectName','RefID','Description','IncidentType','Phase','TaskStatus']]
