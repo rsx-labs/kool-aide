@@ -13,7 +13,8 @@ from kool_aide.library.app_setting import AppSetting
 from kool_aide.library.custom_logger import CustomLogger
 from kool_aide.library.constants import *
 from kool_aide.library.utilities import append_date_to_file_name, \
-    get_param_value, get_version, get_cell_range_address, get_cell_address
+    get_param_value, get_version, get_cell_range_address, get_cell_address, \
+    get_start_date, get_end_date
 
 from kool_aide.db_access.connection import Connection
 from kool_aide.db_access.dbhelper.view_helper \
@@ -172,15 +173,19 @@ class ViewManager:
         sort_keys = None
         divisions = None
         departments = None
+        ids = None
+        status = None
         
         try:
             if arguments.parameters is not None:
                 try:
                     json_parameters = json.loads(arguments.parameters)
-                    sort_keys = None if PARAM_SORT not in json_parameters else json_parameters[PARAM_SORT]
-                    divisions = None if PARAM_DIVISIONS not in json_parameters else json_parameters[PARAM_DIVISIONS] 
-                    departments = None if PARAM_DEPARTMENTS not in json_parameters else json_parameters[PARAM_DEPARTMENTS] 
-                    columns = None if PARAM_COLUMNS not in json_parameters else json_parameters[PARAM_COLUMNS] 
+                    sort_keys = get_param_value(PARAM_SORT, json_parameters)
+                    divisions = get_param_value(PARAM_DIVISIONS, json_parameters)
+                    departments = get_param_value(PARAM_DEPARTMENTS, json_parameters)
+                    columns = get_param_value(PARAM_COLUMNS, json_parameters)
+                    ids = get_param_value(PARAM_IDS, json_parameters)
+                    status = get_param_value(PARAM_STATUS, json_parameters)
                 except Exception as ex:
                     self._log(f'error reading parameters . {str(ex)}',2)
             
@@ -193,6 +198,12 @@ class ViewManager:
             
             if divisions is not None and len(divisions)>0:
                 data_frame = data_frame[data_frame['DivisionID'].isin(divisions)]
+
+            if ids is not None and len(ids)>0:
+                data_frame = data_frame[data_frame['EmployeeID'].isin(ids)]
+
+            if status is not None and len(status)>0:
+                data_frame = data_frame[data_frame['StatusID'].isin(status)]
 
             if sort_keys is not None and len(sort_keys) > 0:
                 data_frame.sort_values(by=sort_keys, inplace= True)
@@ -484,6 +495,8 @@ class ViewManager:
         projects = None
         phases = None
         status = None
+        start_date = None
+        end_date = None
         col_names =[
                 'Employee ID', 'Employee Name', 'Project', 'Ref ID',
                 'Description', 'Incident', 'Date Created',
@@ -505,6 +518,15 @@ class ViewManager:
                     phases = get_param_value(PARAM_PHASES, json_parameters)
                     projects = get_param_value(PARAM_PROJECT, json_parameters)
                     status = get_param_value(PARAM_STATUS, json_parameters)
+
+                    temp_date = get_param_value(PARAM_START_DATE, json_parameters)
+                    if temp_date is not None:
+                        start_date = datetime.strptime(temp_date,'%m-%d-%Y')
+                    
+                    temp_date = get_param_value(PARAM_END_DATE, json_parameters) 
+                    if temp_date is not None:
+                        end_date = datetime.strptime(temp_date,'%m-%d-%Y')
+
                 except Exception as ex:
                     self._log(f'error reading parameters . {str(ex)}',2)
             
@@ -536,6 +558,15 @@ class ViewManager:
 
             if phases is not None and len(phases)>0:
                   data_frame = data_frame[data_frame['PhaseID'].isin(phases)]
+
+            if start_date is not None and end_date is None:
+                data_frame = data_frame[data_frame['DateStarted']>= get_start_date(start_date).date()]
+
+            if start_date is not None and end_date is not None:
+                data_frame = data_frame[
+                    (da_frame['DateStarted']>= get_start_date(start_date).date()) &
+                    (data_frame['DateCompleted']<= get_end_date(end_date).date())
+                ]
 
             if sort_keys is not None and len(sort_keys) > 0:
                 data_frame.sort_values(by=sort_keys, inplace= True)

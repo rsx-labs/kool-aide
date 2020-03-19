@@ -32,7 +32,7 @@ del ..\src\kool_aide\cli\dist\*.* /Q
 del ..\src\kool_aide\cli\build\*.* /Q
 cd ../src/kool_aide/cli
 
-pyinstaller --onedir --name %APP% main.py --paths ..\..\..\kool-aide-venv\Lib\site-packages --paths ..\..\kool-aide --icon=..\assets\images\kool-aide.ico
+pyinstaller --onedir --name %APP% main.py --paths ..\..\..\ka-env\Lib\site-packages --paths ..\..\kool-aide --icon=..\assets\images\kool-aide.ico
 
 cd ../../../build/%BUILD_FOLDER%
 

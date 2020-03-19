@@ -5,9 +5,10 @@
         "debug_mode": "True"
     },
     "connection_string" :{
-        "server_name": "servername",
+        "server_name": "server",
         "user_id": "user",
-        "password": "password"
+        "password": "password",
+        "database": "db"
     },
     "user" : {
         "email": "email",
@@ -28,7 +29,10 @@
             [],
             [],
             []
-        ]
+        ],
+        "defaults":{
+            "fiscal_year":"FY2020"
+        }
     }
 
 }

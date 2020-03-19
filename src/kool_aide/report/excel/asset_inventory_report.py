@@ -55,7 +55,8 @@ class AssetInventoryReport:
                 'DateAssigned',
                 'DatePurchased',
                 'DepartmentID',
-                'DivisionID'
+                'DivisionID',
+                'StatusID'
             ]
 
             column_headers = [
@@ -68,7 +69,8 @@ class AssetInventoryReport:
                 'Serial Number',
                 'Asset Tag',
                 'Other Info',
-                'Comments'
+                'Comments',
+                'Status'
             ]
             
             data_frame.drop(drop_columns, inplace=True, axis=1)
@@ -88,6 +90,7 @@ class AssetInventoryReport:
             worksheet.set_column(2,3,14)
             worksheet.set_column(4,7,22)
             worksheet.set_column(8,9,25, wrap_content)
+            worksheet.set_column(10,10,15)
             current_row = 0
             title_range = get_cell_range_address(
                 get_cell_address(0,1),

@@ -2,15 +2,15 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "kool-aide"
-#define MyAppVersion "0.2.0"
-#define MyAppPublisher "RS Experimental Labs"
-#define MyAppURL "https://github.com/rsx-labs"
+#define MyAppVersion "0.8.3"
+#define MyAppPublisher "Rxs-labs"
+#define MyAppURL "https://rsx-labs.github.io/"
 #define MyAppExeName "kool-aide.exe"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
-AppId={{8F531A0C-4357-43FB-9F07-4FB8159BF62A}
+AppId={{D98C3A87-8280-4892-8B8D-FBD013DDE7DD}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 ;AppVerName={#MyAppName} {#MyAppVersion}
@@ -19,14 +19,16 @@ AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
 DefaultDirName={autopf}\{#MyAppName}
+DisableDirPage=yes
 DefaultGroupName={#MyAppName}
-DisableProgramGroupPage=yes
-InfoBeforeFile=E:\Projects\RSearchLabs\kool-aide-master\docs\install_intro.rtf
-InfoAfterFile=E:\Projects\RSearchLabs\kool-aide-master\docs\install_exit.rtf
+LicenseFile=C:\Dev\codes\kool-aide\LICENSE
+InfoBeforeFile=C:\Dev\codes\kool-aide\docs\install_intro.rtf
+InfoAfterFile=C:\Dev\codes\kool-aide\docs\install_exit.rtf
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
 ;PrivilegesRequired=lowest
-OutputDir=E:\Temp\kool-aide-build
-OutputBaseFilename=kool-aide_v0.2.0_setup
+OutputDir=C:\Temp\kool-aide-build
+OutputBaseFilename=kool-aide_v0.8.3_rc01_setup
+SetupIconFile=C:\Dev\codes\kool-aide\src\kool_aide\assets\images\kool-aide-install.ico
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
@@ -35,14 +37,10 @@ WizardStyle=modern
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Files]
-Source: "E:\Projects\RSearchLabs\kool-aide-master\build\kool-aide_v0.2.0\kool-aide.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "E:\Projects\RSearchLabs\kool-aide-master\build\kool-aide_v0.2.0\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "C:\Dev\codes\kool-aide\build\kool-aide_v0.8.3\kool-aide.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Dev\codes\kool-aide\build\kool-aide_v0.8.3\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
-Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
-
-[Run]
-Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
 
