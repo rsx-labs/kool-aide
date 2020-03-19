@@ -18,4 +18,5 @@ All how-tos and notes has been moved to the [Wiki Page](https://github.com/rsx-l
 |  0.0.5	| - new reports : task-report, task list, lesson-learnt, project billability, employee billability, non-billables s 	|
 |  0.2.0 (0.0.6)	| - new reports : 3Cs,comm cell schedule, success register, kpi target, late monitoring  	|
 |  0.8.0	(0.3.0)| - new reports : skills matrix , resource planner ; improved installer  	|
+|  0.8.3	| - new filters for asset report and task report  	|
 |     |     |
