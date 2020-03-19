@@ -27,7 +27,7 @@ pip install -r requirements.txt
 
 note: if you have installed additional new packages, make sure you update the requirements.txt and check-in the changes. to update the requirements.txt, use the following command:
 ```
-pip list > requirements.txt
+pip freeze > requirements.txt
 ```
 
 ## how to setup the python debugger for visual studio code
