@@ -27,13 +27,13 @@ class ViewHelper:
         try:
             if weeks is not None:
                 if len(weeks) > 0:
-                    query = self._connection.status_report_view.select(
-                        self._connection.status_report_view.c.WeekRangeId.in_(weeks)
+                    query = self._connection.entity.select(
+                        self._connection.entity.c.WeekRangeId.in_(weeks)
                     )
                 else:
-                    query = self._connection.status_report_view.select()
+                    query = self._connection.entity.select()
             else:
-                query = self._connection.status_report_view.select()
+                query = self._connection.entity.select()
             result = query.execute()
             return result
         except Exception as ex:
@@ -42,7 +42,7 @@ class ViewHelper:
     
     def get_asset_inventory_view(self, departments=[], divisions=[]):
         try:
-            query = self._connection.asset_inventory_view.select()
+            query = self._connection.entity.select()
             result = query.execute()
             return result
         except Exception as ex:
@@ -51,7 +51,7 @@ class ViewHelper:
 
     def get_project_view(self, departments=[], divisions=[]):
         try:
-            query = self._connection.project_view.select()
+            query = self._connection.entity.select()
             result = query.execute()
             return result
         except Exception as ex:
@@ -60,7 +60,7 @@ class ViewHelper:
     
     def get_commendation_view(self):
         try:
-            query = self._connection.commendation_view.select()
+            query = self._connection.entity.select()
             result = query.execute()
             return result
         except Exception as ex:
@@ -69,7 +69,7 @@ class ViewHelper:
 
     def get_contact_list_view(self):
         try:
-            query = self._connection.contact_view.select()
+            query = self._connection.entity.select()
             result = query.execute()
             return result
         except Exception as ex:
@@ -80,13 +80,13 @@ class ViewHelper:
         try:
             if fys is not None:
                 if len(fys) > 0:
-                    query = self._connection.leave_sumarry_view.select(
-                        self._connection.leave_sumarry_view.c.FiscalYear.in_(fys)
+                    query = self._connection.entity.select(
+                        self._connection.entity.c.FiscalYear.in_(fys)
                     )
                 else:
-                    query = self._connection.leave_sumarry_view.select()
+                    query = self._connection.entity.select()
             else:
-                query = self._connection.leave_sumarry_view.select()
+                query = self._connection.entity.select()
             result = query.execute()
             return result
         except Exception as ex:
@@ -97,13 +97,13 @@ class ViewHelper:
         try:
             if status is not None:
                 if len(status) > 0:
-                    query = self._connection.task_view.select(
-                        self._connection.task_view.c.TaskStatusID.in_(status)
+                    query = self._connection.entity.select(
+                        self._connection.entity.c.TaskStatusID.in_(status)
                     )
                 else:
-                    query = self._connection.task_view.select()
+                    query = self._connection.entity.select()
             else:
-                query = self._connection.task_view.select()
+                query = self._connection.entity.select()
             result = query.execute()
             return result
         except Exception as ex:
@@ -114,13 +114,13 @@ class ViewHelper:
         try:
             if fys is not None:
                 if len(fys) > 0:
-                    query = self._connection.action_list_view.select(
-                        self._connection.action_list_view.c.FiscalYear.in_(fys)
+                    query = self._connection.entity.select(
+                        self._connection.entity.c.FiscalYear.in_(fys)
                     )
                 else:
-                    query = self._connection.action_list_view.select()
+                    query = self._connection.entity.select()
             else:
-                query = self._connection.action_list_view.select()
+                query = self._connection.entity.select()
             result = query.execute()
             return result
         except Exception as ex:
@@ -131,13 +131,13 @@ class ViewHelper:
         try:
             if fys is not None:
                 if len(fys) > 0:
-                    query = self._connection.lesson_learnt_view.select(
-                        self._connection.lesson_learnt_view.c.FiscalYear.in_(fys)
+                    query = self._connection.entity.select(
+                        self._connection.entity.c.FiscalYear.in_(fys)
                     )
                 else:
-                    query = self._connection.lesson_learnt_view.select()
+                    query = self._connection.entity.select()
             else:
-                query = self._connection.lesson_learnt_view.select()
+                query = self._connection.entity.select()
             result = query.execute()
             return result
         except Exception as ex:
@@ -148,13 +148,13 @@ class ViewHelper:
         try:
             if fys is not None:
                 if len(fys) > 0:
-                    query = self._connection.project_billability_view.select(
-                        self._connection.project_billability_view.c.FiscalYear.in_(fys)
+                    query = self._connection.entity.select(
+                        self._connection.entity.c.FiscalYear.in_(fys)
                     )
                 else:
-                    query = self._connection.project_billability_view.select()
+                    query = self._connection.entity.select()
             else:
-                query = self._connection.project_billability_view.select()
+                query = self._connection.entity.select()
             result = query.execute()
             return result
         except Exception as ex:
@@ -165,13 +165,13 @@ class ViewHelper:
         try:
             if fys is not None:
                 if len(fys) > 0:
-                    query = self._connection.employee_billability_view.select(
-                        self._connection.employee_billability_view.c.FiscalYear.in_(fys)
+                    query = self._connection.entity.select(
+                        self._connection.entity.c.FiscalYear.in_(fys)
                     )
                 else:
-                    query = self._connection.employee_billability_view.select()
+                    query = self._connection.entity.select()
             else:
-                query = self._connection.employee_billability_view.select()
+                query = self._connection.entity.select()
             result = query.execute()
             return result
         except Exception as ex:
@@ -182,13 +182,13 @@ class ViewHelper:
         try:
             if fys is not None:
                 if len(fys) > 0:
-                    query = self._connection.concern_list_view.select(
-                        self._connection.concern_list_view.c.FiscalYear.in_(fys)
+                    query = self._connection.entity.select(
+                        self._connection.entity.c.FiscalYear.in_(fys)
                     )
                 else:
-                    query = self._connection.concern_list_view.select()
+                    query = self._connection.entity.select()
             else:
-                query = self._connection.concern_list_view.select()
+                query = self._connection.entity.select()
             result = query.execute()
             return result
         except Exception as ex:
@@ -199,13 +199,13 @@ class ViewHelper:
         try:
             if fys is not None:
                 if len(fys) > 0:
-                    query = self._connection.success_register_view.select(
-                        self._connection.success_register_view.c.FiscalYear.in_(fys)
+                    query = self._connection.entity.select(
+                        self._connection.entity.c.FiscalYear.in_(fys)
                     )
                 else:
-                    query = self._connection.success_register_view.select()
+                    query = self._connection.entity.select()
             else:
-                query = self._connection.success_register_view.select()
+                query = self._connection.entity.select()
             result = query.execute()
             return result
         except Exception as ex:
@@ -216,13 +216,13 @@ class ViewHelper:
         try:
             if fys is not None:
                 if len(fys) > 0:
-                    query = self._connection.comcell_schedule_view.select(
-                        self._connection.comcell_schedule_view.c.FiscalYear.in_(fys)
+                    query = self._connection.entity.select(
+                        self._connection.entity.c.FiscalYear.in_(fys)
                     )
                 else:
-                    query = self._connection.comcell_schedule_view.select()
+                    query = self._connection.entity.select()
             else:
-                query = self._connection.comcell_schedule_view.select()
+                query = self._connection.entity.select()
             result = query.execute()
             return result
         except Exception as ex:
@@ -233,13 +233,13 @@ class ViewHelper:
         try:
             if fys is not None:
                 if len(fys) > 0:
-                    query = self._connection.kpi_summary_view.select(
-                        self._connection.kpi_summary_view.c.FiscalYear.in_(fys)
+                    query = self._connection.entity.select(
+                        self._connection.entity.c.FiscalYear.in_(fys)
                     )
                 else:
-                    query = self._connection.kpi_summary_view.select()
+                    query = self._connection.entity.select()
             else:
-                query = self._connection.kpi_summary_view.select()
+                query = self._connection.entity.select()
             result = query.execute()
             return result
         except Exception as ex:
@@ -250,13 +250,13 @@ class ViewHelper:
         try:
             if status is not None:
                 if len(status) > 0:
-                    query = self._connection.attendance_view.select(
-                        self._connection.attendance_view.c.StatusID.in_(status)
+                    query = self._connection.entity.select(
+                        self._connection.entity.c.StatusID.in_(status)
                     )
                 else:
-                    query = self._connection.attendance_view.select()
+                    query = self._connection.entity.select()
             else:
-                query = self._connection.attendance_view.select()
+                query = self._connection.entity.select()
             result = query.execute()
             return result
         except Exception as ex:
@@ -267,13 +267,13 @@ class ViewHelper:
         try:
             if divisions is not None:
                 if len(divisions) > 0:
-                    query = self._connection.skills_matrix_view.select(
-                        self._connection.skills_matrix_view.c.DivisionID.in_(divisions)
+                    query = self._connection.entity.select(
+                        self._connection.entity.c.DivisionID.in_(divisions)
                     )
                 else:
-                    query = self._connection.skills_matrix_view.select()
+                    query = self._connection.entity.select()
             else:
-                query = self._connection.skills_matrix_view.select()
+                query = self._connection.entity.select()
             result = query.execute()
             return result
         except Exception as ex:
@@ -284,13 +284,13 @@ class ViewHelper:
         try:
             if months is not None:
                 if len(months) > 0:
-                    query = self._connection.resource_planner_view.select(
-                        self._connection.resource_planner_view.c.MonthID.in_(months)
+                    query = self._connection.entity.select(
+                        self._connection.entity.c.MonthID.in_(months)
                     )
                 else:
-                    query = self._connection.resource_planner_view.select()
+                    query = self._connection.entity.select()
             else:
-                query = self._connection.resource_planner_view.select()
+                query = self._connection.entity.select()
             result = query.execute()
             return result
         except Exception as ex:

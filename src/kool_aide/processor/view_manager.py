@@ -118,17 +118,19 @@ class ViewManager:
         week_filter = None
         division_filter = None
         department_filter = None
+        ids = None
 
         try:
             if arguments.parameters is not None:
                 try:
                     json_parameters = json.loads(arguments.parameters)
-                    sort_keys = None if PARAM_SORT not in json_parameters else json_parameters[PARAM_SORT]
-                    project_filter = None if PARAM_PROJECT not in json_parameters else json_parameters[PARAM_PROJECT] 
-                    week_filter = None if PARAM_WEEK not in json_parameters else json_parameters[PARAM_WEEK] 
-                    division_filter = None if PARAM_DIVISIONS not in json_parameters else json_parameters[PARAM_DIVISIONS] 
-                    department_filter = None if PARAM_DEPARTMENTS not in json_parameters else json_parameters[PARAM_DEPARTMENTS] 
-                    columns = None if PARAM_COLUMNS not in json_parameters else json_parameters[PARAM_COLUMNS] 
+                    sort_keys = get_param_value(PARAM_SORT, json_parameters)
+                    project_filter = get_param_value(PARAM_PROJECT, json_parameters)
+                    week_filter = get_param_value(PARAM_WEEK, json_parameters)
+                    division_filter = get_param_value(PARAM_DIVISIONS, json_parameters)
+                    department_filter = get_param_value(PARAM_DEPARTMENTS, json_parameters)
+                    ids = get_param_value(PARAM_IDS, json_parameters)
+                    columns = get_param_value(PARAM_COLUMNS, json_parameters)
                 except Exception as ex:
                     self._log(f'error reading parameters . {str(ex)}',2)
             
@@ -148,6 +150,9 @@ class ViewManager:
             
             if department_filter is not None and len(department_filter)>0:
                 data_frame = data_frame[data_frame['DepartmentID'].isin(department_filter)]
+
+            if ids is not None and len(ids)>0:
+                data_frame = data_frame[data_frame['EmployeeID'].isin(ids)]
 
             if sort_keys is not None and len(sort_keys)>0:
                 data_frame.sort_values(by=sort_keys, inplace= True)
@@ -276,9 +281,11 @@ class ViewManager:
         year = None
         projects = None
         fys = None
+        start_date = None
+        end_date = None
 
         col_names =[
-                'Employee', 'Project', 'Sent By', 'Date Sent',
+                'Employee', 'Project', 'Sent By', 'DateSent',
                 'Month', 'Year', 'Reason', 'Fiscal Year'
             ]
         
@@ -292,6 +299,14 @@ class ViewManager:
                     projects = get_param_value(PARAM_PROJECT, json_parameters)
                     fys = get_param_value(PARAM_FYS, json_parameters)
                     columns = get_param_value(PARAM_COLUMNS, json_parameters)
+
+                    temp_date = get_param_value(PARAM_START_DATE, json_parameters)
+                    if temp_date is not None:
+                        start_date = datetime.strptime(temp_date,'%m-%d-%Y')
+                    
+                    temp_date = get_param_value(PARAM_END_DATE, json_parameters) 
+                    if temp_date is not None:
+                        end_date = datetime.strptime(temp_date,'%m-%d-%Y')
                 except Exception as ex:
                     self._log(f'error reading parameters . {str(ex)}',2)
             
@@ -316,6 +331,15 @@ class ViewManager:
 
             if fys is not None and len(fys)>0:
                 data_frame = data_frame[data_frame['FiscalYear'].isin(fys)]
+
+            if start_date is not None and end_date is None:
+                data_frame = data_frame[data_frame['DateSent']>= get_start_date(start_date).date()]
+
+            if start_date is not None and end_date is not None:
+                data_frame = data_frame[
+                    (data_frame['DateSent']>= get_start_date(start_date).date()) &
+                    (data_frame['DateSent']<= get_end_date(end_date).date())
+                ]
 
             if sort_keys is not None and len(sort_keys) > 0:
                 data_frame.sort_values(by=sort_keys, inplace= True)
@@ -608,6 +632,9 @@ class ViewManager:
         fys = None
         months = None
         year = None
+        start_date = None
+        end_date = None
+
         col_names =[
                 'Action ID', 'Action', 'EmployeeID', 'Employee', 'Date Created',
                 'Due Date', 'Date Closed', 'DivisionID','Division','DepartmentID',
@@ -628,6 +655,14 @@ class ViewManager:
                     year = get_param_value(PARAM_YEAR, json_parameters, year)
                     status = get_param_value(PARAM_STATUS, json_parameters)
                     fys = get_param_value(PARAM_FYS, json_parameters)
+                    
+                    temp_date = get_param_value(PARAM_START_DATE, json_parameters)
+                    if temp_date is not None:
+                        start_date = datetime.strptime(temp_date,'%m-%d-%Y')
+                    
+                    temp_date = get_param_value(PARAM_END_DATE, json_parameters) 
+                    if temp_date is not None:
+                        end_date = datetime.strptime(temp_date,'%m-%d-%Y')
                 except Exception as ex:
                     self._log(f'error reading parameters . {str(ex)}',2)
             
@@ -665,6 +700,15 @@ class ViewManager:
 
             if status is not None and len(status)>0:
                 data_frame = data_frame[data_frame['Status'].isin(status)]
+
+            if start_date is not None and end_date is None:
+                data_frame = data_frame[data_frame['DateCreated']>= get_start_date(start_date).date()]
+
+            if start_date is not None and end_date is not None:
+                data_frame = data_frame[
+                    (data_frame['DateCreated']>= get_start_date(start_date).date()) &
+                    (data_frame['DateCreated']<= get_end_date(end_date).date())
+                ]
 
             if isActive is not None:
                 try:
@@ -721,6 +765,8 @@ class ViewManager:
         fys = None
         months = None
         year = None
+        start_date = None
+        end_date = None
         col_names =[
                 'Learning ID', 'EmployeeID', 'Employee', 'Problem',
                 'Resolution','Date Created', 'Related Action',
@@ -742,6 +788,14 @@ class ViewManager:
                     months = get_param_value(PARAM_MONTHS, json_parameters, months)
                     year = get_param_value(PARAM_YEAR, json_parameters, year)
                     fys = get_param_value(PARAM_FYS, json_parameters)
+
+                    temp_date = get_param_value(PARAM_START_DATE, json_parameters)
+                    if temp_date is not None:
+                        start_date = datetime.strptime(temp_date,'%m-%d-%Y')
+                    
+                    temp_date = get_param_value(PARAM_END_DATE, json_parameters) 
+                    if temp_date is not None:
+                        end_date = datetime.strptime(temp_date,'%m-%d-%Y')
                 except Exception as ex:
                     self._log(f'error reading parameters . {str(ex)}',2)
             
@@ -776,6 +830,15 @@ class ViewManager:
             
             if months is not None and len(months)>0:
                 data_frame = data_frame[data_frame['Month'].isin(months)]
+
+            if start_date is not None and end_date is None:
+                data_frame = data_frame[data_frame['DateCreated']>= get_start_date(start_date).date()]
+
+            if start_date is not None and end_date is not None:
+                data_frame = data_frame[
+                    (data_frame['DateCreated']>= get_start_date(start_date).date()) &
+                    (data_frame['DateCreated']<= get_end_date(end_date).date())
+                ]
 
             if isActive is not None:
                 try:
@@ -1023,6 +1086,8 @@ class ViewManager:
         fys = None
         months = None
         flag = None
+        start_date = None
+        end_date = None
         col_names =[
                 'Concern ID', 'Concern', 'Cause', 'Countermeasure',
                 'RaisedByID','Raised By', 'Date Raised',
@@ -1043,6 +1108,14 @@ class ViewManager:
                     months = get_param_value(PARAM_MONTHS, json_parameters, months)
                     fys = get_param_value(PARAM_FYS, json_parameters)
                     flag = get_param_value(PARAM_FLAG,json_parameters)
+
+                    temp_date = get_param_value(PARAM_START_DATE, json_parameters)
+                    if temp_date is not None:
+                        start_date = datetime.strptime(temp_date,'%m-%d-%Y')
+                    
+                    temp_date = get_param_value(PARAM_END_DATE, json_parameters) 
+                    if temp_date is not None:
+                        end_date = datetime.strptime(temp_date,'%m-%d-%Y')
                 except Exception as ex:
                     self._log(f'error reading parameters . {str(ex)}',2)
             
@@ -1072,6 +1145,15 @@ class ViewManager:
 
             if months is not None and len(months)>0:
                 data_frame = data_frame[data_frame['Month'].isin(months)]
+
+            if start_date is not None and end_date is None:
+                data_frame = data_frame[data_frame['DateRaised']>= get_start_date(start_date).date()]
+
+            if start_date is not None and end_date is not None:
+                data_frame = data_frame[
+                    (data_frame['DateRaised']>= get_start_date(start_date).date()) &
+                    (data_frame['DateRaised']<= get_end_date(end_date).date())
+                ]
 
             if flag is not None:
                 try:
@@ -1712,7 +1794,6 @@ class ViewManager:
         except Exception as ex:
             self._log(f'error getting data frame. {str(ex)}',2)
     
-
     def _retrieve_status_report_view(self, arguments: CliArgument)->None:
         
         try:

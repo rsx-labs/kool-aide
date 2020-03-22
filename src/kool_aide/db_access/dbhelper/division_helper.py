@@ -24,7 +24,7 @@ class DivisionHelper:
 
     def get(self, ids=[]):
         try:
-            query = self._connection.division.select()
+            query = self._connection.entity.select()
             result = query.execute()
             return result
         except Exception as ex:
@@ -33,7 +33,7 @@ class DivisionHelper:
 
     def insert(self, id, description) -> bool:
         try:
-            command = self._connection.division.insert().values(
+            command = self._connection.entity.insert().values(
                 DIV_ID = id,
                 DESCR = description
             )

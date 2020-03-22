@@ -47,4 +47,4 @@ class CliArgument:
                 f"is_csv : {self.is_csv_format} ; quiet_mode : {self.quiet_mode} ; " +\
                 f"interactive : {self.interactive_mode} ; report_to_generate : {self.report} ; " +\
                 f"display_format : {self.display_format} ; result_limit : {self.result_limit} ; " + \
-                f"view : {self.view}]]"
+                f"view : {self.view}: params : {self.parameters}]]"

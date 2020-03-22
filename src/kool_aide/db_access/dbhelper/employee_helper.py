@@ -27,11 +27,11 @@ class EmployeeHelper:
     def get(self, ids=[]):
         try:
             if ids is not None and len(ids) > 0:
-                query = self._connection.employee.select(
-                    self._connection.employee.c.WeekRangeId.in_(ids)
+                query = self._connection.entity.select(
+                    self._connection.entity.c.WeekRangeId.in_(ids)
                 )
             else:
-                query = self._connection.employee.select()
+                query = self._connection.entity.select()
            
             result = query.execute()
             return result
@@ -41,7 +41,7 @@ class EmployeeHelper:
     
     def insert(self, employee: Employee) -> bool:
         try:
-            command = self._connection.employee.insert().values(
+            command = self._connection.entity.insert().values(
                 EMP_ID = employee.id,
                 WS_EMP_ID = employee.custom_id,
                 LAST_NAME = employee.last_name,

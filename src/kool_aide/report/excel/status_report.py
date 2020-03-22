@@ -63,7 +63,7 @@ class StatusReport:
             self._date_cell = self._workbook.add_format({'num_format': 'dd/mm/yy'})
             self._cell_sub_total.set_align('right')
             self._cell_total.set_align('right')
-            drop_columns = ['WeekRangeStart', 'WeekRangeId', 'ProjectId','DepartmentID','DivisionID']
+            drop_columns = ['WeekRangeStart', 'WeekRangeId', 'ProjectId','DepartmentID','DivisionID','EmployeeID']
             column_headers = [
                 'Project',
                 'Project Code',

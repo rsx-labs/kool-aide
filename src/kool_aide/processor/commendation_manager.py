@@ -88,8 +88,10 @@ class CommendationManager:
             if arguments.parameters is not None:
                 try:
                     json_parameters = json.loads(arguments.parameters)
-                    sort_keys = None if PARAM_SORT not in json_parameters else json_parameters[PARAM_SORT]
-                    columns = None if PARAM_COLUMNS not in json_parameters else json_parameters[PARAM_COLUMNS] 
+                    sort_keys = get_param_value(PARAM_SORT, json_parameters)
+                    columns = get_param_value(PARAM_COLUMNS, json_parameters)
+                    # ids = get_param_value(PARAM_IDS, json_parameters)
+
                 except Exception as ex:
                     self._log(f'error reading parameters . {str(ex)}',2)
             
@@ -101,7 +103,7 @@ class CommendationManager:
                 data_frame.sort_values(by=sort_keys, inplace= True)
      
             # if ids is not None and len(ids)>0:
-            #     data_frame = data_frame[data_frame['DEPT_ID'].isin(ids)]
+            #     data_frame = data_frame[data_frame['EMP_ID'].isin(ids)]
                 
             limit = int(arguments.result_limit)
 

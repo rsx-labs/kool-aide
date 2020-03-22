@@ -24,7 +24,7 @@ class WeekRangeHelper:
 
     def get(self, ids=[]):
         try:
-            query = self._connection.week_range.select()
+            query = self._connection.entity.select()
             result = query.execute()
             return result
         except Exception as ex:
@@ -33,7 +33,7 @@ class WeekRangeHelper:
     
     def insert(self, start, end) -> bool:
         try:
-            command = self._connection.week_range.insert().values(
+            command = self._connection.entity.insert().values(
                 WEEK_START = start,
                 WEEK_END = end  # for now skip this
             )

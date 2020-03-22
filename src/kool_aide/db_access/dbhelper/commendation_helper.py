@@ -25,7 +25,7 @@ class CommendationHelper:
 
     def get(self, ids=[]):
         try:
-            query = self._connection.commendation.select()
+            query = self._connection.entity.select()
             result = query.execute()
             return result
         except Exception as ex:
@@ -35,7 +35,7 @@ class CommendationHelper:
     def insert(self, employee, project, date_sent, 
                 sent_by, reason, emp_id) -> bool:
         try:
-            command = self._connection.commendation.insert().values(
+            command = self._connection.entity.insert().values(
                 EMPLOYEE = employee,
                 PROJECT = project,
                 DATE_SENT = date_sent,

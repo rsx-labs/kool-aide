@@ -27,8 +27,7 @@ class AttendanceHelper:
         # time_filter = 
         try:
             # if timestamp == '':
-
-            query = self._connection.attendance.select()
+            query = self._connection.entity.select()
             result = query.execute()
             return result
         except Exception as ex:

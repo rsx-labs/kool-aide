@@ -26,9 +26,9 @@ class ProjectHelper:
     def get_all_project(self, limit=0):
         try:
             if limit <= 0:
-                query = self._connection.project.select()
+                query = self._connection.entity.select()
             else:
-                query = self._connection.project.select().limit(limit)
+                query = self._connection.entity.select().limit(limit)
             result = query.execute()
             return result
         except Exception as ex:
@@ -37,7 +37,7 @@ class ProjectHelper:
 
     def insert(self, project: Project) -> bool:
         try:
-            command = self._connection.project.insert().values(
+            command = self._connection.entity.insert().values(
                 PROJ_NAME = project.name,
                 CATEGORY = project.category,
                 BILLABILITY = project.billability,

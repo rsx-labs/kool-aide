@@ -25,7 +25,7 @@ class DepartmentHelper:
 
     def get(self, ids=[]):
         try:
-            query = self._connection.department.select()
+            query = self._connection.entity.select()
             result = query.execute()
             return result
         except Exception as ex:
@@ -34,7 +34,7 @@ class DepartmentHelper:
     
     def insert(self, id, description, location) -> bool:
         try:
-            command = self._connection.department.insert().values(
+            command = self._connection.entity.insert().values(
                 DEPT_ID = id,
                 DESCR = description,
                 LOCATION = location  # for now skip this

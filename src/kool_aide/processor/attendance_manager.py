@@ -10,8 +10,8 @@ import os
 from kool_aide.library.app_setting import AppSetting
 from kool_aide.library.custom_logger import CustomLogger
 from kool_aide.library.constants import *
-from kool_aide.library.utilities import print_to_screen, get_end_date, get_start_date
-
+from kool_aide.library.utilities import print_to_screen, get_end_date, \
+    get_start_date, get_param_value
 
 from kool_aide.db_access.connection import Connection
 from kool_aide.db_access.dbhelper.attendance_helper import AttendanceHelper
@@ -73,15 +73,18 @@ class AttendanceManager:
             if arguments.parameters is not None:
                 try:
                     json_parameters = json.loads(arguments.parameters)
-                    sort_keys = None if PARAM_SORT not in json_parameters else json_parameters[PARAM_SORT]
-                    columns = None if PARAM_COLUMNS not in json_parameters else json_parameters[PARAM_COLUMNS] 
-                    ids = None if PARAM_IDS not in json_parameters else json_parameters[PARAM_IDS]
-                    start_date =  date.today() if PARAM_START_DATE \
-                                    not in json_parameters \
-                                    else datetime.strptime(json_parameters[PARAM_START_DATE],'%m/%d/%Y')
-                    end_date =  date.today() if PARAM_END_DATE \
-                                    not in json_parameters \
-                                    else datetime.strptime(json_parameters[PARAM_END_DATE],'%m/%d/%Y')
+                    sort_keys = get_param_value(PARAM_SORT, json_parameters) 
+                    columns = get_param_value(PARAM_COLUMNS, json_parameters) 
+                    ids = get_param_value(PARAM_IDS, json_parameters) 
+                    
+                    temp_date = get_param_value(PARAM_START_DATE, json_parameters)       
+                    start_date = date.today() if temp_date is None \
+                    else datetime.strptime(temp_date,'%m-%d-%Y')
+                    
+                    temp_date = get_param_value(PARAM_END_DATE, json_parameters)       
+                    end_date = date.today() if temp_date is None \
+                    else datetime.strptime(temp_date,'%m-%d-%Y')
+
                 except Exception as ex:
                     self._log(f'error reading parameters . {str(ex)}',2)
             
@@ -95,10 +98,11 @@ class AttendanceManager:
             if ids is not None and len(ids)>0:
                 data_frame = data_frame[data_frame['EMP_ID'].isin(ids)]
 
-            data_frame = data_frame[
-                (data_frame['DATE_ENTRY']>= get_start_date(start_date)) &
-                (data_frame['DATE_ENTRY']<= get_end_date(end_date))
-            ]
+            if start_date is not None and end_date is not None:
+                data_frame = data_frame[
+                    (data_frame['DATE_ENTRY']>= get_start_date(start_date)) &
+                    (data_frame['DATE_ENTRY']<= get_end_date(end_date))
+                ]
 
             limit = int(arguments.result_limit)
 

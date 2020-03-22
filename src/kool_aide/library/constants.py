@@ -258,6 +258,38 @@ MAP_VIEW_TO_REPORT ={
     'resource-planner':'resource-planner'
 }
 
+#mapping model:db name
+MAP_MODEL_TO_DB = {
+    'employee': 'EMPLOYEE',
+    'attendance': 'ATTENDANCE',
+    'week-range': 'WEEK_RANGE', 
+    'project': 'PROJECT', 
+    'department': 'DEPARTMENT', 
+    'division': 'DIVISION', 
+    'commendation':'COMMENDATIONS'
+}
+
+#mapping view:db name
+MAP_VIEW_TO_DB = {
+    'status-report': 'vw_StatusReport',
+    'asset-inventory': 'vw_AssetInventory',
+    'commendation': 'vw_Commendation', 
+    'contact-list': 'vw_ContactList', 
+    'leave-summary': 'vw_LeaveSummary', 
+    'task': 'vw_Tasks', 
+    'action-list': 'vw_ActionList', 
+    'lesson-learnt': 'vw_LessonLearnt',
+    'project-billability': 'vw_BillabilityByProjectPerWeek', 
+    'employee-billability': 'vw_BillabilityByEmployeePerWeek', 
+    'concern-list': 'vw_ConcernList',
+    'success-register': 'vw_SuccessRegisters', 
+    'comcell-schedule': 'vw_ComCellSchedule', 
+    'kpi-summary': 'vw_KPISummary', 
+    'attendance': 'vw_Attendance',
+    'skills': 'vw_SkillsMatrix', 
+    'resource-planner':'vw_ResourcePlanner'
+}
+
 # view in excel that are generic
 GENERIC_EXCEL_VIEWS = [
     SUPPORTED_VIEWS[2], SUPPORTED_VIEWS[3], SUPPORTED_VIEWS[4],

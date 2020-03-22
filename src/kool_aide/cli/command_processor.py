@@ -97,10 +97,12 @@ class CommandProcessor:
     def _generate_report(self, arguments : CliArgument):
         self._log(f'generating report : {arguments.report}')
         self._log(f'opening connection to database ...')
-        if self._connection.initialize():
+
+        arguments.view = MAP_VIEW_TO_REPORT[arguments.report]
+        if self._connection.initialize(arguments.view, True):
             self._log(f'connected to the database ...')
             # get the mapped model for the report
-            arguments.view = MAP_VIEW_TO_REPORT[arguments.report]
+            
             report_manager = ReportManager(
                 self._logger, 
                 self._config, 
@@ -115,7 +117,7 @@ class CommandProcessor:
     def _retrieve_model(self, arguments: CliArgument):
         self._log(f'retrieving model : {arguments.model}')
         self._log(f'opening connection to database ...')
-        if self._connection.initialize():
+        if self._connection.initialize(arguments.model, False):
             self._log(f'connected to the database ...')
             print_to_screen('Retrieving data.',arguments.quiet_mode)
             if arguments.model == SUPPORTED_MODELS[0]:
@@ -183,7 +185,7 @@ class CommandProcessor:
         self._log(f'retrieving view : {arguments.view}')
         self._log(f'opening connection to database ...')
         
-        if self._connection.initialize():
+        if self._connection.initialize(arguments.view, True):
             self._log(f'connected to the database ...')
             view_manager = ViewManager(
                     self._logger, 
