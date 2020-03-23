@@ -204,7 +204,7 @@ class CommandProcessor:
     def _create(self, arguments: CliArgument):
         self._log(f'creating data for model : {arguments.model}')
         self._log(f'opening connection to database ...')
-        if self._connection.initialize():
+        if self._connection.initialize(arguments.model, False):
             self._log(f'connected to the database ...')
             print_to_screen('Create process started.',arguments.quiet_mode)
             if arguments.model == SUPPORTED_MODELS[0]:
