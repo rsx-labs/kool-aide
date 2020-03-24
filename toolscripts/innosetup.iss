@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "kool-aide"
-#define MyAppVersion "0.8.3"
+#define MyAppVersion "0.9.0"
 #define MyAppPublisher "Rxs-labs"
 #define MyAppURL "https://rsx-labs.github.io/"
 #define MyAppExeName "kool-aide.exe"
@@ -27,7 +27,7 @@ InfoAfterFile=C:\Dev\codes\kool-aide\docs\install_exit.rtf
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
 ;PrivilegesRequired=lowest
 OutputDir=C:\Temp\kool-aide-build
-OutputBaseFilename=kool-aide_v0.8.3_rc01_setup
+OutputBaseFilename=kool-aide_v0.9.0_setup
 SetupIconFile=C:\Dev\codes\kool-aide\src\kool_aide\assets\images\kool-aide-install.ico
 Compression=lzma
 SolidCompression=yes
@@ -37,10 +37,13 @@ WizardStyle=modern
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Files]
-Source: "C:\Dev\codes\kool-aide\build\kool-aide_v0.8.3\kool-aide.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Dev\codes\kool-aide\build\kool-aide_v0.8.3\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "C:\Dev\codes\kool-aide\build\kool-aide_v0.9.0\kool-aide.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Dev\codes\kool-aide\build\kool-aide_v0.9.0\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
+
+[Dirs]
+Name: {app}; Permissions: users-full
 
