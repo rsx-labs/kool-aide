@@ -1,0 +1,12 @@
+[
+    {
+		"LOCATION": "Cebu",
+		"ONSITE_FLG": 1,
+		"HOLIDAY_FLG": 0
+    },
+    {
+		"LOCATION": "Manila",
+		"ONSITE_FLG": 1,
+		"HOLIDAY_FLG": 0
+    }
+]
