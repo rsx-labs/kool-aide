@@ -170,19 +170,42 @@ class SkillsMatrixReport:
             
             worksheet.write(end_row, 0, 'LEGENDS',self._header_format_lt_gray)
             worksheet.write(end_row, 1, '1', self._has_training)
+
+            temp_range = get_cell_range_address(
+                get_cell_address(2,24),
+                get_cell_address(9,24)
+            )
+            worksheet.merge_range(temp_range,'','')
+
             worksheet.write(end_row, 2, 'Has Received Training', self._header_format_lt_gray)
-            worksheet.write(end_row, 8, '',self._header_format_lt_gray)   
-            worksheet.write(end_row, 9, '',self._header_format_lt_gray)    
+
+            temp_range = get_cell_range_address(
+                get_cell_address(11,24),
+                get_cell_address(18,24)
+            )
+            worksheet.merge_range(temp_range,'','')
+             
             worksheet.write(end_row, 10, '2',self._with_support)
             worksheet.write(end_row, 11, 'Can Deliver Supported', self._header_format_lt_gray)
-            worksheet.write(end_row, 17, '',self._header_format_lt_gray)   
-            worksheet.write(end_row, 18, '',self._header_format_lt_gray)      
+
+            temp_range = get_cell_range_address(
+                get_cell_address(20,24),
+                get_cell_address(27,24)
+            )
+            worksheet.merge_range(temp_range,'','')
+           
             worksheet.write(end_row, 19, '3',self._unsupported)
             worksheet.write(end_row, 20, 'Can Deliver Unsupported', self._header_format_lt_gray)
-            worksheet.write(end_row, 27, '',self._header_format_lt_gray)
+
+            temp_range = get_cell_range_address(
+                get_cell_address(29,24),
+                get_cell_address(35,24)
+            )
+            worksheet.merge_range(temp_range,'','')
+            
             worksheet.write(end_row, 28, '4',self._sme)
             worksheet.write(end_row, 29, 'Subject Matter Expert', self._header_format_lt_gray)
-            worksheet.write(end_row, 35, '',self._header_format_lt_gray)
+        
             end_row = end_row + 2
             worksheet.write(
                 end_row, 
@@ -214,14 +237,14 @@ class SkillsMatrixReport:
             data_frame.sort_values(by=['DisplayOrder','Skill'], inplace= True)
             unique_skills = data_frame['Skill'].unique()
             # skill_df.sort_values(by=['Skill','DisplayOrder'], inplace= True)
-            format_vertical_text = self._header_format_gray
+            format_vertical_text = self._sub_header_format
             format_vertical_text.set_rotation(90)
             format_vertical_text.set_align('bottom')
             format_vertical_text.set_align('center')
             
             start_row = current_row
             skill_dict={}
-            worksheet.write(current_row, current_col, "Proficiency Level", self._header_format_gray)
+            worksheet.write(current_row, current_col, "Proficiency Level", self._main_header_format)
             skill_idx = 0
             for skill in unique_skills:
                 worksheet.write(
