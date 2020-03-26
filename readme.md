@@ -1,7 +1,5 @@
-# kool-aide
+# kool-aide <img src='./src/kool_aide/assets/images/kool-aide.png' height=70 width=45/>
 [![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/dwyl/esta/issues)
-
-<center><img src='./src/kool_aide/assets/images/kool-aide.png' height=150 width=75/></center>
 
 ## Wiki page
 
@@ -20,4 +18,5 @@ All how-tos and notes has been moved to the [Wiki Page](https://github.com/rsx-l
 |  0.8.0	(0.3.0)| - new reports : skills matrix , resource planner ; improved installer  	|
 |  0.8.3	| - new filters for asset report and task report  	|
 |  0.9.0	| - new filters/params support for some reports, optimization  	|
+|  0.9.1	| - improved install setup, more table support to the add method  	|
 |     |     |
