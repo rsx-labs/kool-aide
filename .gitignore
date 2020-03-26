@@ -130,6 +130,7 @@ pip.txt
 *.sample
 *.docx
 kool-aide-settings.json
+kool-aide-settings.prod.json
 *.log.*
 /build
 /dist
