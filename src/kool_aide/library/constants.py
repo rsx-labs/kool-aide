@@ -14,7 +14,10 @@ REPORT_TYPES = [
 
 SUPPORTED_MODELS = [
     'employee', 'attendance', 'week-range', 'project', 
-    'department', 'division', 'commendation'
+    'department', 'division', 'commendation', 
+    'asset-manufacturer', 'asset-type', 'leave-credits',
+    'skills', 'status', 'position', 'permission-group',
+    'location'
 ]
 
 SUPPORTED_VIEWS = [
@@ -266,7 +269,15 @@ MAP_MODEL_TO_DB = {
     'project': 'PROJECT', 
     'department': 'DEPARTMENT', 
     'division': 'DIVISION', 
-    'commendation':'COMMENDATIONS'
+    'commendation': 'COMMENDATIONS',
+    'asset-manufacturer': 'ASSET_MANUFACTURER',
+    'asset-type': 'ASSET_TYPE',
+    'leave-credits': 'LEAVE_CREDITS',
+    'skills': 'SKILLS',
+    'status': 'STATUS',
+    'position': 'POSITION',
+    'permission-group': 'PERMISSION_GROUP',
+    'location': 'LOCATION'
 }
 
 #mapping view:db name

@@ -18,6 +18,14 @@ from kool_aide.processor.department_manager import DepartmentManager
 from kool_aide.processor.division_manager import DivisionManager
 from kool_aide.processor.project_manager import ProjectManager
 from kool_aide.processor.commendation_manager import CommendationManager
+from kool_aide.processor.asset_manufacturer_manager import AssetManufacturerManager
+from kool_aide.processor.asset_type_manager import AssetTypeManager
+from kool_aide.processor.leave_credits_manager import LeaveCreditsManager
+from kool_aide.processor.skills_manager import SkillsManager
+from kool_aide.processor.status_manager import StatusManager
+from kool_aide.processor.position_manager import PositionManager
+from kool_aide.processor.permission_group_manager import PermissionGroupManager
+from kool_aide.processor.location_manager import LocationManager
 
 
 class CommandProcessor:
@@ -252,6 +260,78 @@ class CommandProcessor:
                     arguments
                 )
                 return commendation_manager.create(arguments)
+            elif arguments.model == SUPPORTED_MODELS[7]:
+                # asset_manufacturer
+                asset_manufacturer_manager = AssetManufacturerManager(
+                    self._logger,
+                    self._config, 
+                    self._connection, 
+                    arguments
+                )
+                return asset_manufacturer_manager.create(arguments)
+            elif arguments.model == SUPPORTED_MODELS[8]:
+                # asset type
+                asset_type_manager = AssetTypeManager(
+                    self._logger,
+                    self._config, 
+                    self._connection, 
+                    arguments
+                )
+                return asset_type_manager.create(arguments)
+            elif arguments.model == SUPPORTED_MODELS[9]:
+                # leave credits
+                leave_credits_manager = LeaveCreditsManager(
+                    self._logger,
+                    self._config, 
+                    self._connection, 
+                    arguments
+                )
+                return leave_credits_manager.create(arguments)
+            elif arguments.model == SUPPORTED_MODELS[10]:
+                # skills
+                skills_manager = SkillsManager(
+                    self._logger,
+                    self._config, 
+                    self._connection, 
+                    arguments 
+                )
+                return skills_manager.create(arguments)
+            elif arguments.model == SUPPORTED_MODELS[11]:
+                # status
+                status_manager = StatusManager(
+                    self._logger,
+                    self._config, 
+                    self._connection, 
+                    arguments 
+                )
+                return status_manager.create(arguments)
+            elif arguments.model == SUPPORTED_MODELS[12]:
+                # position
+                position_manager = PositionManager(
+                    self._logger,
+                    self._config, 
+                    self._connection, 
+                    arguments 
+                )
+                return position_manager.create(arguments)
+            elif arguments.model == SUPPORTED_MODELS[13]:
+                # permission group
+                permission_group_manager = PermissionGroupManager(
+                    self._logger,
+                    self._config, 
+                    self._connection, 
+                    arguments 
+                )
+                return permission_group_manager.create(arguments)
+            elif arguments.model == SUPPORTED_MODELS[14]:
+                # location
+                location_manager = LocationManager(
+                    self._logger,
+                    self._config, 
+                    self._connection, 
+                    arguments 
+                )
+                return location_manager.create(arguments)
             else:
                 common_manager = CommonManager(
                     self._logger, 
