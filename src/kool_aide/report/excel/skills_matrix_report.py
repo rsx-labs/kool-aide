@@ -163,13 +163,27 @@ class SkillsMatrixReport:
                         prof_format
                     )
 
-
-                except:
-                    pass
-
-
+                except Exception as ex:
+                    self._log(f'error creating matrix. {str(ex)}',2)
 
             end_row = last_row + 2
+            
+            worksheet.write(end_row, 0, 'LEGENDS',self._header_format_lt_gray)
+            worksheet.write(end_row, 1, '1', self._has_training)
+            worksheet.write(end_row, 2, 'Has Received Training', self._header_format_lt_gray)
+            worksheet.write(end_row, 8, '',self._header_format_lt_gray)   
+            worksheet.write(end_row, 9, '',self._header_format_lt_gray)    
+            worksheet.write(end_row, 10, '2',self._with_support)
+            worksheet.write(end_row, 11, 'Can Deliver Supported', self._header_format_lt_gray)
+            worksheet.write(end_row, 17, '',self._header_format_lt_gray)   
+            worksheet.write(end_row, 18, '',self._header_format_lt_gray)      
+            worksheet.write(end_row, 19, '3',self._unsupported)
+            worksheet.write(end_row, 20, 'Can Deliver Unsupported', self._header_format_lt_gray)
+            worksheet.write(end_row, 27, '',self._header_format_lt_gray)
+            worksheet.write(end_row, 28, '4',self._sme)
+            worksheet.write(end_row, 29, 'Subject Matter Expert', self._header_format_lt_gray)
+            worksheet.write(end_row, 35, '',self._header_format_lt_gray)
+            end_row = end_row + 2
             worksheet.write(
                 end_row, 
                 0, 
