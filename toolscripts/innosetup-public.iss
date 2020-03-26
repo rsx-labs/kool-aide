@@ -27,7 +27,7 @@ InfoAfterFile=C:\Dev\codes\kool-aide\docs\install_exit.rtf
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
 ;PrivilegesRequired=lowest
 OutputDir=C:\Temp\kool-aide-build
-OutputBaseFilename=kool-aide_v0.9.0_setup
+OutputBaseFilename=kool-aide_v0.9.1_public_release_setup
 SetupIconFile=C:\Dev\codes\kool-aide\src\kool_aide\assets\images\kool-aide-install.ico
 Compression=lzma
 SolidCompression=yes
@@ -37,8 +37,8 @@ WizardStyle=modern
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Files]
-Source: "C:\Dev\codes\kool-aide\build\kool-aide_v0.9.0\kool-aide.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Dev\codes\kool-aide\build\kool-aide_v0.9.0\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "C:\Dev\codes\kool-aide\build\kool-aide_v0.9.1_public\kool-aide.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Dev\codes\kool-aide\build\kool-aide_v0.9.1_public\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]

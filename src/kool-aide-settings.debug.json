@@ -1,7 +1,8 @@
 {
     "common":{
-        "log_level": 1,
+        "log_level": 10,
         "log_location": "",
+        "output_folder": "",
         "debug_mode": "True"
     },
     "connection_string" :{
@@ -11,8 +12,8 @@
         "database": "db"
     },
     "user" : {
-        "email": "email",
-        "vsts_email": "vsts_email"
+        "email": "your@email.com",
+        "vsts_email": "your@vsts_email.com"
     },
     "reports" : {
         "colors_themes" : [],

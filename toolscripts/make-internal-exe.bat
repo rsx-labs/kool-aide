@@ -33,7 +33,7 @@ del ..\src\kool_aide\cli\dist\*.* /Q
 del ..\src\kool_aide\cli\build\*.* /Q
 cd ../src/kool_aide/cli
 
-if not exist ..\..\..\ka-renv (
+if not exist ..\..\..\ka-env (
     echo the virtual environment folder does not exist
     Goto ERR
 )
@@ -45,6 +45,9 @@ cd ../../../build/%BUILD_FOLDER%
 
 copy ..\..\src\kool_aide\cli\dist\*.*
 copy ..\..\src\kool-aide-settings.debug.json kool-aide-settings.json 
+copy ..\..\docs\readme.rtf 
+CD ..\..
+
 Goto DONE
 
 :ERR

@@ -44,6 +44,9 @@ cd ../../../build/%BUILD_FOLDER%
 xcopy ..\..\src\kool_aide\cli\dist\kool-aide /e
 copy ..\..\src\kool-aide-settings.prod.json kool-aide-settings.json 
 xcopy ..\..\toolscripts\Batch /e
+copy ..\..\docs\readme.rtf 
+
+cd ..\..
 Goto DONE
 
 :ERR
