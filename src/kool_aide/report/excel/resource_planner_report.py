@@ -174,49 +174,34 @@ class ResourcePlannerReport:
                 current_row += 1 
             
             last_row= current_row
+            contents = {}
 
             for index, row in data_frame.iterrows():
                 temp_date = datetime.strptime(str(row['Date Entry']),'%Y-%m-%d')
                 format_cell = self._present
+
+                temp_address = f"{employee_dict[row['Employee Name']]}:{temp_date.day}"
+                self._log(f'temp address = {temp_address}',4)
+
                 try:
                     format_cell = color_of_day[int(row['StatusID'])]
-
                 except Exception as e:
-                    print(e)
+                    self._log(f"error = {e}", 2)
+                
+                content = row['Short Status']
+                if temp_address in contents:
+                    content = f"{contents[temp_address]}\\{row['Short Status']}"
+                else:
+                    contents[temp_address] = row['Short Status']
+
                 worksheet.write(
                     employee_dict[row['Employee Name']],
                     temp_date.day,
-                    row['Short Status'],
+                    content,
                     format_cell
 
                 )
             
-            # # map
-            # for index, row in data_frame.iterrows():
-            #     try:
-            #         proficiency_level = int(row['ProficiencyLevel'])
-            #         if proficiency_level == 1:
-            #             prof_format = self._has_training
-            #         elif proficiency_level == 2:
-            #             prof_format = self._with_support
-            #         elif proficiency_level == 3:
-            #             prof_format = self._unsupported
-            #         else:
-            #             prof_format = self._sme
-
-            #         worksheet.write(
-            #             employee_dict[row['Employee Name']],
-            #             skill_dict[row['Skill']],
-            #             row['ProficiencyLevel'],
-            #             prof_format
-            #         )
-
-
-            #     except:
-            #         pass
-
-
-
             end_row = last_row + 2
             worksheet.write(
                 end_row, 
