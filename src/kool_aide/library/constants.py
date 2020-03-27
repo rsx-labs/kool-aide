@@ -2,7 +2,7 @@
 # kool-aide/library/constants.py
 
 CMD_ACTIONS =[ 
-    'add','get','edit','delete','generate-report','dbupdate'
+    'add','get','edit','delete','generate-report','dbupdate','config'
 ]
 REPORT_TYPES = [
     'status-report','asset-inventory',

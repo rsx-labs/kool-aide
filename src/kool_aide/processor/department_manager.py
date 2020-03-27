@@ -122,6 +122,9 @@ class DepartmentManager:
     def send_to_output(self, data_frame: pd.DataFrame, format, out_file)-> None:
         if out_file is None:
             file = DEFAULT_FILENAME
+            out_file = file
+
+        out_file = append_date_to_file_name(out_file)
         try:
             if format == OUTPUT_FORMAT[1]:
                 json_file = f"{file}.json" if out_file is None else out_file

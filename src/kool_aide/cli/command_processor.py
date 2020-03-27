@@ -99,6 +99,8 @@ class CommandProcessor:
                 return False, 'report type not supported'
         elif arguments.action == CMD_ACTIONS[5]: # dbupdate
             return self._dbupdate(arguments)
+        elif arguments.action == CMD_ACTIONS[6]: # config
+            return self._configure(arguments)
         else:
             print_to_screen('Invalid action. Check logs.',arguments.quiet_mode)
             return False, 'invalid action'
@@ -415,6 +417,25 @@ class CommandProcessor:
         try:
             folder_name = os.path.join(os.path.dirname(sys.argv[0]),'dbcomp')
 
+            if arguments.input_file is not None :
+                self._log(f"running the upgrade script at {arguments.input_file}",4)
+                os.chdir(arguments.input_file)
+            else:
+                self._log(f"running the upgrade script at {arguments.input_file}",4)
+                os.chdir(folder_name)
+
+            os.system('run-sql.bat')
+            self._log(f"upgrade db successful",3)
+            return True, f'True | upgraded db'
+            
+        except Exception as ex:
+            self._log(f'error = {ex}',1)
+            return True, f'False | {ex}'
+
+    def _configure(self, arguments: CliArgument):
+        self._log(f'configure {str(arguments)}') 
+        try:
+            
             if arguments.input_file is not None :
                 self._log(f"running the upgrade script at {arguments.input_file}",4)
                 os.chdir(arguments.input_file)
