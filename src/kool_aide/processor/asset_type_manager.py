@@ -121,6 +121,9 @@ class AssetTypeManager:
     def send_to_output(self, data_frame: pd.DataFrame, format, out_file)-> None:
         if out_file is None:
             file = DEFAULT_FILENAME
+
+        out_file = append_date_to_file_name(out_file)
+
         try:
             if format == OUTPUT_FORMAT[1]:
                 json_file = f"{file}.json" if out_file is None else out_file
@@ -132,7 +135,11 @@ class AssetTypeManager:
                 # print(f"the file was saved : {csv_file}")
             elif format == OUTPUT_FORMAT[3]:
                 excel_file = f"{file}.xslx" if out_file is None else out_file
-                data_frame.to_excel(excel_file)
+                self._generate_raw_excel(
+                    data_frame, 
+                    excel_file,
+                    'Asset_Manufacturer'
+                )
                 # print(f"the file was saved : {excel_file}") 
             elif format == OUTPUT_FORMAT[0]:    
                 print('\n') 
@@ -180,5 +187,39 @@ class AssetTypeManager:
         if data['TYP_DESCR'] == '':
             return False
         return True
+    
+    def _generate_raw_excel(self, data_frame : pd.DataFrame, file_name, sheet_name = 'Sheet1')-> None:
+        try:
+            self._writer = pd.ExcelWriter(file_name, engine='xlsxwriter')
+            
+            self._workbook = self._writer.book
+            main_header_format = self._workbook.add_format(SHEET_TOP_HEADER)
+            footer_format = self._workbook.add_format(SHEET_CELL_FOOTER)
+        
+            data_frame.to_excel(
+                self._writer, 
+                sheet_name=sheet_name, 
+                index= False 
+            )
+
+            worksheet = self._writer.sheets[sheet_name]
+            
+            for col_num, value in enumerate(data_frame.columns.values):
+                worksheet.write(0, col_num, value, main_header_format)       
+
+            total_row = len(data_frame)
+            worksheet.write(
+                total_row + 4, 
+                0, 
+                f'Report generated : {datetime.now()}', 
+                footer_format
+            )
+               
+            self._writer.save()
+            # data_frame.to_excel(file_name, index=False)
+            print(f'the file was saved : {file_name}') 
+       
+        except Exception as ex:
+            self._log(f'error = {str(ex)}', 2)
 
     

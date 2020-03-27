@@ -6,6 +6,7 @@ from kool_aide.library.custom_logger import CustomLogger
 from kool_aide.library.constants import *
 from kool_aide.library.utilities import print_to_screen
 from kool_aide.model.aide.project import Project
+from kool_aide.library.utilities import append_date_to_file_name, print_to_screen
 
 from kool_aide.db_access.connection import Connection
 from kool_aide.db_access.dbhelper.project_helper import ProjectHelper
@@ -122,6 +123,9 @@ class ProjectManager:
     def send_to_output(self, data_frame: pd.DataFrame, format, out_file)-> None:
         if out_file is None:
             file = DEFAULT_FILENAME
+
+        out_file = append_date_to_file_name(out_file)
+        
         try:
             if format == OUTPUT_FORMAT[1]:
                 json_file = f"{file}.json" if out_file is None else out_file

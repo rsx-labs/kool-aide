@@ -177,8 +177,72 @@ class CommandProcessor:
                     arguments
                 )
                 return commendation_manager.retrieve(arguments)
+            elif arguments.model == SUPPORTED_MODELS[7]: #asset_manufacturer
+                asset_manufacturer_manager = AssetManufacturerManager(
+                    self._logger,
+                    self._config,
+                    self._connection, 
+                    arguments
+                )
+                return asset_manufacturer_manager.retrieve(arguments)
+            elif arguments.model == SUPPORTED_MODELS[8]: #asset_type
+                asset_type_manager = AssetTypeManager(
+                    self._logger,
+                    self._config,
+                    self._connection, 
+                    arguments
+                )
+                return asset_type_manager.retrieve(arguments)
+            elif arguments.model == SUPPORTED_MODELS[9]: #leave_credits
+                leave_credits_manager = LeaveCreditsManager(
+                    self._logger,
+                    self._config,
+                    self._connection, 
+                    arguments
+                )
+                return leave_credits_manager.retrieve(arguments)
+            elif arguments.model == SUPPORTED_MODELS[10]: #skills
+                skills_manager = SkillsManager(
+                    self._logger,
+                    self._config,
+                    self._connection, 
+                    arguments
+                )
+                return skills_manager.retrieve(arguments)
+            elif arguments.model == SUPPORTED_MODELS[11]: #status
+                status_manager = StatusManager(
+                    self._logger,
+                    self._config,
+                    self._connection, 
+                    arguments
+                )
+                return status_manager.retrieve(arguments)
+            elif arguments.model == SUPPORTED_MODELS[12]: #position
+                position_manager = PositionManager(
+                    self._logger,
+                    self._config,
+                    self._connection, 
+                    arguments
+                )
+                return position_manager.retrieve(arguments)
+            elif arguments.model == SUPPORTED_MODELS[13]: #permission group
+                permission_group_manager = PermissionGroupManager(
+                    self._logger,
+                    self._config,
+                    self._connection, 
+                    arguments
+                )
+                return permission_group_manager.retrieve(arguments)
+            elif arguments.model == SUPPORTED_MODELS[14]: #location
+                location_manager = LocationManager(
+                    self._logger,
+                    self._config,
+                    self._connection, 
+                    arguments
+                )
+                return location_manager.retrieve(arguments)
             else:
-                common_manager = CommonManager(
+                commasson_manager = CommonManager(
                     self._logger,
                     self._config, 
                     self._connection,
