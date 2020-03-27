@@ -1,4 +1,5 @@
 # kool-aide/cli/command_processor.py
+import subprocess, os, sys
 
 from kool_aide.db_access.connection import Connection
 
@@ -96,8 +97,8 @@ class CommandProcessor:
                 print_to_screen('Report not supported. Check logs.',arguments.quiet_mode)
                 self._log(f'report type not supported : {arguments.report}')
                 return False, 'report type not supported'
-        elif arguments.action == CMD_ACTIONS[5]: # time-in
-            return self._execute(arguments)
+        elif arguments.action == CMD_ACTIONS[5]: # dbupdate
+            return self._dbupdate(arguments)
         else:
             print_to_screen('Invalid action. Check logs.',arguments.quiet_mode)
             return False, 'invalid action'
@@ -340,24 +341,27 @@ class CommandProcessor:
                     arguments
                 )
                 return common_manager.create(arguments)
-            # elif arguments.model == SUPPORTED_MODELS[4]:
-            #     # status-report
-            #     status_report_manager = StatusReportManager(
-            #         self._logger, 
-            #         self._config, 
-            #         self._connection, 
-            #         arguments
-            #     )
-            #     return status_report_manager.retrieve(arguments)
-            
-            # else:
-            #     common_manager = CommonManager(
-            #         self._logger,
-            #         self._config, 
-            #         self._connection,
-            #         arguments
-            #     )
-            #     return common_manager.retrieve(arguments)
+         
         else:
             self._log(f'error connecting to the database', 1)
             return False, 'command execution failed'
+
+    def _dbupdate(self, arguments: CliArgument):
+        self._log(f'dbupdate {str(arguments)}') 
+        try:
+            folder_name = os.path.join(os.path.dirname(sys.argv[0]),'dbcomp')
+
+            if arguments.input_file is not None :
+                self._log(f"running the upgrade script at {arguments.input_file}",4)
+                os.chdir(arguments.input_file)
+            else:
+                self._log(f"running the upgrade script at {arguments.input_file}",4)
+                os.chdir(folder_name)
+
+            os.system('run-sql.bat')
+            self._log(f"upgrade db successful",3)
+            return True, f'True | upgraded db'
+            
+        except Exception as ex:
+            self._log(f'error = {ex}',1)
+            return True, f'False | {ex}'
