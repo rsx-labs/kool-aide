@@ -1,0 +1,2 @@
+@echo off
+"C:\Program Files (x86)\kool-aide\kool-aide" get -vw leave-summary-per-year --format excel --output "e:\\AIDE Generated Reports\\Retail Services SL Summary Calendar Year [Y].xlsx" --params {\"flag\":1,\"sorts\":[\"EmployeeName\"],\"types\":[3]} --autorun

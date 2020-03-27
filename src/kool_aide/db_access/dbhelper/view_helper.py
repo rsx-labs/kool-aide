@@ -297,5 +297,21 @@ class ViewHelper:
             self._log(f"error getting db values. {str(ex)}")
             return False
 
+    def get_leave_summary_per_year_view(self, year=0):
+        try:
+            
+            if year > 0:
+                query = self._connection.entity.select(
+                    self._connection.entity.c.Year == year
+                )
+            else:
+                query = self._connection.entity.select()
+           
+            result = query.execute()
+            return result
+        except Exception as ex:
+            self._log(f"error getting db values. {str(ex)}")
+            return False
+
 
     

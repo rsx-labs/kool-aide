@@ -40,11 +40,14 @@ if not exist ..\..\..\ka-env (
 pyinstaller --onedir --name %APP% main.py --paths ..\..\..\ka-env\Lib\site-packages --paths ..\..\kool-aide --icon=..\assets\images\kool-aide.ico
 
 cd ../../../build/%BUILD_FOLDER%
-
+mkdir batch
+mkdir dbcomp
 xcopy ..\..\src\kool_aide\cli\dist\kool-aide /e
 copy ..\..\src\kool-aide-settings.prod.json kool-aide-settings.json 
-xcopy ..\..\toolscripts\Batch /e
+xcopy ..\..\toolscripts\Batch  .\batch /e
+xcopy ..\..\dbcomp  .\dbcomp /e
 copy ..\..\docs\readme.rtf 
+copy ..\..\toolscripts\run-sql.cmd .\dbcomp
 
 cd ..\..
 Goto DONE

@@ -106,6 +106,9 @@ class ViewManager:
         elif arguments.view == SUPPORTED_VIEWS[16]:
             self._retrieve_resource_planner_view(arguments)
             return True, DATA_RETRIEVED
+        elif arguments.view == SUPPORTED_VIEWS[17]:
+            self._retrieve_leave_summary_per_year_view(arguments)
+            return True, DATA_RETRIEVED
         
        
         return False, NOT_SUPPORTED
@@ -1794,6 +1797,109 @@ class ViewManager:
         except Exception as ex:
             self._log(f'error getting data frame. {str(ex)}',2)
     
+    def get_leave_summary_per_year_view_data_frame(self, arguments: CliArgument):
+
+        columns = None
+        sort_keys = None
+        departments = None
+        divisions = None
+        ids  = None
+        isActive = None
+        year = None
+        types = None
+        col_names =[
+                'EmployeeID', 'Employee Name','Leave Type', 'Total', 'Year',                
+                'DivisionID','DepartmentID',
+                'IsActive','LeaveTypeID'
+            ] 
+
+        try:
+            if arguments.parameters is not None:
+                try:
+                    json_parameters = json.loads(arguments.parameters)
+                    sort_keys = get_param_value(PARAM_SORT, json_parameters)
+                    columns = get_param_value(PARAM_COLUMNS, json_parameters)
+                    departments = get_param_value(PARAM_DEPARTMENTS, json_parameters)
+                    divisions = get_param_value(PARAM_DIVISIONS, json_parameters)
+                    ids = get_param_value(PARAM_IDS, json_parameters)
+                    isActive = get_param_value(PARAM_FLAG, json_parameters)
+                    year = get_param_value(PARAM_YEAR, json_parameters)
+                    types = get_param_value(PARAM_TYPES, json_parameters)
+                except Exception as ex:
+                    self._log(f'error reading parameters . {str(ex)}',2)
+            
+            if arguments.auto_mode:
+                isActive = 1
+                year = datetime.now().year
+
+            if isActive is None:
+                isActive = 1 
+          
+            if year is not None and int(year)>0:
+                results = self._db_helper.get_leave_summary_per_year_view(year)
+            else:
+                results = self._db_helper.get_leave_summary_per_year_view()
+
+            data_frame = pd.DataFrame(results.fetchall()) 
+            data_frame.columns = results.keys()
+
+            if departments is not None and len(departments)>0:
+                 data_frame = data_frame[data_frame['DepartmentID'].isin(departments)]
+            
+            if ids is not None and len(ids)>0:
+                  data_frame = data_frame[data_frame['EmployeeID'].isin(ids)]
+            
+            if types is not None and len(types)>0:
+                  data_frame = data_frame[data_frame['LeaveType'].isin(types)]
+
+            if isActive is not None:
+                try:
+                    data_frame = data_frame[data_frame['IsActive'] == int(isActive)]
+                except:
+                    pass
+            
+            
+            if sort_keys is not None and len(sort_keys) > 0:
+                data_frame.sort_values(by=sort_keys, inplace= True)
+     
+            limit = int(arguments.result_limit)
+
+            if columns is not None:        
+                data_frame = data_frame[columns].head(limit)
+            else:
+                if self._get_parameters(arguments, PARAM_COLUMNS) is None:
+                    data_frame.columns = col_names
+                data_frame = data_frame.head(limit)
+            
+            try:
+                if arguments.action == CMD_ACTIONS[1]:
+                    data_frame.drop(
+                        [
+                            'DepartmentID',
+                            'DivisionID',
+                            'IsActive',
+                            'LeaveType'                       ], 
+                        inplace=True, 
+                        axis=1
+                    )
+                else:
+                    data_frame.drop(
+                        [
+                            'DepartmentID',
+                            'DivisionID'
+                        ], 
+                        inplace=True, 
+                        axis=1
+                    )
+            except Exception as ex:
+                print(ex)
+
+            return data_frame
+
+        except Exception as ex:
+            self._log(f'error getting data frame. {str(ex)}',2)
+    
+
     def _retrieve_status_report_view(self, arguments: CliArgument)->None:
         
         try:
@@ -2123,7 +2229,25 @@ class ViewManager:
         except Exception as ex:
             self._log(f'error parsing parameter. {str(ex)}',2)
    
+    def _retrieve_leave_summary_per_year_view(self, arguments: CliArgument) ->None:
+        try:
+            data_frame = self.get_leave_summary_per_year_view_data_frame(arguments)
+            col_widths = [[0,12],[1,35],[2,20],[3,10],[4,10]]
+            
+            self._send_to_output(
+                data_frame, 
+                arguments.display_format, 
+                arguments.output_file,
+                arguments.view,
+                sheet_name = 'Leave Summary',
+                column_widths=col_widths,
+                title='Leave Summary Per Year'
+            )
 
+            self._log(f"retrieved [ {len(data_frame)} ] records")
+        except Exception as ex:
+            self._log(f'error parsing parameter. {str(ex)}',2)
+   
     def _send_to_output(
         self, 
         data_frame: pd.DataFrame, 

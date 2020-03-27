@@ -25,7 +25,7 @@ SUPPORTED_VIEWS = [
     'leave-summary', 'task', 'action-list', 'lesson-learnt',
     'project-billability', 'employee-billability', 'concern-list',
     'success-register', 'comcell-schedule', 'kpi-summary', 'attendance',
-    'skills', 'resource-planner'
+    'skills', 'resource-planner','leave-summary-per-year'
 ]
 
 OUTPUT_FORMAT = [
@@ -298,7 +298,8 @@ MAP_VIEW_TO_DB = {
     'kpi-summary': 'vw_KPISummary', 
     'attendance': 'vw_Attendance',
     'skills': 'vw_SkillsMatrix', 
-    'resource-planner':'vw_ResourcePlanner'
+    'resource-planner':'vw_ResourcePlanner',
+    'leave-summary-per-year':'vw_LeaveSummaryPerYear'
 }
 
 # view in excel that are generic
@@ -307,5 +308,6 @@ GENERIC_EXCEL_VIEWS = [
     SUPPORTED_VIEWS[5], SUPPORTED_VIEWS[6], SUPPORTED_VIEWS[7],
     SUPPORTED_VIEWS[8], SUPPORTED_VIEWS[9], SUPPORTED_VIEWS[10],
     SUPPORTED_VIEWS[11], SUPPORTED_VIEWS[12], SUPPORTED_VIEWS[13],
-    SUPPORTED_VIEWS[14], SUPPORTED_VIEWS[15], SUPPORTED_VIEWS[16]
+    SUPPORTED_VIEWS[14], SUPPORTED_VIEWS[15], SUPPORTED_VIEWS[16],
+    SUPPORTED_VIEWS[17]
 ]
