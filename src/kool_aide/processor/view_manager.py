@@ -1740,6 +1740,9 @@ class ViewManager:
 
             if departments is not None and len(departments)>0:
                  data_frame = data_frame[data_frame['DepartmentID'].isin(departments)]
+
+            if divisions is not None and len(divisions)>0:
+                 data_frame = data_frame[data_frame['DivisionID'].isin(divisions)]
             
             if ids is not None and len(ids)>0:
                   data_frame = data_frame[data_frame['EmployeeID'].isin(ids)]
@@ -1753,7 +1756,7 @@ class ViewManager:
             if year is None:
                 year = datetime.now().year
 
-            data_frame[data_frame['YearID'] == int(year)]
+            data_frame = data_frame[data_frame['YearID'] == int(year)]
             
             if sort_keys is not None and len(sort_keys) > 0:
                 data_frame.sort_values(by=sort_keys, inplace= True)

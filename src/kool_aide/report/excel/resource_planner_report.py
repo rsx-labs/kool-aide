@@ -48,10 +48,13 @@ class ResourcePlannerReport:
         elif arguments.auto_mode:
             months =[datetime.now().month]
             year = datetime.now().year
+            self._month = datetime.now().month
 
 
         if months != None:
             self._month = months[0]
+        else:
+            self._month = datetime.now().month
         
         if year != None:
             self._year = int(year)
@@ -179,7 +182,7 @@ class ResourcePlannerReport:
             for index, row in data_frame.iterrows():
                 temp_date = datetime.strptime(str(row['Date Entry']),'%Y-%m-%d')
                 format_cell = self._present
-
+                #self._log(f"****** temp_date : {temp_date} {row['Employee Name']}")
                 temp_address = f"{employee_dict[row['Employee Name']]}:{temp_date.day}"
                 self._log(f'temp address = {temp_address}',4)
 
